@@ -217,16 +217,15 @@ export default function LoginPage() {
       {/* RIGHT SIDE - Branding and Images */}
       {!hideRightSide && (
         <div className="flex flex-col justify-center bg-[#265A46] text-white p-8 sm:p-10 items-center">
-          <h2
-            className={`${playfair.className} text-4xl sm:text-6xl font-bold mb-4 sm:mb-6 text-center`}
+           <h2
+            className={`${playfair.className} text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-center`}
           >
-            Anestropedia Admin
+            Anestropedia
+             <span className="mt-10" style={{display:"inline-block", marginTop:"10px",marginLeft:"15px"}}> Admin</span>
+            <br></br>
+            <span className="mt-10" style={{display:"block", marginTop:"10px"}}> Panel</span>
           </h2>
-          <h2
-            className={`${playfair.className} text-4xl sm:text-6xl font-bold mb-4 sm:mb-6 text-center`}
-          >
-            Panel
-          </h2>
+
           <p
             className={`${inter.className} text-center leading-relaxed mt-5 sm:mt-7 text-sm sm:text-base`}
           >
