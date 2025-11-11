@@ -3,28 +3,25 @@
 import { useState, useEffect } from "react";
 import { Inter, Playfair_Display } from "next/font/google";
 import Image from "next/image";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
+import { axiosInstance } from "../../config/axios.js";
 
 const inter = Inter({ subsets: ["latin"] });
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700"] });
 
 export default function LoginPage() {
-  const [userId, setUserId] = useState("");
+  // State for form fields
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
+  // State for UI interactions
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [hideRightSide, setHideRightSide] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Forgot password flow
-  const [step, setStep] = useState("login"); // login | email | otp | reset
-  const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [resetMessage, setResetMessage] = useState("");
-
+  // Handle window resize to show/hide right side on mobile
   useEffect(() => {
     const handleResize = () => {
       setHideRightSide(window.innerWidth <= 1025);
@@ -35,52 +32,64 @@ export default function LoginPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // --- Login Logic ---
-  const handleLogin = () => {
-    if (userId !== "LXP387637" || password !== "123456") {
+  /**
+   * Handle login form submission
+   * Sends email and password to the authentication API
+   */
+  const handleLogin = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    
+    // Basic validation
+    if (!email || !password) {
       setError(true);
-    } else {
-      setError(false);
-      alert("Login Successful!");
-    }
-  };
-
-  // --- Forgot Password Logic ---
-  const handleEmailSubmit = () => {
-    if (!email.includes("@")) {
-      setResetMessage("Please enter a valid email address.");
+      setErrorMessage("Please enter both email and password");
       return;
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setStep("otp");
-      setResetMessage("OTP sent to your email!");
-    }, 1500);
-  };
 
-  const handleOtpSubmit = () => {
-    if (otp !== "123456") {
-      setResetMessage("Invalid OTP. Try again.");
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError(true);
+      setErrorMessage("Please enter a valid email address");
       return;
     }
-    setStep("reset");
-    setResetMessage("");
-  };
 
-  const handlePasswordReset = () => {
-    if (newPassword !== confirmPassword) {
-      setResetMessage("Passwords do not match!");
-      return;
+
+
+    setIsLoading(true);
+    setError(false);
+    setErrorMessage("");
+
+    try {
+      // API call to login endpoint
+
+      const response = await axiosInstance.post("admin/auth/login",{email,password});
+
+            console.log(response.data," data from login response (inside frontend login2 page)");
+
+        
+    
+      // Check if login was successful
+      
+    } catch (error) {
+      // Network error or other issues
+      console.error("Login error:", error);
+      setError(true);
+      setErrorMessage("incorrect details. Please check email and password.");
+
+    } finally {
+      setIsLoading(false);
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setStep("login");
-      setResetMessage("Password reset successful! Please login.");
-    }, 1500);
   };
 
+
+   // Handle form submission (same as handleLogin but for form onSubmit)
+
+  const handleSubmit = (e) => {
+    handleLogin(e);
+  };
+
+  // Image assets for the right side panel
   const roverImages = [
     "/rover1.webp",
     "/rover2.webp",
@@ -101,9 +110,9 @@ export default function LoginPage() {
         hideRightSide ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
       }`}
     >
-      {/* LEFT SIDE */}
+      {/* LEFT SIDE - Login Form */}
       <div className="flex flex-col items-center justify-center bg-[#F3FFF9] p-6 sm:p-10">
-        {/* Logo & Text */}
+        {/* Logo & Welcome Text */}
         <div className="text-center mb-8 sm:mb-10">
           <img
             src="/logo.svg"
@@ -113,191 +122,99 @@ export default function LoginPage() {
           <h2
             className={`${playfair.className} text-2xl sm:text-3xl font-bold text-[#265A46]`}
           >
-            ANESTROPEDIA
+            ANCESTROPEDIA
           </h2>
           <p
             className={`${inter.className} text-[#265A46] mt-2 font-semibold text-sm sm:text-base`}
           >
-            {step === "login"
-              ? "Welcome back! Please log in to manage Anestropedia."
-              : "Reset your password in simple steps."}
+            Welcome back! Please log in to manage Ancestropedia.
           </p>
         </div>
 
-        {/* LOGIN FORM */}
-        {step === "login" && (
-          <form
-            className={`w-full ${
-              hideRightSide ? "max-w-full px-4" : "max-w-sm sm:max-w-md"
-            } space-y-4`}
-            onSubmit={(e) => e.preventDefault()}
-          >
-            {/* USER ID */}
-            <div>
-              <label
-                htmlFor="userId"
-                className="block text-lg sm:text-xl font-medium text-gray-700"
-              >
-                User ID
-              </label>
-              <input
-                type="text"
-                id="userId"
-                placeholder="e.g. LXP387637"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                className={`mt-1 bg-white mb-2 block w-full border ${
-                  error ? "border-red-500" : "border-black"
-                } rounded-md p-3 focus:ring-green-700 focus:border-green-700 py-[15px] font-bold`}
-              />
-            </div>
-
-            {/* PASSWORD */}
-            <div className="relative">
-              <label
-                htmlFor="password"
-                className="block text-lg sm:text-xl font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                placeholder="Enter Your Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`mb-2 bg-white block w-full border ${
-                  error ? "border-red-500" : "border-black"
-                } rounded-md p-3 focus:ring-green-700 focus:border-green-700 py-[15px] font-bold`}
-              />
-              <div
-                className="absolute right-4 top-[45px] cursor-pointer"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-              </div>
-            </div>
-
-            {/* ERROR MESSAGE */}
-            {error && (
-              <p className="text-red-600 text-sm font-semibold mb-3 text-center">
-                The password or username you entered is incorrect. Please try again.
-              </p>
-            )}
-
-            {/* BUTTONS */}
-            <div className="flex flex-col gap-4 w-full">
-              <button
-                type="button"
-                onClick={handleLogin}
-                className="bg-[#FFC300] mt-3 hover:bg-yellow-500 w-full py-[16px] rounded-md font-bold text-2xl shadow-md text-[#265A46]"
-              >
-                Login
-              </button>
-              <button
-                type="button"
-                className="bg-[#F2FAF7] w-full py-[13px] rounded-md hover:bg-[#F9FAF8] shadow-md text-xl text-[#265A46] mt-1 border border-black"
-              >
-                Executive Login
-              </button>
-            </div>
-
-            {/* FORGET PASSWORD */}
-            <p
-              className="text-sm font-bold text-gray-500 text-center mt-5 cursor-pointer hover:text-green-700"
-              onClick={() => setStep("email")}
+        {/* Login Form */}
+        <form
+          className={`w-full ${
+            hideRightSide ? "max-w-full px-4" : "max-w-sm sm:max-w-md"
+          } space-y-4`}
+          onSubmit={handleSubmit}
+        >
+          {/* EMAIL FIELD */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-lg sm:text-xl font-medium text-gray-700"
             >
-              Forgot Password?
-            </p>
-          </form>
-        )}
-
-        {/* EMAIL STEP */}
-        {step === "email" && (
-          <div className="max-w-sm w-full space-y-4 text-center">
-            <p className="text-gray-700 font-semibold">
-              Enter your registered email to receive an OTP.
-            </p>
+              Email
+            </label>
             <input
               type="email"
-              placeholder="Enter your email"
+              id="email"
+              placeholder="Enter your email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border border-black rounded-md p-3 w-full"
+              className={`mt-1 bg-white mb-2 block w-full border ${
+                error ? "border-red-500" : "border-black"
+              } rounded-md p-3 focus:ring-green-700 focus:border-green-700 py-[15px] font-bold`}
+              disabled={isLoading}
             />
-            <button
-              onClick={handleEmailSubmit}
-              className="bg-[#FFC300] hover:bg-yellow-500 w-full py-3 rounded-md font-bold text-xl shadow-md text-[#265A46]"
-            >
-              {loading ? <Loader2 className="animate-spin mx-auto" /> : "Send OTP"}
-            </button>
-            <p
-              className="text-sm text-gray-500 cursor-pointer hover:text-green-700"
-              onClick={() => setStep("login")}
-            >
-              Back to Login
-            </p>
-            {resetMessage && <p className="text-green-600">{resetMessage}</p>}
           </div>
-        )}
 
-        {/* OTP STEP */}
-        {step === "otp" && (
-          <div className="max-w-sm w-full space-y-4 text-center">
-            <p className="text-gray-700 font-semibold">
-              Enter the OTP sent to your email.
-            </p>
-            <input
-              type="text"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              className="border border-black rounded-md p-3 w-full"
-            />
-            <button
-              onClick={handleOtpSubmit}
-              className="bg-[#FFC300] hover:bg-yellow-500 w-full py-3 rounded-md font-bold text-xl shadow-md text-[#265A46]"
+          {/* PASSWORD FIELD */}
+          <div className="relative">
+            <label
+              htmlFor="password"
+              className="block text-lg sm:text-xl font-medium text-gray-700"
             >
-              Verify OTP
-            </button>
-            {resetMessage && <p className="text-red-600">{resetMessage}</p>}
+              Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`mb-2 bg-white block w-full border ${
+                error ? "border-red-500" : "border-black"
+              } rounded-md p-3 focus:ring-green-700 focus:border-green-700 py-[15px] font-bold`}
+              disabled={isLoading}
+            />
+            {/* Password visibility toggle */}
+            <div
+              className="absolute right-4 top-[45px] cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+            </div>
           </div>
-        )}
 
-        {/* RESET PASSWORD STEP */}
-        {step === "reset" && (
-          <div className="max-w-sm w-full space-y-4 text-center">
-            <p className="text-gray-700 font-semibold">Enter your new password.</p>
-            <input
-              type="password"
-              placeholder="New Password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="border border-black rounded-md p-3 w-full"
-            />
-            <input
-              type="password"
-              placeholder="Confirm New Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="border border-black rounded-md p-3 w-full"
-            />
+          {/* ERROR MESSAGE DISPLAY */}
+          {error && (
+            <p className="text-red-600 text-sm font-semibold mb-3 text-center">
+              {errorMessage}
+            </p>
+          )}
+
+          {/* LOGIN BUTTONS */}
+          <div className="flex flex-col gap-4 w-full">
             <button
-              onClick={handlePasswordReset}
-              className="bg-[#FFC300] hover:bg-yellow-500 w-full py-3 rounded-md font-bold text-xl shadow-md text-[#265A46]"
+              type="submit"
+              disabled={isLoading}
+              className="bg-[#FFC300] mt-3 hover:bg-yellow-500 w-full py-4 rounded-md font-bold text-2xl shadow-md text-[#265A46] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
-                <Loader2 className="animate-spin mx-auto" />
-              ) : (
-                "Reset Password"
-              )}
+              {isLoading ? "Logging in..." : "Login"}
             </button>
-            {resetMessage && <p className="text-green-600">{resetMessage}</p>}
+            <button
+              type="button"
+              className="bg-[#F2FAF7] w-full py-[13px] rounded-md hover:bg-[#F9FAF8] shadow-md text-xl text-[#265A46] mt-1 border border-black"
+              disabled={isLoading}
+            >
+              Executive Login
+            </button>
           </div>
-        )}
+        </form>
       </div>
 
-      {/* RIGHT SIDE */}
+      {/* RIGHT SIDE - Branding and Images */}
       {!hideRightSide && (
         <div className="flex flex-col justify-center bg-[#265A46] text-white p-8 sm:p-10 items-center">
           <h2
@@ -322,6 +239,7 @@ export default function LoginPage() {
             Because every story deserves to be remembered.
           </p>
 
+          {/* Image Carousel */}
           <div
             className="overflow-hidden w-[300px] sm:w-[500px] flex items-center justify-center"
             role="presentation"
@@ -334,7 +252,7 @@ export default function LoginPage() {
                   alt={`Cultural representation ${index + 1}`}
                   width={88}
                   height={65}
-                  className="rounded-md object-cover w-[88px] h-[65px] flex-shrink-0"
+                  className="rounded-md object-cover w-[88px] h-[65px] shrink-0"
                 />
               ))}
             </div>
