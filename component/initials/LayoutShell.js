@@ -1,5 +1,5 @@
 import React from 'react'
-import DashBoardHeader from '../dashboard/DashBoradHeader.js'
+import DashBoardHeader from '../dashboard/DashBoardHeader.js'
 import SideBar from '../dashboard/SideBar.js'
 import MainLayOut from '../maincontent/MainLayout.js'
 
