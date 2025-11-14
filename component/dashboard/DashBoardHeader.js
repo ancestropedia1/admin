@@ -1,20 +1,24 @@
 "use client";
 import React from 'react';
-import { Bell, Search, Menu } from "lucide-react";
+import { Bell, Search, Menu, X } from "lucide-react";
 
-const DashBoardHeader = ({ onMenuToggle }) => {
+const DashBoardHeader = ({ sidebarOpen, onMenuToggle }) => {
   return (
     <div>
       <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.08)] px-4 sm:px-6 py-4 sm:py-6 flex items-center gap-4 sm:gap-6 justify-between z-50">
         {/* Left: Logo and Hamburger */}
         <div className="flex items-center gap-3">
-          {/* Hamburger Menu for Mobile */}
+          {/* Hamburger Menu for Mobile - Shows close icon when sidebar is open */}
           <button 
             onClick={onMenuToggle}
             className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
             aria-label="Toggle menu"
           >
-            <Menu className="text-gray-600" size={24} />
+            {sidebarOpen ? (
+              <X className="text-gray-600" size={24} />
+            ) : (
+              <Menu className="text-gray-600" size={24} />
+            )}
           </button>
           
           {/* Logo - Hidden on mobile, visible on tablet and up */}

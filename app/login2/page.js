@@ -4,12 +4,16 @@ import { useState, useEffect } from "react";
 import { Inter, Playfair_Display } from "next/font/google";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
-import { axiosInstance } from "../../config/axios.js";
+import { axiosInstance, axiosInstanceLocal } from "../../config/axios.js";
+import { useRouter } from "next/navigation.js";
+
 
 const inter = Inter({ subsets: ["latin"] });
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700"] });
 
 export default function LoginPage() {
+
+  const router = useRouter();
   // State for form fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,13 +67,17 @@ export default function LoginPage() {
     try {
       // API call to login endpoint
 
-      const response = await axiosInstance.post("admin/auth/login",{email,password});
+      const response = await axiosInstanceLocal.post("admin/auth/login",{email,password});
 
             console.log(response.data," data from login response (inside frontend login2 page)");
 
         
     
       // Check if login was successful
+      if(response.data && response.data.success){
+        // Redirect to dashboard on successful login
+        router.push("/");
+      }
       
     } catch (error) {
       // Network error or other issues
