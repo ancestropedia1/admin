@@ -13,15 +13,16 @@ const sections = [
         text: "Dashboard" 
       },
       {
+        icon: "/add-user-data.svg",
+        link: "/AddUser",
+        text: "Add User",
+      },
+      {
         icon: "/user-management.svg",
         link: "/user-management",
         text: "User Management",
       },
-      {
-        icon: "/add-user-data.svg",
-        link: "/AddUser",
-        text: "Add User Data",
-      },
+      
       { 
         icon: "/blogs-management.svg", 
         link: "/blogs-management", 
@@ -33,14 +34,14 @@ const sections = [
     title: "Order Management",
     items: [
       { 
-        icon: "/DNA-Kit-Order.svg", 
+        icon: "/DNA-Kit.svg", 
         link: "/order", 
-        text: "DNA Kit Order & Report" 
+        text: "DNA Kit" 
       },
       {
         icon: "/Wall-art-order.svg",
         link: "/heritage",
-        text: "Wall Art Order & Frame",
+        text: "Wall Art",
       },
     ],
   },
@@ -53,7 +54,7 @@ const sections = [
         text: "Token Request",
       },
       {
-        icon: "/Vault-management.svg",
+        icon: "/Vault-Management.svg",
         link: "/settings/account",
         text: "Vault Management",
       },
