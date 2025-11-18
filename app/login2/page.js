@@ -67,7 +67,7 @@ export default function LoginPage() {
     try {
       // API call to login endpoint
 
-      const response = await axiosInstanceLocal.post("admin/auth/login",{email,password});
+      const response = await axiosInstance.post("admin/auth/login",{email,password});
 
             console.log(response.data," data from login response (inside frontend login2 page)");
 

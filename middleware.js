@@ -31,6 +31,10 @@ export function middleware(request) {
   }
   
   // SCENARIO 2: Allow access to login page regardless of auth status
+  if (pathname === '/login' && adminToken) {
+    const dashboardUrl = new URL('/', request.url);
+    return NextResponse.redirect(dashboardUrl);
+}
   // (Removed the redirect for /login with token)
   
   console.log(`✅ Allowing access to ${pathname}`);
