@@ -42,6 +42,8 @@ export default function LoginPage() {
    */
   const handleLogin = async (e) => {
     e.preventDefault(); // Prevent default form submission
+
+    
     
     // Basic validation
     if (!email || !password) {
@@ -67,15 +69,18 @@ export default function LoginPage() {
     try {
       // API call to login endpoint
 
+      
+
       const response = await axiosInstance.post("admin/auth/login",{email,password});
 
-            console.log(response.data," data from login response (inside frontend login2 page)");
+      console.log(response.data," data from login response (inside frontend login2 page)");
 
         
     
       // Check if login was successful
       if(response.data && response.data.success){
         // Redirect to dashboard on successful login
+        console.log("Login successful, redirecting to dashboard...");
         router.push("/");
       }
       

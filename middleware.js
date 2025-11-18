@@ -11,7 +11,12 @@ export function middleware(request) {
   ];
   
   const isProtectedRoute = protectedRoutes.includes(pathname);
+
+  console.log(`🚦 Incoming request to ${pathname} + + ${isProtectedRoute}`);
+
   const adminToken = request.cookies.get('adminToken');
+
+  console.log(`🔑 Admin Token Present: ${adminToken}`);
   
   /**
    * ONLY PROTECT ROUTES - DON'T REDIRECT FROM LOGIN
@@ -24,20 +29,25 @@ export function middleware(request) {
    */
   
   // SCENARIO 1: Block access to protected routes without token
+
   if (isProtectedRoute && !adminToken) {
+
+    console.log(` if case triggered - redirecting to login`);
    
     const loginUrl = new URL('/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
   
-  // SCENARIO 2: Allow access to login page regardless of auth status
-  if (pathname === '/login' && adminToken) {
+ // if these conditions match, redirect to dashboard
+ 
+  if (pathname === '/login2' && adminToken) {
     const dashboardUrl = new URL('/', request.url);
     return NextResponse.redirect(dashboardUrl);
 }
   // (Removed the redirect for /login with token)
   
   console.log(`✅ Allowing access to ${pathname}`);
+
   return NextResponse.next();
 }
 
