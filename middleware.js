@@ -30,13 +30,13 @@ export function middleware(request) {
   
   // SCENARIO 1: Block access to protected routes without token
 
-  if (isProtectedRoute && !adminToken) {
+  // if (isProtectedRoute && !adminToken) {
 
-    console.log(` if case triggered - redirecting to login`);
+  //   console.log(` if case triggered - redirecting to login`);
    
-    const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
-  }
+  //   const loginUrl = new URL('/login', request.url);
+  //   return NextResponse.redirect(loginUrl);
+  // }
   
  // if these conditions match, redirect to dashboard
  
