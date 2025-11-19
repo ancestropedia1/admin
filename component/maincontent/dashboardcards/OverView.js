@@ -13,27 +13,26 @@ const cards = [
 
 const OverView = () => {
   return (
-    <div className="bg-white rounded-2xl shadow-lg  border-[#E6E6E6]  sm:p-6">
-
+    <div className="bg-white rounded-2xl shadow-lg border-[#E6E6E6] sm:p-6">
       <div className="border-b border-gray-300 mb-3">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4 sm:mb-6">Overview</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 sm:mb-6">Overview</h2>
       </div>
       
-      {/* Mobile: horizontal scroll, Desktop: flex layout */}
-      <div className="flex overflow-x-auto pb-4 space-x-4 sm:grid sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:gap-6 sm:overflow-x-visible sm:pb-0 sm:space-x-0">
+      {/* Mobile: horizontal scroll, Desktop: flex wrap with proper sizing */}
+      <div className="flex overflow-x-auto sm:overflow-x-visible pb-4 sm:pb-0 space-x-4 sm:space-x-0 sm:flex sm:flex-wrap sm:gap-4 lg:gap-6">
         {cards.map((card, i) => (
           <div
             key={i}
             className={`
               ${card.color} text-white p-3 rounded-2xl shadow-lg relative overflow-hidden 
-              shrink-0 w-[280px] sm:w-full
-              min-h-[160px] flex flex-col justify-between
+              shrink-0 w-[280px] sm:shrink sm:w-full
+              sm:flex-[1_1_calc(50%-8px)] lg:flex-[1_1_calc(33.333%-16px)]
+              min-h-40 flex flex-col justify-between
             `}
           >
             <div className="flex justify-between items-start">
               <div className="bg-white/90 p-2 rounded-md shadow-sm inline-flex items-center justify-center">
-              <Image src={card.icon} alt={card.title} width={20} height={20} />
-              
+                <Image src={card.icon} alt={card.title} width={20} height={20} />
               </div>
               <div className="text-xs font-medium opacity-90 bg-white/20 px-2 py-1 rounded-md">
                 {card.percent}

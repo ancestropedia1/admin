@@ -1,8 +1,8 @@
 import React from 'react'
 import OverView from './dashboardcards/OverView'
 import SystemAlert from './dashboardcards/SystemAlert'
-import Executive from './dashboardcards/Executive'
 import RecentAct from './dashboardcards/RecentAct'
+import Executive from './dashboardcards/Executive'
 
 const MainLayOut = () => {
   return (
@@ -36,12 +36,14 @@ const MainLayOut = () => {
         
         {/* Item 4: Recent Activities - Takes 2/3 width on large screens */}
         <div className="min-w-0 lg:w-2/3">
-          <RecentAct />
+          <Executive />
+
         </div>
 
         {/* Item 3: Executive - Takes 1/3 width on large screens */}
         <div className="min-w-0 lg:w-1/3">
-          <Executive />
+          <RecentAct />
+
         </div>
         
       </div>
