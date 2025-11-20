@@ -9,12 +9,12 @@ const sections = [
     items: [
       { 
         icon: "/dashboard-icon.svg",
-        link: "/", 
-        text: "Dashboard" 
+        link: "/dashboard",
+        text: "Dashboard",
       },
       {
         icon: "/add-user-data.svg",
-        link: "/AddUser",
+        link: "/adduser",
         text: "Add User",
       },
       {
@@ -35,12 +35,12 @@ const sections = [
     items: [
       { 
         icon: "/DNA-Kit.svg", 
-        link: "/order", 
+        link: "/dna-kit", 
         text: "DNA Kit" 
       },
       {
         icon: "/Wall-art-order.svg",
-        link: "/heritage",
+        link: "/wall-art",
         text: "Wall Art",
       },
     ],
@@ -50,12 +50,12 @@ const sections = [
     items: [
       {
         icon: "/Token-Request.svg",
-        link: "/profile",
+        link: "/token-request",
         text: "Token Request",
       },
       {
         icon: "/Vault-Management.svg",
-        link: "/settings/account",
+        link: "/vault-management",
         text: "Vault Management",
       },
     ],
@@ -65,12 +65,12 @@ const sections = [
     items: [
       { 
         icon: "/Reports-Analytics.svg", 
-        link: "/myorders", 
+        link: "/reports-analytics", 
         text: "Reports & Analytics" 
       },
       { 
         icon: "/User-Support.svg", 
-        link: "/blogs", 
+        link: "/user-support", 
         text: "User Support" 
       },
     ],
@@ -80,7 +80,7 @@ const sections = [
     items: [
       { 
         icon: "/Executive-Management.svg",
-        link: "/help", 
+        link: "/executive-management", 
         text: "Executive Management" 
       },
       { 

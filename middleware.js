@@ -41,9 +41,12 @@ export function middleware(request) {
  // if these conditions match, redirect to dashboard
  
   if (pathname === '/login2' && adminToken) {
-    const dashboardUrl = new URL('/', request.url);
+
+  console.log(` if case triggered - redirecting to dashboard`);
+    const dashboardUrl = new URL('/dashboard', request.url);
     return NextResponse.redirect(dashboardUrl);
 }
+
   // (Removed the redirect for /login with token)
   
   console.log(`✅ Allowing access to ${pathname}`);

@@ -2,10 +2,15 @@
 import React, { useState } from 'react';
 import DashBoardHeader from '../dashboard/DashBoardHeader.js';
 import SideBar from '../dashboard/SideBar.js';
-import MainLayOut from '../maincontent/MainLayout.js';
+import { usePathname } from 'next/navigation.js';
 
-const LayOutShell = () => {
+const LayOutShell = ({children}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+
+  if(pathname === "/" || pathname === "/login") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -29,7 +34,7 @@ const LayOutShell = () => {
         
         {/* Main content */}
         <main className="flex-1 bg-[#F3FFF9] p-4 lg:p-6 overflow-auto w-full">
-          <MainLayOut />
+          {children}
         </main>
       </div>
     </div>

@@ -1,37 +1,108 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Playfair_Display } from "next/font/google";
-import { Inter } from "next/font/google";
+import { useState, useEffect } from "react";
+import { Inter, Playfair_Display } from "next/font/google";
 import Image from "next/image";
-import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
+import { axiosInstance, axiosInstanceLocal } from "../../config/axios.js";
+import { useRouter } from "next/navigation.js";
+
+
 const inter = Inter({ subsets: ["latin"] });
+const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700"] });
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
+export default function Page() {
 
-const Page = () => {
-  const [showRightSide, setShowRightSide] = useState(true);
+  const router = useRouter();
+  // State for form fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  
+  // State for UI interactions
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [hideRightSide, setHideRightSide] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Handle window resize to show/hide right side on mobile
   useEffect(() => {
     const handleResize = () => {
-      const width = window.innerWidth;
-      // Hide right side for phones (≤430px) and iPads (≤1024px)
-      if (width <= 1024) {
-        setShowRightSide(false);
-      } else {
-        setShowRightSide(true);
-      }
+      setHideRightSide(window.innerWidth <= 1025);
     };
 
-    handleResize(); // Run once when component loads
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  /**
+   * Handle login form submission
+   * Sends email and password to the authentication API
+   */
+  const handleLogin = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+
+    
+    
+    // Basic validation
+    if (!email || !password) {
+      setError(true);
+      setErrorMessage("Please enter both email and password");
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError(true);
+      setErrorMessage("Please enter a valid email address");
+      return;
+    }
+
+
+
+    setIsLoading(true);
+    setError(false);
+    setErrorMessage("");
+
+    try {
+      // API call to login endpoint
+
+      
+
+      const response = await axiosInstance.post("admin/auth/login",{email,password});
+
+      console.log(response.data," data from login response (inside frontend login2 page)");
+
+        
+    
+      // Check if login was successful
+      if(response.data && response.data.success){
+        // Redirect to dashboard on successful login
+        console.log("Login successful, redirecting to dashboard...");
+        router.push("/");
+      }
+      
+    } catch (error) {
+      // Network error or other issues
+      console.error("Login error:", error);
+      setError(true);
+      setErrorMessage("incorrect details. Please check email and password.");
+
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+   // Handle form submission (same as handleLogin but for form onSubmit)
+
+  const handleSubmit = (e) => {
+    handleLogin(e);
+  };
+
+  // Image assets for the right side panel
   const roverImages = [
     "/rover1.webp",
     "/rover2.webp",
@@ -48,56 +119,133 @@ const Page = () => {
 
   return (
     <div
-      className={`min-h-screen grid transition-all duration-300 ${
-        showRightSide ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
+      className={`min-h-screen grid ${
+        hideRightSide ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
       }`}
     >
-      {/* LEFT SIDE */}
-      <div className="flex flex-col items-center justify-center bg-[#F3FFF9] p-8">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-6">
-          <img src="/logo.svg" alt="Anestropedia Logo" className="w-25 h-25 mb-3" />
-          <h1
-            className={`${playfair.className} text-2xl font-semibold tracking-wide text-[#265A46] mb-4`}
+      {/* LEFT SIDE - Login Form */}
+      <div className="flex flex-col items-center justify-center bg-[#F3FFF9] p-6 sm:p-10">
+        {/* Logo & Welcome Text */}
+        <div className="text-center mb-8 sm:mb-10">
+          <Image
+            src="/logo.svg"
+            alt="Anestropedia Logo"
+            className="w-20 h-20 sm:w-28 sm:h-28 mx-auto mb-3"
+            width={100}
+            height={100}
+          />
+          <h2
+            className={`${playfair.className} text-2xl sm:text-3xl font-bold text-[#265A46]`}
           >
             ANCESTROPEDIA
-          </h1>
+          </h2>
           <p
-            className={`${inter.className} text-[#265A46] mt-2 mb-4 text-center font-bold`}
+            className={`${inter.className} text-[#265A46] mt-2 font-semibold text-sm sm:text-base`}
           >
-            Welcome back! Please log in to manage Anestropedia.
+            Welcome back! Please log in to manage Ancestropedia.
           </p>
         </div>
 
-        {/* Buttons */}
-        <div className="flex flex-col gap-4 w-full max-w-xs sm:max-w-sm md:max-w-md">
-          <Link href="/login2">
-          <button href="/login2" className="bg-[#FFC300] hover:bg-yellow-500 w-full py-[16px] rounded-md font-bold text-lg sm:text-xl md:text-2xl shadow-md text-[#265A46] transition-all duration-200">
-            Admin Login
-          </button>
-            </Link>
-          <button className="bg-[#FFC300] hover:bg-yellow-500 w-full py-[16px] rounded-md font-bold text-lg sm:text-xl md:text-2xl shadow-md text-[#265A46] mt-2 transition-all duration-200">
-            Executive Login
-          </button>
-        </div>
+        {/* Login Form */}
+        <form
+          className={`w-full ${
+            hideRightSide ? "max-w-full px-4" : "max-w-sm sm:max-w-md"
+          } space-y-4`}
+          onSubmit={handleSubmit}
+        >
+          {/* EMAIL FIELD */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-lg sm:text-xl font-medium text-gray-700"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={`mt-1 bg-white mb-2 block w-full border ${
+                error ? "border-red-500" : "border-black"
+              } rounded-md p-3 focus:ring-green-700 focus:border-green-700 py-[15px] font-bold`}
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* PASSWORD FIELD */}
+          <div className="relative">
+            <label
+              htmlFor="password"
+              className="block text-lg sm:text-xl font-medium text-gray-700"
+            >
+              Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`mb-2 bg-white block w-full border ${
+                error ? "border-red-500" : "border-black"
+              } rounded-md p-3 focus:ring-green-700 focus:border-green-700 py-[15px] font-bold`}
+              disabled={isLoading}
+            />
+            {/* Password visibility toggle */}
+            <div
+              className="absolute right-4 top-[45px] cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+            </div>
+          </div>
+
+          {/* ERROR MESSAGE DISPLAY */}
+          {error && (
+            <p className="text-red-600 text-sm font-semibold mb-3 text-center">
+              {errorMessage}
+            </p>
+          )}
+
+          {/* LOGIN BUTTONS */}
+          <div className="flex flex-col gap-4 w-full">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="bg-[#FFC300] mt-3 hover:bg-yellow-500 w-full py-4 rounded-md font-bold text-2xl shadow-md text-[#265A46] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Logging in..." : "Login"}
+            </button>
+            <button
+              type="button"
+              className="bg-[#F2FAF7] w-full py-[13px] rounded-md hover:bg-[#F9FAF8] shadow-md text-xl text-[#265A46] mt-1 border border-black"
+              disabled={isLoading}
+            >
+              Executive Login
+            </button>
+          </div>
+        </form>
       </div>
 
-      {/* RIGHT SIDE */}
-      {showRightSide && (
-        <div className="flex flex-col justify-center bg-[#265A46] text-white p-10 items-center">
-          <h2
+      {/* RIGHT SIDE - Branding and Images */}
+      {!hideRightSide && (
+        <div className="flex flex-col justify-center bg-[#265A46] text-white p-8 sm:p-10 items-center">
+           <h2
             className={`${playfair.className} text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-center`}
           >
-            Anestropedia Admin
+            Anestropedia
+             <span className="mt-10" style={{display:"inline-block", marginTop:"10px",marginLeft:"15px"}}> Admin</span>
+            <br></br>
+            <span className="mt-10" style={{display:"block", marginTop:"10px"}}> Panel</span>
           </h2>
-          <h2
-            className={`${playfair.className} text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-center`}
+
+          <p
+            className={`${inter.className} text-center leading-relaxed mt-5 sm:mt-7 text-sm sm:text-base`}
           >
-            Panel
-          </h2>
-          <p className={`${inter.className} text-center leading-relaxed mt-7 text-sm sm:text-base`}>
-            Powering the preservation of heritage, family stories, and DNA
-            insights across generations.
+            Powering the preservation of heritage, family stories, and DNA insights
+            across generations.
           </p>
           <p
             className={`${inter.className} text-center leading-relaxed mb-6 text-sm sm:text-base`}
@@ -105,9 +253,9 @@ const Page = () => {
             Because every story deserves to be remembered.
           </p>
 
-          {/* Image Row */}
+          {/* Image Carousel */}
           <div
-            className="overflow-hidden w-[300px] sm:w-[400px] md:w-[500px] flex items-center justify-center"
+            className="overflow-hidden w-[300px] sm:w-[500px] flex items-center justify-center"
             role="presentation"
           >
             <div className="flex gap-3 animate-scroll w-max">
@@ -118,7 +266,7 @@ const Page = () => {
                   alt={`Cultural representation ${index + 1}`}
                   width={88}
                   height={65}
-                  className="rounded-md object-cover w-[88px] h-[65px] flex-shrink-0"
+                  className="rounded-md object-cover w-[88px] h-[65px] shrink-0"
                 />
               ))}
             </div>
@@ -127,6 +275,4 @@ const Page = () => {
       )}
     </div>
   );
-};
-
-export default Page;
+}

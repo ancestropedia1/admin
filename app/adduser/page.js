@@ -1,9 +1,9 @@
-import AddUser from '@/component/addUser/AddUser'
+import AddUserPage from '@/component/addUser/AddUser'
 import React from 'react'
 
 function Page() {
   return (
-    <AddUser/>
+    <AddUserPage/>
   )
 }
 
