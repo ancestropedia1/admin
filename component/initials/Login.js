@@ -76,8 +76,8 @@ const Login = () => {
 
         {/* Buttons */}
         <div className="flex flex-col gap-4 w-full max-w-xs sm:max-w-sm md:max-w-md">
-          <Link href="/login2">
-          <button href="/login2" className="bg-[#FFC300] hover:bg-yellow-500 w-full py-4 rounded-md font-bold text-lg sm:text-xl md:text-2xl shadow-md text-[#265A46] transition-all duration-200">
+          <Link href="/login">
+          <button href="/login" className="bg-[#FFC300] hover:bg-yellow-500 w-full py-4 rounded-md font-bold text-lg sm:text-xl md:text-2xl shadow-md text-[#265A46] transition-all duration-200">
             Admin Login
           </button>
             </Link>
