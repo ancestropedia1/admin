@@ -20,12 +20,12 @@ const sections = [
       },
       {
         icon: "/user-management.svg",
-        link: "/user-management",
+        link: "/usermanagement",
         text: "User Management",
       },
       { 
         icon: "/blogs-management.svg", 
-        link: "/blogs-management", 
+        link: "/blogManagement", 
         text: "Blogs Management" 
       },
     ],
@@ -50,12 +50,12 @@ const sections = [
     items: [
       {
         icon: "/Token-Request.svg",
-        link: "/token-request",
+        link: "/tokenmanagement",
         text: "Token Request",
       },
       {
         icon: "/Vault-Management.svg",
-        link: "/vault-management",
+        link: "/vaultmanagement",
         text: "Vault Management",
       },
     ],
@@ -65,12 +65,12 @@ const sections = [
     items: [
       { 
         icon: "/Reports-Analytics.svg", 
-        link: "/reports-analytics", 
+        link: "/reportmanagement", 
         text: "Reports & Analytics" 
       },
       { 
         icon: "/User-Support.svg", 
-        link: "/user-support", 
+        link: "/supportmanagement", 
         text: "User Support" 
       },
     ],
