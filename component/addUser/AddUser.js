@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Lato, Playfair_Display } from "next/font/google";
 import Link from "next/link";
+import AdminFamilyTreeForm from "./build/form/AdminAddUserForm.js";
 
 
 
@@ -32,7 +33,7 @@ export default function AddUserPage() {
 
       {/* 🔥 ONLY FORM SHOWS WHEN CLICKED */}
       {showForm ? (
-        <Form onClose={() => setShowForm(false)} />
+        <AdminFamilyTreeForm onClose={() => setShowForm(false)} />
       ) : (
         <>
           {/* ============================= */}
@@ -63,7 +64,7 @@ export default function AddUserPage() {
                 <p
                   className={`${lato.className} text-sm sm:text-base md:text-lg font-medium text-gray-600 mt-2 md:mt-4 max-w-md md:max-w-lg`}
                 >
-                  Manually add user details to Anestropedia's database and help expand our heritage community.
+                  Manually add user details to Anestropedias database and help expand our heritage community.
                 </p>
               </div>
 

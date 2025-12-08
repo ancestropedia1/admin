@@ -1,7 +1,8 @@
 "use client";
+import { axiosInstance } from "@/config/axios";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const sections = [
   {
@@ -22,7 +23,6 @@ const sections = [
         link: "/user-management",
         text: "User Management",
       },
-      
       { 
         icon: "/blogs-management.svg", 
         link: "/blogs-management", 
@@ -92,42 +92,36 @@ const sections = [
   },
 ];
 
-export default function AdminSideBar({ setShow }) {
-  const sideBarRef = useRef(null);
+export default function AdminSideBar({ onNavigate }) {
   const pathname = usePathname();
   const router = useRouter();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [logginOut, setLoggingOut] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const logoutRef = useRef(null);
 
-  // Click outside handler for sidebar
+  // Click outside handler ONLY for logout modal
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (sideBarRef.current && !sideBarRef.current.contains(event.target)) {
-        if (setShow) setShow();
-      }
-    };
+    if (!showLogoutConfirm) return;
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [setShow]);
-
-  // Click outside handler for logout confirmation
-  useEffect(() => {
     const handleClickOutside = (event) => {
       if (logoutRef.current && !logoutRef.current.contains(event.target)) {
-        if (!logginOut) setShowLogoutConfirm(false);
+        if (!loggingOut) {
+          setShowLogoutConfirm(false);
+        }
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [setShowLogoutConfirm, logginOut]);
+  }, [showLogoutConfirm, loggingOut]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
       console.log("Logging out...");
+      await axiosInstance.post("/auth/logout");
+      console.log("Logged out successfully");
+
       setTimeout(() => {
         window.location.href = "/login";
       }, 1000);
@@ -140,15 +134,12 @@ export default function AdminSideBar({ setShow }) {
 
   const handleNavigation = (link) => {
     router.push(link);
-    if (setShow) setShow(); // Close sidebar on mobile after navigation
+    if (onNavigate) onNavigate(); // Close sidebar on mobile after navigation
   };
 
   return (
     <>
-      <aside
-        className="w-[260px] border-t bg-white border-r border-gray-200 overflow-y-auto h-full scrollbar-hidden"
-        ref={sideBarRef}
-      >
+      <aside className="w-[260px] border-t bg-white border-r border-gray-200 overflow-y-auto h-full scrollbar-hidden">
         <nav className="p-4 flex flex-col gap-6">
           {sections.map((section, idx) => (
             <div
@@ -164,7 +155,7 @@ export default function AdminSideBar({ setShow }) {
               )}
               <ul className="flex flex-col gap-1">
                 {section.items.map((item, i) => {
-                  const active = pathname === item.link; // Fixed: use exact match instead of startsWith
+                  const active = pathname === item.link;
                   
                   return (
                     <li key={i}>
@@ -222,14 +213,14 @@ export default function AdminSideBar({ setShow }) {
             <div className="flex w-full justify-between gap-4">
               <button
                 onClick={handleLogout}
-                disabled={logginOut}
+                disabled={loggingOut}
                 className="p-2 bg-red-500 rounded-xl cursor-pointer text-white flex-1 hover:bg-red-600 disabled:bg-red-300"
               >
-                {logginOut ? "Logging Out..." : "Log Out"}
+                {loggingOut ? "Logging Out..." : "Log Out"}
               </button>
               <button
                 onClick={() => setShowLogoutConfirm(false)}
-                disabled={logginOut}
+                disabled={loggingOut}
                 className="p-2 bg-gray-200 rounded-xl cursor-pointer text-gray-800 flex-1 hover:bg-gray-300 disabled:bg-gray-100"
               >
                 Cancel

@@ -10,7 +10,11 @@ const DashBoardHeader = ({ sidebarOpen, onMenuToggle }) => {
         <div className="flex items-center gap-3">
           {/* Hamburger Menu for Mobile - Shows close icon when sidebar is open */}
           <button 
-            onClick={onMenuToggle}
+          data-sidebar-toggle
+            onClick={(e)=>{
+               e.stopPropagation(); 
+               onMenuToggle();
+            }}
             className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
             aria-label="Toggle menu"
           >
@@ -19,6 +23,7 @@ const DashBoardHeader = ({ sidebarOpen, onMenuToggle }) => {
             ) : (
               <Menu className="text-gray-600" size={24} />
             )}
+            {console.log("clicked")}
           </button>
           
           {/* Logo - Hidden on mobile, visible on tablet and up */}

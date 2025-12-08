@@ -88,7 +88,7 @@ export default function AddUserForm() {
           Add New User
         </h1>
         <p className={`${lato.className} text-center text-gray-600 mt-2`}>
-          Manually add user details to Ancestropedia's database.
+          Manually add user details to Ancestropedias database.
         </p>
       </div>
 

@@ -40,7 +40,7 @@ export function middleware(request) {
   
  // if these conditions match, redirect to dashboard
  
-  if (pathname === '/login2' && adminToken) {
+  if (pathname === '/login' && adminToken) {
 
   console.log(` if case triggered - redirecting to dashboard`);
     const dashboardUrl = new URL('/dashboard', request.url);
