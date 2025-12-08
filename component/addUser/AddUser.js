@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Lato, Playfair_Display } from "next/font/google";
 import Link from "next/link";
-import AdminFamilyTreeForm from "./build/form/AdminAddUserForm.js";
 
 
 
@@ -33,7 +32,7 @@ export default function AddUserPage() {
 
       {/* 🔥 ONLY FORM SHOWS WHEN CLICKED */}
       {showForm ? (
-        <AdminFamilyTreeForm onClose={() => setShowForm(false)} />
+        <Form onClose={() => setShowForm(false)} />
       ) : (
         <>
           {/* ============================= */}
