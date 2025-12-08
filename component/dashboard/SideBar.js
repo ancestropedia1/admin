@@ -80,7 +80,7 @@ const sections = [
     items: [
       { 
         icon: "/Executive-Management.svg",
-        link: "/executive-management", 
+        link: "/executivemanagement", 
         text: "Executive Management" 
       },
       { 

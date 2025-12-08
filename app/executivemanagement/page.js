@@ -1,8 +1,9 @@
+import ExecutiveManagement from '@/component/executivemanagement/ExecutiveManagement'
 import React from 'react'
 
 function Page() {
   return (
-    <div>P</div>
+    <div><ExecutiveManagement/></div>
   )
 }
 
