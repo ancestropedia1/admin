@@ -81,7 +81,7 @@ export default function Page() {
       if(response.data && response.data.success){
         // Redirect to dashboard on successful login
         console.log("Login successful, redirecting to dashboard...");
-        router.push("/");
+        router.push("/dashboard");
       }
       
     } catch (error) {
