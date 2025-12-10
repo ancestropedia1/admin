@@ -22,21 +22,21 @@ const lato = Lato({
   weight: ["400", "700"],
 });
 
-const DnaKit = () => {
+const WallArt = () => {
   const [activeTab, setActiveTab] = useState("orders");
 
   return (
     <div className="w-full min-h-screen p-4 md:p-6">
       {/* ----------------------------- HEADER ------------------------------- */}
-      <div className="bg-[#F6F1E9] border mt-4 border-gray-300 p-8 rounded-xl shadow-sm">
+      <div className="bg-[#F6F1E9] border border-gray-300 p-8 rounded-xl shadow-sm mt-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
             <h1 className={`${playfair.className} text-4xl font-extrabold text-gray-800`}>
-              DNA Kit
+              Wall Art
             </h1>
 
             <p className={`${lato.className} text-gray-600 mt-3 text-lg max-w-xl`}>
-              Upload, verify, and publish DNA reports with complete accuracy and control.
+             Upload, verify, and publish DNA reports with complete accuracy and control.
             </p>
           </div>
 
@@ -48,33 +48,7 @@ const DnaKit = () => {
       </div>
 
       {/* ----------------------------- TABS ------------------------------- */}
-      <div className="bg-[#F6F1E9] border-b mt-6 p-2 flex gap-3">
-
-        {/* Orders Tab */}
-        <button
-          onClick={() => setActiveTab("orders")}
-          className={`px-6 py-3 rounded-md font-semibold transition ${
-            activeTab === "orders"
-              ? "bg-[]"
-              : "text-gray-700"
-          }`}
-        >
-          Orders
-        </button>
-
-        {/* Reports Tab */}
-        <button
-          onClick={() => setActiveTab("reports")}
-          className={`px-6 py-3 rounded-md font-semibold transition ${
-            activeTab === "reports"
-              ? "bg-[#C46A3A] text-white"
-              : " text-gray-700"
-          }`}
-        >
-          Reports
-        </button>
-      </div>
-
+      
       {/* ----------------------------- FILTER BAR ------------------------------- */}
       <div className="bg-[#F6F1E9] border border-gray-400 p-4 rounded-xl shadow-sm mt-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -175,4 +149,4 @@ const ReportsList = () => {
   );
 };
 
-export default DnaKit;
+export default WallArt;

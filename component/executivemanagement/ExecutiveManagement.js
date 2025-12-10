@@ -30,46 +30,48 @@ const lato = Lato({
 const ExecutiveManagement = () => {
 
 
-    const [users, setUsers] = useState([
-      {
-        id: "813764",
-        ticketId: "8384",
-        name: "Gaurav Singh",
-        status: "Open",
-        category: "DNA Kit",
-        date: "18/08/2025",
-        avatar: "/avatar-placeholder.jpg",
-      },
-      {
-        id: "813765",
-        ticketId: "8385",
-        name: "Aarav Sharma",
-        status: "In Progress",
-        category: "Heritage Vault",
-        date: "05/03/2025",
-        avatar: "/avatar-placeholder.jpg",
-      },
-      {
-        id: "813766",
-        ticketId: "8386",
-        name: "Kunal Verma",
-        status: "Resolved",
-        category: "Wall Art",
-        date: "27/04/2025",
-        avatar: "/avatar-placeholder.jpg",
-      },
-      {
-        id: "813767",
-        ticketId: "8387",
-        name: "Rahul Singh",
-        status: "In Progress",
-        category: "Token",
-        date: "13/02/2025",
-        avatar: "/avatar-placeholder.jpg",
-      },
-    ]);
-
-// ----------------------------
+    // ⭐ DYNAMIC USER TABLE DATA
+      // ----------------------------
+      const [users, setUsers] = useState([
+        {
+          id: "813764",
+          name: "Gaurav Singh",
+          plan: "Standard",
+          used: 7,
+          total: 10,
+          files: 400,
+          avatar: "/avatar-placeholder.jpg",
+        },
+        {
+          id: "813765",
+          name: "Aarav Sharma",
+          plan: "Pro",
+          used: 6,
+          total: 10,
+          files: 600,
+          avatar: "/avatar-placeholder.jpg",
+        },
+        {
+          id: "813766",
+          name: "Kunal Verma",
+          plan: "Standard",
+          used: 8,
+          total: 10,
+          files: 800,
+          avatar: "/avatar-placeholder.jpg",
+        },
+        {
+          id: "813767",
+          name: "Rahul Singh",
+          plan: "Pro",
+          used: 9,
+          total: 10,
+          files: 1000,
+          avatar: "/avatar-placeholder.jpg",
+        },
+      ]);
+    
+      // ----------------------------
       // ⭐ PAGINATION STATES
       // ----------------------------
       const [page, setPage] = useState(1);
@@ -80,13 +82,12 @@ const ExecutiveManagement = () => {
         page * rowsPerPage
       );
     
-      const totalPages = Math.ceil(users.length / rowsPerPage);
-
+      const totalPages = Math.ceil(users.length / rowsPerPage)
 
   return (
     <div className='w-full min-h-screen'>
         {/* ---------------------------------- HEADER ---------------------------------- */}
-        <div className="bg-[#F6F1E9] border mt-4 border-gray-400 p-8 rounded-xl shadow-sm w-full">
+        <div className="bg-[#F6F1E9] border border-gray-400 p-8 mt-10 rounded-xl shadow-sm w-full">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex-1">
               <h1
@@ -145,247 +146,112 @@ const ExecutiveManagement = () => {
       {/* --------------------------- */}
       {/* ⭐ SUPPORT TICKETS TABLE (Figma Exact) */}
       {/* --------------------------- */}
-      <div className="bg-white rounded-xl shadow-sm mt-10 overflow-x-auto">
-        {/* Mobile card view for small screens */}
-        <div className="md:hidden">
-          {paginatedUsers.map((user, index) => (
-            <div key={index} className="border-b p-4 last:border-none">
-              {/* Mobile Card Header */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={user.avatar}
-                    className="w-12 h-12 rounded-full border"
-                    alt={user.name}
-                  />
-                  <div>
-                    <p className="font-medium text-gray-700">{user.name}</p>
-                    <p className="text-xs text-gray-500">ID-{user.id}</p>
-                    <p className="text-xs text-gray-500">#{user.ticketId}</p>
-                  </div>
-                </div>
-                <span
-                  className={`text-sm font-semibold ${
-                    user.status === "Open"
-                      ? "text-red-500"
-                      : user.status === "In Progress"
-                      ? "text-blue-500"
-                      : "text-green-600"
-                  }`}
-                >
-                  {user.status}
-                </span>
-              </div>
-      
-              {/* Mobile Card Details */}
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-gray-500 text-xs">Category</p>
-                  <p className="font-medium text-gray-700">{user.category}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs">Created</p>
-                  <p className="font-medium text-gray-700">{user.date}</p>
-                </div>
-              </div>
-      
-              {/* Mobile Actions */}
-              <div className="flex gap-2 mt-4">
-                <button className="flex-1 px-4 py-2 bg-[#C5FFCD] text-[#1D7A48] rounded-md text-sm font-medium">
-                  Resolve
-                </button>
-                <button className="flex-1 px-4 py-2 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-sm font-medium">
-                  Assign
-                </button>
-              </div>
-            </div>
-          ))}
+      <div className="bg-white rounded-xl border-2 border-gray-300 shadow-sm mt-10 overflow-x-auto">
+        <div className="bg-[#F6F1E9]">
+
+          <h3 className="text-lg font-bold Created p-3 md:text-xl  text-[#1B3B2F]">
+                Executive List
+              </h3>
         </div>
+              
       
-        {/* Desktop table view (hidden on mobile) */}
-        <table className="w-full text-sm hidden md:table">
-          <thead>
-            <tr className="bg-[#FDF7EE] text-gray-700 border-b">
-              <th className="p-4 md:p-6 text-left">User</th>
-              <th className="p-4 md:p-6 text-left">Status</th>
-              <th className="p-4 md:p-6 text-left">Category</th>
-              <th className="p-4 md:p-6 text-left">Created</th>
-              <th className="p-4 md:p-6 text-left">Action</th>
-            </tr>
-          </thead>
+              <div className="overflow-x-auto">
+                <table className="w-full font-light text-left">
+                <thead className="bg-[#F6F1E9] border-t-2">
+                  <tr>
+                    
+                    <th className="text-left text-gray-70 p-3">Executive</th>
+                    <th className="text-left text-gray-70  p-3">Assignment</th>
+                    <th className="text-left text-gray-70  p-3">Status</th>
+                    <th className="text-left text-gray-70 p-3">Created</th>
+                    <th className="text-left text-gray-70 p-3">Action</th>
+                    
+                    
+                  </tr>
+                </thead>
       
-          <tbody>
-            {paginatedUsers.map((user, index) => (
-              <tr key={index} className="border-b last:border-none hover:bg-gray-50">
-                {/* User Column */}
-                <td className="p-3 md:p-4">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={user.avatar}
-                      className="w-10 h-10 rounded-full border"
-                      alt={user.name}
-                    />
-                    <div>
-                      <p className="font-medium text-gray-700">{user.name}</p>
-                      <p className="text-xs text-gray-500">ID-{user.id}</p>
-                      <p className="text-xs text-gray-500">#{user.ticketId}</p>
-                    </div>
-                  </div>
-                </td>
+                <tbody>
+                  {paginatedUsers.map((user) => {
+                    const percent = (user.used / user.total) * 100;
       
-                {/* Status Column */}
-                <td className="p-3 md:p-4">
-                  <span
-                    className={`font-semibold ${
-                      user.status === "Open"
-                        ? "text-red-500"
-                        : user.status === "In Progress"
-                        ? "text-blue-500"
-                        : "text-green-600"
-                    }`}
-                  >
-                    {user.status}
-                  </span>
-                </td>
+                    return (
+                      <tr key={user.id} className="border-b bg-white">
+                        <td className="p-3 flex items-center gap-3">
+                          <img
+                            src={user.avatar}
+                            className="w-10 h-10 rounded-full border"
+                          />
+                          <div>
+                            <p className="font-medium text-gray-700">{user.name}</p>
+                            <p className="text-xs text-gray-500">ID-{user.id}</p>
+                          </div>
+                        </td>
       
-                {/* Category */}
-                <td className="p-3 md:p-4 text-gray-700">{user.category}</td>
-      
-                {/* Created Date */}
-                <td className="p-3 md:p-4 text-gray-700">{user.date}</td>
-      
-                {/* Actions */}
-                <td className="p-3 md:p-4">
-                  <div className="flex gap-2 flex-wrap">
-                    <button className="px-3 py-1 md:px-4 md:py-1 bg-[#C5FFCD] text-[#1D7A48] rounded-md text-xs md:text-sm font-medium hover:opacity-90 transition-opacity">
-                      Resolve
-                    </button>
-                    <button className="px-3 py-1 md:px-4 md:py-1 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-xs md:text-sm font-medium hover:opacity-90 transition-opacity">
-                      Assign
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      
-        {/* Footer with pagination - Responsive */}
-        <div className="border-t p-4">
-          {/* Showing text */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-            <p className="text-gray-600 text-xs md:text-sm">
-              Showing {(page - 1) * rowsPerPage + 1} to{" "}
-              {Math.min(page * rowsPerPage, users.length)} of {users.length} Requests
-            </p>
-      
-            {/* Pagination */}
-            <div className="flex flex-wrap justify-center sm:justify-end gap-2 items-center">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-                className="p-2 border rounded-md bg-white hover:bg-gray-100 disabled:opacity-40 transition-colors"
-                aria-label="Previous page"
-              >
-                <ChevronLeft size={16} />
-              </button>
-      
-              {/* Responsive page numbers */}
-              <div className="flex gap-1 md:gap-2">
-                {totalPages <= 5 ? (
-                  // Show all pages for small total
-                  [...Array(totalPages)].map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setPage(i + 1)}
-                      className={`px-2 md:px-3 py-1 rounded-md border text-sm ${
-                        page === i + 1
-                          ? "bg-[#1B5E20] text-white"
-                          : "bg-white text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))
-                ) : (
-                  // Show limited pages for large total
-                  <>
-                    {page > 3 && (
-                      <>
-                        <button
-                          onClick={() => setPage(1)}
-                          className={`px-2 md:px-3 py-1 rounded-md border text-sm ${
-                            page === 1
-                              ? "bg-[#1B5E20] text-white"
-                              : "bg-white text-gray-700 hover:bg-gray-100"
-                          }`}
-                        >
-                          1
-                        </button>
-                        {page > 4 && <span className="px-2 py-1">...</span>}
-                      </>
-                    )}
-      
-                    {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                      let pageNum;
-                      if (page <= 3) {
-                        pageNum = i + 1;
-                      } else if (page >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = page - 2 + i;
-                      }
-      
-                      return (
-                        pageNum <= totalPages && (
-                          <button
-                            key={i}
-                            onClick={() => setPage(pageNum)}
-                            className={`px-2 md:px-3 py-1 rounded-md border text-sm ${
-                              page === pageNum
-                                ? "bg-[#1B5E20] text-white"
-                                : "bg-white text-gray-700 hover:bg-gray-100"
-                            }`}
+                        <td className="p-3">
+                          <span
+                            className={`px-3 py-1 rounded-md text-xs font-medium 
+                              ${
+                                user.plan === "Standard"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-blue-100 text-blue-700"
+                              }`}
                           >
-                            {pageNum}
+                            {user.plan}
+                          </span>
+                        </td>
+      
+                        <td className="p-3">
+                          <div className="text-xs text-gray-600 mb-1">
+                            {user.used} GB of {user.total} GB
+                          </div>
+                          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-green-600"
+                              style={{ width: `${percent}%` }}
+                            ></div>
+                          </div>
+                        </td>
+      
+                        <td className="p-3 text-gray-700">{user.files}</td>
+      
+                        <td className="p-3">
+                          <button className="px-4 py-1 bg-[#E6ECFF] text-[#4A63C0] rounded-md text-xs font-medium hover:bg-[#dce3ff]">
+                            Manage
                           </button>
-                        )
-                      );
-                    })}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
       
-                    {page < totalPages - 2 && (
-                      <>
-                        {page < totalPages - 3 && (
-                          <span className="px-2 py-1">...</span>
-                        )}
-                        <button
-                          onClick={() => setPage(totalPages)}
-                          className={`px-2 md:px-3 py-1 rounded-md border text-sm ${
-                            page === totalPages
-                              ? "bg-[#1B5E20] text-white"
-                              : "bg-white text-gray-700 hover:bg-gray-100"
-                          }`}
-                        >
-                          {totalPages}
-                        </button>
-                      </>
-                    )}
-                  </>
-                )}
               </div>
+              
+              {/* --------------------------- */}
+              {/* PAGINATION */}
+              {/* --------------------------- */}
+              <div className="flex justify-end mt-4 gap-2 text-sm items-center p-4">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(page - 1)}
+                  className="p-2 border rounded-md bg-white hover:bg-gray-100 disabled:opacity-40"
+                >
+                  <ChevronLeft size={16} />
+                </button>
       
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage(page + 1)}
-                className="p-2 border rounded-md bg-white hover:bg-gray-100 disabled:opacity-40 transition-colors"
-                aria-label="Next page"
-              >
-                <ChevronRight size={16} />
-              </button>
+                <span className="px-3 py-1 bg-[#1D7A48] text-white rounded-md">
+                  {page}
+                </span>
+      
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage(page + 1)}
+                  className="p-2 border rounded-md bg-white hover:bg-gray-100 disabled:opacity-40"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-        </div>
     </div>
   )
 }

@@ -29,63 +29,68 @@ const lato = Lato({
 
 const SupportManagement = () => {
 
-  const [users, setUsers] = useState([
+  // Example Ticket Data (replace with your API data)
+const tickets = [
   {
-    id: "813764",
-    ticketId: "8384",
-    name: "Gaurav Singh",
-    status: "Open",
+    ticketId: "88384",
+    title: "Issue with DNA report",
     category: "DNA Kit",
+    status: "Open",
     date: "18/08/2025",
-    avatar: "/avatar-placeholder.jpg",
+    agent: "Divyanshu",
   },
   {
-    id: "813765",
-    ticketId: "8385",
-    name: "Aarav Sharma",
-    status: "In Progress",
+    ticketId: "88384",
+    title: "Token Balance Updating",
     category: "Heritage Vault",
-    date: "05/03/2025",
-    avatar: "/avatar-placeholder.jpg",
-  },
-  {
-    id: "813766",
-    ticketId: "8386",
-    name: "Kunal Verma",
-    status: "Resolved",
-    category: "Wall Art",
-    date: "27/04/2025",
-    avatar: "/avatar-placeholder.jpg",
-  },
-  {
-    id: "813767",
-    ticketId: "8387",
-    name: "Rahul Singh",
     status: "In Progress",
-    category: "Token",
-    date: "13/02/2025",
-    avatar: "/avatar-placeholder.jpg",
+    date: "05/03/2025",
+    agent: "Divyanshu",
   },
-]);
+  {
+    ticketId: "88384",
+    title: "Vault Space Issue",
+    category: "Wall Art",
+    status: "Resolved",
+    date: "27/04/2025",
+    agent: "Divyanshu",
+  },
+  {
+    ticketId: "88384",
+    title: "Billing Inquiry Premium",
+    category: "Token",
+    status: "In Progress",
+    date: "13/02/2025",
+    agent: "Divyanshu",
+  },
+  {
+    ticketId: "88384",
+    title: "Wall Art Disorder",
+    category: "Family tree",
+    status: "Open",
+    date: "23/09/2025",
+    agent: "Divyanshu",
+  },
+];
 
 
-    // ----------------------------
-      // ⭐ PAGINATION STATES
-      // ----------------------------
-      const [page, setPage] = useState(1);
-      const rowsPerPage = 4;
-    
-      const paginatedUsers = users.slice(
-        (page - 1) * rowsPerPage,
-        page * rowsPerPage
-      );
-    
-      const totalPages = Math.ceil(users.length / rowsPerPage);
+
+    const [page, setPage] = useState(1);
+const rowsPerPage = 5;
+
+const totalPages = Math.ceil(tickets.length / rowsPerPage);
+
+// Slice for current page
+const paginatedTickets = tickets.slice(
+  (page - 1) * rowsPerPage,
+  page * rowsPerPage
+);
+
   return (
     <div className='w-full min-h-screen'>
   
   {/* ---------------------------------- HEADER ---------------------------------- */}
-        <div className="bg-[#F6F1E9] border mt-4 border-gray-400 p-8 rounded-xl shadow-sm w-full">
+        <div className="bg-[#F6F1E9] mt-10 border border-gray-400 p-8 rounded-xl shadow-sm w-full">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex-1">
               <h1
@@ -150,125 +155,80 @@ const SupportManagement = () => {
         </div>
       </div>
       
-       {/* --------------------------- */}
-{/* ⭐ SUPPORT TICKETS TABLE (Figma Exact) */}
-{/* --------------------------- */}
-<div className="bg-white rounded-xl shadow-sm mt-10 overflow-x-auto">
-  {/* Mobile card view for small screens */}
-  <div className="md:hidden">
-    {paginatedUsers.map((user, index) => (
-      <div key={index} className="border-b p-4 last:border-none">
-        {/* Mobile Card Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <img
-              src={user.avatar}
-              className="w-12 h-12 rounded-full border"
-              alt={user.name}
-            />
-            <div>
-              <p className="font-medium text-gray-700">{user.name}</p>
-              <p className="text-xs text-gray-500">ID-{user.id}</p>
-              <p className="text-xs text-gray-500">#{user.ticketId}</p>
-            </div>
-          </div>
-          <span
-            className={`text-sm font-semibold ${
-              user.status === "Open"
-                ? "text-red-500"
-                : user.status === "In Progress"
-                ? "text-blue-500"
-                : "text-green-600"
-            }`}
-          >
-            {user.status}
-          </span>
-        </div>
+      {/* --------------------------- */}
+{/* ⭐ SUPPORT TICKETS TABLE – FIGMA EXACT UI */} 
+<div className="bg-white rounded-xl shadow-sm mt-10 overflow-x-auto border">
 
-        {/* Mobile Card Details */}
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <p className="text-gray-500 text-xs">Category</p>
-            <p className="font-medium text-gray-700">{user.category}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 text-xs">Created</p>
-            <p className="font-medium text-gray-700">{user.date}</p>
-          </div>
-        </div>
-
-        {/* Mobile Actions */}
-        <div className="flex gap-2 mt-4">
-          <button className="flex-1 px-4 py-2 bg-[#C5FFCD] text-[#1D7A48] rounded-md text-sm font-medium">
-            Resolve
-          </button>
-          <button className="flex-1 px-4 py-2 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-sm font-medium">
-            Assign
-          </button>
-        </div>
-      </div>
-    ))}
+  {/* Section Header */}
+  <div className="bg-[#F6F1E9] border-b p-4 text-xl font-bold text-gray-800">
+    Ticket ID
   </div>
 
-  {/* Desktop table view (hidden on mobile) */}
-  <table className="w-full text-sm hidden md:table">
+  {/* DESKTOP TABLE */}
+  <table className="w-full hidden md:table">
     <thead>
-      <tr className="bg-[#FDF7EE] text-gray-700 border-b">
-        <th className="p-4 md:p-6 text-left">User</th>
-        <th className="p-4 md:p-6 text-left">Status</th>
-        <th className="p-4 md:p-6 text-left">Category</th>
-        <th className="p-4 md:p-6 text-left">Created</th>
-        <th className="p-4 md:p-6 text-left">Action</th>
+      <tr className="bg-[#F6F1E9] border-b">
+        <th className="text-left p-5 font-semibold text-gray-700">Ticket ID</th>
+        <th className="text-left p-5 font-semibold text-gray-700">User</th>
+        <th className="text-left p-5 font-semibold text-gray-700">Category</th>
+        <th className="text-left p-5 font-semibold text-gray-700">Status</th>
+        <th className="text-left p-5 font-semibold text-gray-700">Created</th>
+        <th className="text-left p-5 font-semibold text-gray-700">Action</th>
       </tr>
     </thead>
 
     <tbody>
-      {paginatedUsers.map((user, index) => (
-        <tr key={index} className="border-b last:border-none hover:bg-gray-50">
-          {/* User Column */}
-          <td className="p-3 md:p-4">
+      {paginatedTickets.map((item, index) => (
+        <tr
+          key={index}
+          className="border-b last:border-none hover:bg-gray-50 transition"
+        >
+          {/* TICKET ID */}
+          <td className="p-5 text-gray-700">#{item.ticketId}</td>
+
+          {/* USER COLUMN – Image + Name + ID */}
+          <td className="p-5">
             <div className="flex items-center gap-3">
               <img
-                src={user.avatar}
-                className="w-10 h-10 rounded-full border"
-                alt={user.name}
+                src={item.avatar}
+                className="w-10 h-10 rounded-full object-cover"
+                alt="User"
               />
-              <div>
-                <p className="font-medium text-gray-700">{user.name}</p>
-                <p className="text-xs text-gray-500">ID-{user.id}</p>
-                <p className="text-xs text-gray-500">#{user.ticketId}</p>
+              <div className="flex">
+                <p className="text-gray-800 font-medium">{item.name}</p>
+                <p className="text-xs text-gray-500">ID-{item.userId}</p>
               </div>
             </div>
           </td>
 
-          {/* Status Column */}
-          <td className="p-3 md:p-4">
+          {/* CATEGORY */}
+          <td className="p-5 text-gray-700">{item.category}</td>
+
+          {/* STATUS */}
+          <td className="p-5">
             <span
-              className={`font-semibold ${
-                user.status === "Open"
-                  ? "text-red-500"
-                  : user.status === "In Progress"
-                  ? "text-blue-500"
-                  : "text-green-600"
+              className={`font-medium ${
+                item.status === "Open"
+                  ? "text-[#E56A34]"
+                  : item.status === "In Progress"
+                  ? "text-[#4A6FF3]"
+                  : "text-[#1E7E34]"
               }`}
             >
-              {user.status}
+              {item.status}
             </span>
           </td>
 
-          {/* Category */}
-          <td className="p-3 md:p-4 text-gray-700">{user.category}</td>
+          {/* CREATED DATE */}
+          <td className="p-5 text-gray-700">{item.date}</td>
 
-          {/* Created Date */}
-          <td className="p-3 md:p-4 text-gray-700">{user.date}</td>
-
-          {/* Actions */}
-          <td className="p-3 md:p-4">
-            <div className="flex gap-2 flex-wrap">
-              <button className="px-3 py-1 md:px-4 md:py-1 bg-[#C5FFCD] text-[#1D7A48] rounded-md text-xs md:text-sm font-medium hover:opacity-90 transition-opacity">
+          {/* ACTION BUTTONS */}
+          <td className="p-5">
+            <div className="flex gap-2">
+              <button className="px-3 py-1 bg-[#C5FFCD] text-[#1D7A48] rounded-md text-xs font-medium">
                 Resolve
               </button>
-              <button className="px-3 py-1 md:px-4 md:py-1 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-xs md:text-sm font-medium hover:opacity-90 transition-opacity">
+              <button className="px-3 py-1 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-xs font-medium">
                 Assign
               </button>
             </div>
@@ -278,123 +238,107 @@ const SupportManagement = () => {
     </tbody>
   </table>
 
-  {/* Footer with pagination - Responsive */}
-  <div className="border-t p-4">
-    {/* Showing text */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-      <p className="text-gray-600 text-xs md:text-sm">
-        Showing {(page - 1) * rowsPerPage + 1} to{" "}
-        {Math.min(page * rowsPerPage, users.length)} of {users.length} Requests
-      </p>
+  {/* MOBILE CARD VIEW */}
+  <div className="md:hidden p-3">
+    {paginatedTickets.map((item, index) => (
+      <div key={index} className="border rounded-lg p-4 mb-4 bg-white shadow-sm">
 
-      {/* Pagination */}
-      <div className="flex flex-wrap justify-center sm:justify-end gap-2 items-center">
-        <button
-          disabled={page === 1}
-          onClick={() => setPage(page - 1)}
-          className="p-2 border rounded-md bg-white hover:bg-gray-100 disabled:opacity-40 transition-colors"
-          aria-label="Previous page"
-        >
-          <ChevronLeft size={16} />
-        </button>
-
-        {/* Responsive page numbers */}
-        <div className="flex gap-1 md:gap-2">
-          {totalPages <= 5 ? (
-            // Show all pages for small total
-            [...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i + 1)}
-                className={`px-2 md:px-3 py-1 rounded-md border text-sm ${
-                  page === i + 1
-                    ? "bg-[#1B5E20] text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))
-          ) : (
-            // Show limited pages for large total
-            <>
-              {page > 3 && (
-                <>
-                  <button
-                    onClick={() => setPage(1)}
-                    className={`px-2 md:px-3 py-1 rounded-md border text-sm ${
-                      page === 1
-                        ? "bg-[#1B5E20] text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    1
-                  </button>
-                  {page > 4 && <span className="px-2 py-1">...</span>}
-                </>
-              )}
-
-              {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                let pageNum;
-                if (page <= 3) {
-                  pageNum = i + 1;
-                } else if (page >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = page - 2 + i;
-                }
-
-                return (
-                  pageNum <= totalPages && (
-                    <button
-                      key={i}
-                      onClick={() => setPage(pageNum)}
-                      className={`px-2 md:px-3 py-1 rounded-md border text-sm ${
-                        page === pageNum
-                          ? "bg-[#1B5E20] text-white"
-                          : "bg-white text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  )
-                );
-              })}
-
-              {page < totalPages - 2 && (
-                <>
-                  {page < totalPages - 3 && (
-                    <span className="px-2 py-1">...</span>
-                  )}
-                  <button
-                    onClick={() => setPage(totalPages)}
-                    className={`px-2 md:px-3 py-1 rounded-md border text-sm ${
-                      page === totalPages
-                        ? "bg-[#1B5E20] text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {totalPages}
-                  </button>
-                </>
-              )}
-            </>
-          )}
+        {/* Top Row */}
+        <div className="flex justify-between mb-3">
+          <p className="font-semibold text-gray-800">#{item.ticketId}</p>
+          <span
+            className={`text-sm font-semibold ${
+              item.status === "Open"
+                ? "text-[#E56A34]"
+                : item.status === "In Progress"
+                ? "text-[#4A6FF3]"
+                : "text-[#1E7E34]"
+            }`}
+          >
+            {item.status}
+          </span>
         </div>
 
-        <button
-          disabled={page === totalPages}
-          onClick={() => setPage(page + 1)}
-          className="p-2 border rounded-md bg-white hover:bg-gray-100 disabled:opacity-40 transition-colors"
-          aria-label="Next page"
-        >
-          <ChevronRight size={16} />
-        </button>
+        {/* User */}
+        <div className="flex items-center gap-3 mb-3">
+          <img src={item.avatar} className="w-12 h-12 rounded-full" />
+          <div>
+            <p className="font-medium text-gray-700">{item.name}</p>
+            <p className="text-xs text-gray-500">ID-{item.userId}</p>
+          </div>
+        </div>
+
+        {/* Category + Date */}
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p className="text-gray-500 text-xs">Category</p>
+            <p className="font-medium text-gray-700">{item.category}</p>
+          </div>
+          <div>
+            <p className="text-gray-500 text-xs">Created</p>
+            <p className="font-medium text-gray-700">{item.date}</p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 mt-4">
+          <button className="w-full px-4 py-2 bg-[#C5FFCD] text-[#1D7A48] rounded-md text-sm">
+            Resolve
+          </button>
+          <button className="w-full px-4 py-2 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-sm">
+            Assign
+          </button>
+        </div>
       </div>
+    ))}
+  </div>
+
+  {/* FOOTER PAGINATION */}
+  <div className="border-t p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <p className="text-gray-600 text-sm">
+      Showing {(page - 1) * rowsPerPage + 1}–
+      {Math.min(page * rowsPerPage, tickets.length)} of {tickets.length} Requests
+    </p>
+
+    <div className="flex gap-2">
+      <button
+        disabled={page === 1}
+        onClick={() => setPage(page - 1)}
+        className="p-2 border rounded-md bg-white disabled:opacity-40"
+      >
+        <ChevronLeft size={16} />
+      </button>
+
+      {[...Array(totalPages)].map((_, i) => (
+        <button
+          key={i}
+          onClick={() => setPage(i + 1)}
+          className={`px-3 py-1 border rounded-md ${
+            page === i + 1
+              ? "bg-green-700 text-white"
+              : "bg-white text-gray-700"
+          }`}
+        >
+          {i + 1}
+        </button>
+      ))}
+
+      <button
+        disabled={page === totalPages}
+        onClick={() => setPage(page + 1)}
+        className="p-2 border rounded-md bg-white disabled:opacity-40"
+      >
+        <ChevronRight size={16} />
+      </button>
     </div>
   </div>
 </div>
-    </div>
+
+</div>
+
+
+
+    
   )
 }
 

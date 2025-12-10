@@ -20,38 +20,10 @@ export default function TokenManagement() {
 
   // ---------------- DUMMY STATIC DATA ----------------
   const dummyRequests = [
-    {
-      _id: "1",
-      user: "Anant",
-      userId: "USR101",
-      tokens: 200,
-      date: new Date(),
-      status: "Pending",
-    },
-    {
-      _id: "2",
-      user: "Rohan",
-      userId: "USR102",
-      tokens: 150,
-      date: new Date(),
-      status: "Approved",
-    },
-    {
-      _id: "3",
-      user: "Sneha",
-      userId: "USR103",
-      tokens: 500,
-      date: new Date(),
-      status: "Declined",
-    },
-    {
-      _id: "4",
-      user: "Aditya",
-      userId: "USR104",
-      tokens: 300,
-      date: new Date(),
-      status: "Pending",
-    },
+    { _id: "1", user: "Anant", userId: "USR101", tokens: 200, date: new Date(), status: "Pending" },
+    { _id: "2", user: "Rohan", userId: "USR102", tokens: 150, date: new Date(), status: "Approved" },
+    { _id: "3", user: "Sneha", userId: "USR103", tokens: 500, date: new Date(), status: "Declined" },
+    { _id: "4", user: "Aditya", userId: "USR104", tokens: 300, date: new Date(), status: "Pending" },
   ];
 
   const dummyPlans = [
@@ -66,11 +38,16 @@ export default function TokenManagement() {
 
   const [page, setPage] = useState(1);
   const limit = 5;
-  const totalPages = 1; // since dummy has only one page
+  const totalPages = 1;
+
+  // ---------------- POPUP STATE ----------------
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [comment, setComment] = useState("");
 
   return (
     <div className="w-full p-4 sm:p-6 md:p-8 bg-[#F1FFF8] min-h-screen">
-
+      
       {/* ---------- PAGE TITLE ---------- */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800">Token Management</h1>
@@ -130,7 +107,7 @@ export default function TokenManagement() {
 
             <tbody>
               {requests.map((item, idx) => (
-                <tr key={idx} className="border-b hover:bg-gray-50">
+                <tr key={idx} className="border-b hover:bg-gray-100">
 
                   {/* USER */}
                   <td className="p-4 flex items-center gap-3">
@@ -149,10 +126,14 @@ export default function TokenManagement() {
                     {new Date(item.date).toLocaleDateString()}
                   </td>
 
-                  {/* STATUS */}
+                  {/* STATUS (CLICK TO OPEN POPUP) */}
                   <td className="p-4">
                     <span
-                      className={`px-3 py-1 text-sm ${
+                      onClick={() => {
+                        setSelectedRequest(item);
+                        setShowPopup(true);
+                      }}
+                      className={`cursor-pointer px-3 py-1 text-sm hover:bg-orange-200 transition ${
                         item.status === "Pending"
                           ? "text-yellow-600"
                           : item.status === "Declined"
@@ -170,16 +151,16 @@ export default function TokenManagement() {
                   <td className="p-4 flex gap-2">
                     <button
                       onClick={() => router.push(`/token-management/${item._id}`)}
-                      className="px-3 py-1 text-sm rounded bg-purple-200 text-purple-700"
+                      className="px-3 py-1 hover:bg-gray-300 transition text-sm rounded bg-purple-200 text-purple-700"
                     >
                       Edit
                     </button>
 
-                    <button className="px-3 py-1 text-sm rounded bg-green-200 text-green-700">
+                    <button className="px-3 py-1 hover:bg-gray-300 transition text-sm rounded bg-green-200 text-green-700">
                       Approve
                     </button>
 
-                    <button className="px-3 py-1 text-sm rounded bg-red-200 text-red-700">
+                    <button className="px-3 py-1 hover:bg-gray-300 transition text-sm rounded bg-red-200 text-red-700">
                       Decline
                     </button>
                   </td>
@@ -208,7 +189,7 @@ export default function TokenManagement() {
         </div>
       </div>
 
-      {/* ---------- TOKEN PLANS (static) ---------- */}
+      {/* ---------- TOKEN PLANS (STATIC) ---------- */}
       <div className="mt-12 grid bg-[#F6F1E9] gap-5 p-5 rounded-md border-2 border-gray-300">
         <h2 className="text-2xl font-bold mb-4">Token Plan Allocations</h2>
 
@@ -223,6 +204,60 @@ export default function TokenManagement() {
           ))}
         </div>
       </div>
+
+      {/* ---------- STATUS POPUP UI (FIGMA STYLE) ---------- */}
+      {showPopup && selectedRequest && (
+        <div className="fixed inset-0  flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-[20%] h-[50%] max-w-md border-2 border-gray-300">
+
+            {/* HEADER */}
+            <div className="bg-green-900 text-white p-3 rounded-t-lg text-lg font-semibold">
+              Comments
+            </div>
+
+            {/* BODY */}
+            <div className="p-4 space-y-3">
+              <p className="text-gray-700">
+                <strong>Token Request:</strong> {selectedRequest.tokens}
+              </p>
+
+              <p className="text-gray-700">
+                <strong>Approved Token:</strong>{" "}
+                {selectedRequest.status === "Approved" ? selectedRequest.tokens - 50 : 0}
+              </p>
+
+              {/* COMMENT BOX */}
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Add comments for your response..."
+                className="w-full border rounded-md p-2 h-24 outline-none focus:ring"
+              ></textarea>
+            </div>
+
+            {/* FOOTER BUTTONS */}
+            <div className="flex justify-end gap-3 p-4">
+              <button
+                onClick={() => setShowPopup(false)}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  alert("Status updated!");
+                  setShowPopup(false);
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Decline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

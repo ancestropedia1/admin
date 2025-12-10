@@ -39,7 +39,7 @@ const DashBoardHeader = ({ sidebarOpen, onMenuToggle }) => {
         {/* Center: Search - Adjusted for responsive */}
         <div className="flex-1 max-w-xl mx-4">
           <div className="relative" style={{height: '36px'}}>
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute mt-1.5 left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
               placeholder="Search anything..."
