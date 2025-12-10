@@ -120,7 +120,7 @@ export default function AdminSideBar({ onNavigate }) {
     try {
       console.log("Logging out...");
       const res = await axiosInstance.post("admin/auth/logout");
-      console.log("Logged out successfully", res);
+      console.log("Logged out successfully from frontend ", res, "from back response");
 
       setTimeout(() => {
         window.location.href = "/login";
