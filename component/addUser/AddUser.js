@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Form from "../addUser/build/Form.js"
 import {
   Lightbulb,
   CalendarDays,
@@ -10,8 +9,7 @@ import {
 } from "lucide-react";
 import { Lato, Playfair_Display } from "next/font/google";
 import Link from "next/link";
-
-
+import AdminComplete from "./build/AdminComplete"; // Changed from AdminDataForm to AdminComplete
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -29,20 +27,19 @@ export default function AddUserPage() {
 
   return (
     <main className="flex-1 w-full min-h-screen p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 mt-4 md:mt-8">
-
-      {/* 🔥 ONLY FORM SHOWS WHEN CLICKED */}
+      {/* 🔥 MULTI-STEP FORM SHOWS WHEN CLICKED */}
       {showForm ? (
-        <Form onClose={() => setShowForm(false)} />
+        <AdminComplete onClose={() => setShowForm(false)} />
       ) : (
         <>
           {/* ============================= */}
-          {/* ALL YOUR PAGE CONTENT */}
+          {/* DASHBOARD CONTENT */}
           {/* ============================= */}
 
           {/* Back link */}
           <div>
             <Link
-              href="/"
+              href="/admin/dashboard" // Update this to your actual dashboard path
               className={`${lato.className} text-sm sm:text-base md:text-lg text-green-700 font-medium hover:underline`}
             >
               ← Back to Dashboard
@@ -63,11 +60,11 @@ export default function AddUserPage() {
                 <p
                   className={`${lato.className} text-sm sm:text-base md:text-lg font-medium text-gray-600 mt-2 md:mt-4 max-w-md md:max-w-lg`}
                 >
-                  Manually add user details to Anestropedias database and help expand our heritage community.
+                  Manually add user details to Ancestropedia s database and help expand our heritage community.
                 </p>
               </div>
 
-              {/* RIGHT BUTTON (WITH LOGIC) */}
+              {/* RIGHT BUTTON */}
               <div className="w-full md:w-auto mt-4 md:mt-0">
                 <button 
                   onClick={() => setShowForm(true)}
