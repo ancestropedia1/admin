@@ -40,14 +40,14 @@ export function middleware(request) {
   
  // if these conditions match, redirect to dashboard
  
-  if (pathname === '/login' && adminToken) {
+ if (pathname === '/login' && adminToken) {
 
   console.log(` if case triggered - redirecting to dashboard`);
     const dashboardUrl = new URL('/dashboard', request.url);
     return NextResponse.redirect(dashboardUrl);
 }
 
-  // (Removed the redirect for /login with token)
+  //(Removed the redirect for /login with token)
   
   console.log(`✅ Allowing access to ${pathname}`);
 
@@ -60,4 +60,5 @@ export const config = {
     '/order', '/heritage', '/profile', '/settings/account', '/myorders',
     '/blogs', '/help'
   ]
-};
+}; 
+

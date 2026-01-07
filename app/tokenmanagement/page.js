@@ -1,10 +1,11 @@
-import TokenManagement from '@/component/tokenmanagement/TokenManagement'
-import React from 'react'
+"use client";
+import BlogManagement from "@/component/blogManagement/BlogManagement";
+import protectPage from "../utils/protectPage";
+import TokenManagement from "@/component/tokenmanagement/TokenManagement";
 
 function Page() {
-  return (
-    <div><TokenManagement/></div>
-  )
+  return <div><TokenManagement/></div>;
 }
 
-export default Page
+// 🚨 ONLY users with "blogmanagement" permission can open this page
+export default protectPage("tokenmanagement")(Page);

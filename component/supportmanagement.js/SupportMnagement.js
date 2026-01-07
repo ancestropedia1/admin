@@ -188,7 +188,7 @@ const paginatedTickets = tickets.slice(
 
           {/* USER COLUMN – Image + Name + ID */}
           <td className="p-5">
-            <div className="flex items-center gap-3">
+            <div className=" gap-3">
               <img
                 src={item.avatar}
                 className="w-10 h-10 rounded-full object-cover"
@@ -262,11 +262,12 @@ const paginatedTickets = tickets.slice(
         {/* User */}
         <div className="flex items-center gap-3 mb-3">
           <img src={item.avatar} className="w-12 h-12 rounded-full" />
-          <div>
+        </div>
+
+        <div>
             <p className="font-medium text-gray-700">{item.name}</p>
             <p className="text-xs text-gray-500">ID-{item.userId}</p>
           </div>
-        </div>
 
         {/* Category + Date */}
         <div className="grid grid-cols-2 gap-3 text-sm">
@@ -333,12 +334,7 @@ const paginatedTickets = tickets.slice(
     </div>
   </div>
 </div>
-
-</div>
-
-
-
-    
+</div>    
   )
 }
 

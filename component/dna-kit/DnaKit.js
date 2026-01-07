@@ -48,7 +48,7 @@ const DnaKit = () => {
       </div>
 
       {/* ----------------------------- TABS ------------------------------- */}
-      <div className="bg-[#F6F1E9] border-b mt-6 p-2 flex gap-3">
+      <div className="border-b mt-6 p-2 flex gap-3">
 
         {/* Orders Tab */}
         <button
@@ -65,9 +65,9 @@ const DnaKit = () => {
         {/* Reports Tab */}
         <button
           onClick={() => setActiveTab("reports")}
-          className={`px-6 py-3 rounded-md font-semibold transition ${
+          className={`px-6 py-3 font-semibold transition ${
             activeTab === "reports"
-              ? "bg-[#C46A3A] text-white"
+              ? "border-b border-red-200 text-gray-700"
               : " text-gray-700"
           }`}
         >

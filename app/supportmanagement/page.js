@@ -1,10 +1,11 @@
-import SupportManagement from '@/component/supportmanagement.js/SupportMnagement'
-import React from 'react'
+"use client";
+import BlogManagement from "@/component/blogManagement/BlogManagement";
+import protectPage from "../utils/protectPage";
+import SupportManagement from "@/component/supportmanagement.js/SupportMnagement";
 
 function Page() {
-  return (
-    <SupportManagement/>
-  )
+  return <div><SupportManagement/></div>;
 }
 
-export default Page
+// 🚨 ONLY users with "blogmanagement" permission can open this page
+export default protectPage("supportmanagement")(Page);

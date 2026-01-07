@@ -1,10 +1,11 @@
-import AddUserPage from '@/component/addUser/AddUser'
-import React from 'react'
+"use client";
+
+import protectPage from "../utils/protectPage";
+import AddUserPage from "@/component/addUser/AddUser";
 
 function Page() {
-  return (
-    <AddUserPage/>
-  )
+  return <div><AddUserPage/></div>;
 }
 
-export default Page
+// 🚨 ONLY users with "blogmanagement" permission can open this page
+export default protectPage("adduser")(Page);

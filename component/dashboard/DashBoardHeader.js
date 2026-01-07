@@ -1,6 +1,8 @@
 "use client";
 import React from 'react';
 import { Bell, Search, Menu, X } from "lucide-react";
+import ProfileButton from './ProfileButton';
+import NotificationBell from './NotificationBell';
 
 const DashBoardHeader = ({ sidebarOpen, onMenuToggle }) => {
   return (
@@ -39,7 +41,7 @@ const DashBoardHeader = ({ sidebarOpen, onMenuToggle }) => {
         {/* Center: Search - Adjusted for responsive */}
         <div className="flex-1 max-w-xl mx-4">
           <div className="relative" style={{height: '36px'}}>
-            <Search className="absolute mt-1.5 left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute sm:top-1/2 mt-1.5 sm:left-3 left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
               placeholder="Search anything..."
@@ -50,24 +52,8 @@ const DashBoardHeader = ({ sidebarOpen, onMenuToggle }) => {
 
         {/* Right: Profile and Notifications */}
         <div className="flex items-center gap-3 sm:gap-5">
-          <div className="relative">
-            <Bell className="text-gray-600" size={20} />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
-              3
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <img
-              src="https://i.pravatar.cc/40"
-              alt="Profile"
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-gray-300"
-            />
-            <div className="hidden sm:block">
-              <div className="text-sm font-medium text-gray-800">Divyanshu</div>
-              <div className="text-xs text-gray-500">Admin</div>
-            </div>
-          </div>
+         <NotificationBell/>
+         <ProfileButton />
         </div>
       </header>
     </div>

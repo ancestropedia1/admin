@@ -10,6 +10,7 @@ import {
   CalendarDays,
   Eye,
 } from "lucide-react";
+import { axiosInstance } from "@/config/axios";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -24,6 +25,26 @@ const lato = Lato({
 
 const BlogManagement = () => {
   const [showEditor, setShowEditor] = useState(false);
+
+  
+
+  const handleSubmitNewBlog=()=>{
+    if(!title.trim()|| !authorName.trim() || !content.trim()){
+      console.log("required fields")
+      return;
+    }
+  
+
+  const blogData = {
+    title: title,
+    author: authorName,
+    description: content,
+  };
+
+  console.log("✅ BLOG SUBMITTED:");
+  console.table(blogData);
+};
+
 
   // NEW input-based fields
   const [title, setTitle] = useState("");
@@ -95,38 +116,33 @@ const BlogManagement = () => {
     setImagePreview(null);
   };
 
-  const submitBlog = () => {
+   const submitBlog = async () => {
     if (!title.trim() || !content.trim() || !authorName.trim()) {
       showPopupMessage("Please fill all fields.");
       return;
     }
 
-    const blogData = {
-      title,
-      shortDesc,
-      author: authorName,
-      date: postDate || new Date().toLocaleDateString(),
-      fullContent: content,
-      featured: false,
-      image: image || null,
-    };
+    try {
 
-    if (editIndex !== null) {
-      let updated = [...blogList];
-      updated[editIndex] = blogData;
-      setBlogList(updated);
-      showPopupMessage("Blog Updated Successfully!");
-    } else {
-      setBlogList([...blogList, blogData]);
-      showPopupMessage("Blog Added Successfully!");
+      console.log(axiosInstance.get("/ping"))
+      console.log("title", title)
+
+      let response = await axiosInstance.post(
+        "/admin/blog/createBlog",
+        {
+          title: title,
+          description: content,
+          image: image, // base64
+        }
+      );
+
+      console.log("✅ Blog Created:", response.data);
+      showPopupMessage("Blog created successfully!");
+      setShowEditor(false);
+    } catch (error) {
+      console.error("❌ Blog create failed:", error.response?.data || error);
+      showPopupMessage("Failed to create blog");
     }
-
-    setShowEditor(false);
-  };
-
-  const handleDelete = (index) => {
-    setDeleteIndex(index);
-    setShowDeletePopup(true);
   };
 
   const filteredBlogs = blogList.filter((b) => {
@@ -144,7 +160,7 @@ const BlogManagement = () => {
     <div className="w-full min-h-screen">
       <div className="max-w-[1200px] mx-auto p-4 sm:p-6 md:p-10">
         {/* HEADER */}
-        <div className="bg-[#F6F1E9] border mt-1 border-[#faead2] p-8 rounded-xl shadow-sm">
+        <div className="bg-[#F6F1E9] border mt-1 border-[#faead2] p-8 rounded-xl shadow-lg">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex-1">
               <h1 className={`${playfair.className} text-4xl font-extrabold`}>
@@ -174,15 +190,7 @@ const BlogManagement = () => {
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full p-3 border bg-white rounded-lg"
               />
-
-              <input
-                type="text"
-                placeholder="Short Description"
-                value={shortDesc}
-                onChange={(e) => setShortDesc(e.target.value)}
-                className="w-full p-3 border bg-white rounded-lg"
-              />
-
+              
               <textarea
                 placeholder="Write your blog content..."
                 value={content}
@@ -221,19 +229,19 @@ const BlogManagement = () => {
                   placeholder="Post Date (optional)"
                   value={postDate}
                   onChange={(e) => setPostDate(e.target.value)}
-                  className="p-2 border rounded w-40"
+                  className="p-2 bg-white border rounded w-40"
                 />
 
                 <button
                   onClick={submitBlog}
-                  className="bg-black text-white px-6 py-2 rounded-lg"
+                  className="bg-gray-400 text-white px-6 py-2 rounded-lg"
                 >
                   Submit Blog
                 </button>
 
                 <button
                   onClick={() => setShowEditor(false)}
-                  className="px-4 py-2 rounded-lg border"
+                  className="px-4 bg-white py-2 rounded-lg border"
                 >
                   Cancel
                 </button>
@@ -515,3 +523,313 @@ const BlogManagement = () => {
 };
 
 export default BlogManagement;
+
+ /*"use client";
+import { useState, useEffect } from "react";
+import api from "@/app/utils/api";
+import { Lato, Playfair_Display } from "next/font/google";
+import {
+  Pencil,
+  Trash2,
+  ChevronDown,
+  Search,
+  CalendarDays,
+  Eye,
+} from "lucide-react";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const lato = Lato({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+export default function BlogManagement() {
+   ---------------- STATE ---------------- 
+
+  const [showEditor, setShowEditor] = useState(false);
+  const [blogList, setBlogList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // form fields
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  // edit tracking
+  const [editBlogId, setEditBlogId] = useState(null);
+
+  // filters & UI
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [viewBlog, setViewBlog] = useState(null);
+
+  ---------------- HELPERS ---------------- 
+
+  const showPopupMessage = (msg) => {
+    setPopupMessage(msg);
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 2500);
+  };
+
+   ---------------- IMAGE UPLOAD ---------------- 
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImage(reader.result);
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+   ---------------- FETCH BLOGS ---------------- 
+
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/myBlogs");
+
+      // map backend → UI structure
+      const formatted = res.data.data.map((b) => ({
+        _id: b._id,
+        title: b.title,
+        author: "Admin",
+        date: new Date(b.createdAt).toLocaleDateString(),
+        fullContent: b.description,
+        image: b.imageUrl || null,
+      }));
+
+      setBlogList(formatted);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+   ---------------- CREATE / UPDATE ---------------- 
+
+  const submitBlog = async () => {
+    if (!title.trim() || !content.trim()) {
+      showPopupMessage("Please fill all fields");
+      return;
+    }
+
+    try {
+      if (editBlogId) {
+        // UPDATE
+        await api.put(`/update?blogId=${editBlogId}`, {
+          newTitle: title,
+          newDescription: content,
+          newImage: image,
+        });
+        showPopupMessage("Blog Updated Successfully!");
+      } else {
+        // CREATE
+        await api.post("/createBlog", {
+          title,
+          description: content,
+          image,
+        });
+        showPopupMessage("Blog Added Successfully!");
+      }
+
+      setShowEditor(false);
+      setEditBlogId(null);
+      setTitle("");
+      setContent("");
+      setImage(null);
+      setImagePreview(null);
+      fetchBlogs();
+    } catch (err) {
+      showPopupMessage("Something went wrong");
+    }
+  };
+
+   ---------------- DELETE ---------------- 
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/remove?blogId=${id}`);
+      showPopupMessage("Blog Deleted Successfully!");
+      fetchBlogs();
+    } catch (err) {
+      showPopupMessage("Delete failed");
+    }
+  };
+
+   ---------------- VIEW ---------------- 
+
+  const viewBlogById = async (id) => {
+    const res = await api.get(`/specificBlog?blogId=${id}`);
+    setViewBlog({
+      title: res.data.data.title,
+      author: "Admin",
+      fullContent: res.data.data.description,
+      image: res.data.data.imageUrl,
+    });
+  };
+
+   ---------------- FILTER ---------------- 
+
+  const filteredBlogs = blogList.filter((b) =>
+    b.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+   ---------------- UI ---------------- 
+
+  return (
+    <div className="w-full min-h-screen">
+      <div className="max-w-[1200px] mx-auto p-6">
+
+         HEADER 
+        <div className="bg-[#F6F1E9] p-8 rounded-xl shadow-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className={`${playfair.className} text-4xl font-bold`}>
+                Blog Management
+              </h1>
+              <p className={`${lato.className} mt-2`}>
+                Create and manage blog posts
+              </p>
+            </div>
+            <button
+              onClick={() => setShowEditor(true)}
+              className="bg-[#265A46] text-white px-6 py-3 rounded-xl"
+            >
+              + Add Blog
+            </button>
+          </div>
+
+         EDITOR 
+          {showEditor && (
+            <div className="mt-6 space-y-4">
+              <input
+                className="w-full p-3 border rounded"
+                placeholder="Blog title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+
+              <textarea
+                className="w-full p-3 border rounded min-h-[150px]"
+                placeholder="Blog content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+              />
+
+              <input type="file" onChange={handleImageUpload} />
+
+              {imagePreview && (
+                <img src={imagePreview} className="h-40 rounded mt-2" />
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={submitBlog}
+                  className="bg-black text-white px-6 py-2 rounded"
+                >
+                  Submit
+                </button>
+                <button
+                  onClick={() => setShowEditor(false)}
+                  className="border px-6 py-2 rounded"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+         SEARCH 
+        <div className="mt-6 flex bg-white p-3 rounded shadow">
+          <Search size={18} />
+          <input
+            className="ml-2 w-full outline-none"
+            placeholder="Search blog..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+         BLOG LIST 
+        <div className="mt-8 space-y-4">
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            filteredBlogs.map((blog) => (
+              <div key={blog._id} className="bg-white p-4 rounded shadow">
+                <h3 className="font-semibold">{blog.title}</h3>
+                <p className="text-sm text-gray-500">{blog.date}</p>
+
+                <div className="flex gap-4 mt-3 justify-end">
+                  <Pencil
+                    onClick={() => {
+                      setEditBlogId(blog._id);
+                      setShowEditor(true);
+                      setTitle(blog.title);
+                      setContent(blog.fullContent);
+                      setImage(blog.image);
+                      setImagePreview(blog.image);
+                    }}
+                    className="cursor-pointer"
+                  />
+                  <Eye
+                    onClick={() => viewBlogById(blog._id)}
+                    className="cursor-pointer"
+                  />
+                  <Trash2
+                    onClick={() => handleDelete(blog._id)}
+                    className="cursor-pointer text-red-600"
+                  />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+         POPUP 
+        {showPopup && (
+          <div className="fixed top-5 right-5 bg-green-600 text-white px-6 py-3 rounded">
+            {popupMessage}
+          </div>
+        )}
+
+        {/* VIEW MODAL 
+        {viewBlog && (
+          <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+            <div className="bg-white p-6 rounded max-w-lg w-full">
+              <h2 className="text-xl font-bold">{viewBlog.title}</h2>
+              {viewBlog.image && (
+                <img src={viewBlog.image} className="rounded mt-3" />
+              )}
+              <p className="mt-3">{viewBlog.fullContent}</p>
+              <button
+                onClick={() => setViewBlog(null)}
+                className="mt-4 bg-black text-white px-4 py-2 rounded"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+*/
+

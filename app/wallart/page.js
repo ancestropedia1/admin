@@ -1,10 +1,11 @@
-import WallArt from '@/component/wallart/WallArt'
-import React from 'react'
+"use client";
+import BlogManagement from "@/component/blogManagement/BlogManagement";
+import protectPage from "../utils/protectPage";
+import WallArt from "@/component/wallart/WallArt";
 
-const page = () => {
-  return (
-    <div><WallArt/></div>
-  )
+function BlogsPage() {
+  return <div><WallArt/></div>;
 }
 
-export default page
+// 🚨 ONLY users with "blogmanagement" permission can open this page
+export default protectPage("wallart")(BlogsPage);

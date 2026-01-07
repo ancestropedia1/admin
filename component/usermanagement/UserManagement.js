@@ -1,4 +1,6 @@
 "use client";
+
+import Link from "next/link";
 import {
   Search,
   Calendar,
@@ -8,71 +10,85 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+import { useEffect, useState } from "react";
+import { axiosInstanceLocal } from "@/config/axios";
+
 export default function UserManagement() {
-  const users = [
-    {
-      id: 1,
-      name: "Anant Narayan",
-      dob: "18/08/2000",
-      gender: "Male",
-      city: "Kanpur",
-      profession: "Engineer",
-      img: "https://i.pravatar.cc/100?img=12",
-    },
-    {
-      id: 2,
-      name: "Rajesh Chaudhary",
-      dob: "28/06/1996",
-      gender: "Female",
-      city: "Agra",
-      profession: "Teacher",
-      img: "https://i.pravatar.cc/100?img=22",
-    },
-    {
-      id: 3,
-      name: "Balram Chaurasia",
-      dob: "12/02/1984",
-      gender: "Female",
-      city: "Lucknow",
-      profession: "Software Engineer",
-      img: "https://i.pravatar.cc/100?img=36",
-    },
-    {
-      id: 4,
-      name: "Anuj Bharti",
-      dob: "02/12/2005",
-      gender: "Male",
-      city: "Gorakhpur",
-      profession: "Software Engineer",
-      img: "https://i.pravatar.cc/100?img=10",
-    },
-  ];
+  const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // PAGINATION STATE
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 5;
+
+  // FETCH USERS (PAGINATED)
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+
+        const res = await axiosInstanceLocal.get(
+          `/admin/users/users?page=${page}&limit=${limit}`
+        );
+        console.log("USERS API RESPONSE 👉", res.data);
+
+        // ✅ SAFE DATA HANDLING
+        setUsers(res.data.users || []);
+        setTotalPages(res.data.pagination?.totalPages || 1);
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [page]);
+
+  if (loading) {
+    return <div className="p-10">Loading users...</div>;
+  }
+
+  const filteredUsers = users.filter((user) => {
+  if (!searchQuery) return true;
+
+  const q = searchQuery.toLowerCase();
+
+  return (
+    user.fullName?.toLowerCase().includes(q) ||
+    user.email?.toLowerCase().includes(q) ||
+    user.role?.toLowerCase().includes(q) ||
+    user.permissions?.join(" ").toLowerCase().includes(q) ||
+    user._id?.toLowerCase().includes(q) ||
+    (q === "active" && user.isActive) ||
+    (q === "disabled" && !user.isActive)
+  );
+});
 
   return (
     <div className="p-4 md:p-10 min-h-screen">
-
-      {/* -------------------- FILTER BOX -------------------- */}
+      {/* FILTER BOX */}
       <div className="bg-[#F6F1E9] p-6 rounded-xl shadow-sm">
-
-        {/* SEARCH ROW */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex items-center bg-white w-full rounded-lg px-4 py-3 shadow-sm border">
             <Search className="w-5 h-5 mr-3" />
             <input
               className="w-full outline-none text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               type="text"
               placeholder="Search User by name, User Id & email."
             />
           </div>
 
-          <button className="bg-[#0A4D27] text-white px-8 py-3 rounded-lg text-sm shadow-md whitespace-nowrap">
+          <button className="bg-[#0A4D27] text-white px-8 py-3 rounded-lg text-sm shadow-md">
             Search User
           </button>
         </div>
 
-        {/* FILTER BUTTONS */}
         <div className="flex flex-wrap gap-3 items-center mt-5">
-
           <button className="bg-white px-4 py-2 rounded-lg shadow-sm border flex items-center gap-2 text-sm">
             Date of Birth <Calendar className="w-4 h-4" />
           </button>
@@ -88,105 +104,126 @@ export default function UserManagement() {
           <button className="bg-[#8B4B26] text-white px-6 py-2 rounded-lg flex items-center gap-2 text-sm shadow-md">
             <Filter className="w-4 h-4" /> Filter
           </button>
-
         </div>
       </div>
 
-      {/* -------------------- USER LIST TABLE -------------------- */}
+      {/* USER LIST */}
       <div className="bg-white rounded-xl mt-8 shadow-sm">
-        <h2 className="text-lg font-semibold border-b p-4 text-[#1C1C1C] mb-2">
+        <h2 className="text-lg border-b border-gray-300 font-semibold p-4 mb-6">
           User Lists
         </h2>
 
-        {/* DESKTOP HEADER */}
-        <div className="hidden md:grid grid-cols-12 gap-4 p-2">
-          <div className="col-span-3">
-            <div className="py-3 px-4 border-b text-sm font-semibold text-gray-700">
-              User
+        <div className="hidden md:flex gap-6 p-4">
+          {/* LEFT LIST */}
+          <div className="bg-[#F6F1E9] rounded-xl p-4 shadow-sm w-[230px]">
+            <div className="border-b border-gray-400 p-3 mb-4 font-semibold">
+              Users
+            </div>
+
+            <div className="space-y-3 max-h-[300px]">
+              {users.map((user) => (
+                <Link
+                  key={user._id}
+                  href={`/user-management/${user._id}`}
+                >
+                  <div className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100">
+                    <img
+                      src={user.profilePicture || "/avatar-placeholder.png"}
+                      className="w-10 h-10 rounded-full"
+                      alt="profile"
+                    />
+                    <div className="text-sm font-medium">
+                      {user.firstName} {user.lastName}
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
 
-          <div className="col-span-9">
-            <div className="grid grid-cols-9 py-3 px-4 border-b text-sm font-semibold text-gray-700">
+          {/* RIGHT TABLE */}
+          <div className="flex-1 mt-5">
+            <div className="grid grid-cols-12 border-b border-gray-400 p-3 mb-4 font-semibold text-sm">
               <div className="col-span-3">DOB</div>
               <div className="col-span-2">Gender</div>
               <div className="col-span-2">Birth City</div>
-              <div className="col-span-2 text-right pr-4">Profession</div>
+              <div className="col-span-2 text-right">Profession</div>
+              <div className="col-span-2 text-right">Action</div>
+            </div>
+
+            <div className="space-y-3">
+              {users.map((user) => (
+                <div
+                  key={user._id}
+                  className="grid grid-cols-12 items-center bg-[#F6F1E9] p-4 rounded-lg"
+                >
+                  <div className="col-span-3 text-sm">
+                    {new Date(user.createdAt).toLocaleDateString()}
+                  </div>
+
+                  <div className="col-span-2 text-sm">{user.gender || "—"}</div>
+                  <div className="col-span-2 text-sm">—</div>
+
+                  <div className="col-span-3 text-sm pl-8 font-semibold text-green-700">
+                    —
+                  </div>
+
+                  <div className="col-span-2 flex justify-end gap-1">
+                    <button className="text-xs font-bold border-b text-yellow-700">
+                      Hold
+                    </button>
+                    <button className="text-xs font-bold border-b text-green-400">
+                      Active
+                    </button>
+                    <button className="text-xs font-bold border-b text-gray-800">
+                      Block
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-
-        {/* ---------------- USER ROWS ---------------- */}
-        {users.map((user, index) => (
-          <div
-            key={index}
-            className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-4 p-2"
-          >
-            {/* USER LEFT SECTION */}
-            <div className="col-span-3">
-              <div className="flex items-center gap-3 py-3 px-4">
-                <img
-                  src={user.img}
-                  className="w-12 h-12 rounded-full object-cover"
-                  alt=""
-                />
-                <div className="text-base font-medium">{user.name}</div>
-              </div>
-            </div>
-
-            {/* RIGHT SECTION (CARD ON MOBILE, GRID ON DESKTOP) */}
-            <div className="col-span-9">
-              <div className="bg-[#F6F1E9] grid grid-cols-2 sm:grid-cols-4 md:grid-cols-9 gap-4 rounded-xl py-3 px-4 border border-[#E4D9C6] items-center">
-
-                {/* DOB */}
-                <div className="text-sm col-span-2 md:col-span-3">
-                  <span className="font-medium md:hidden">DOB: </span>
-                  {user.dob}
-                </div>
-
-                {/* GENDER */}
-                <div className="text-sm col-span-1 md:col-span-2">
-                  <span className="font-medium md:hidden">Gender: </span>
-                  {user.gender}
-                </div>
-
-                {/* CITY */}
-                <div className="text-sm col-span-1 md:col-span-2">
-                  <span className="font-medium md:hidden">City: </span>
-                  {user.city}
-                </div>
-
-                {/* PROFESSION */}
-                <div className="text-green-700 font-semibold text-sm col-span-2 md:col-span-2 text-right md:pr-4 cursor-pointer hover:underline">
-                  {user.profession}
-                </div>
-
-              </div>
-            </div>
-          </div>
-        ))}
       </div>
 
-      {/* -------------------- PAGINATION -------------------- */}
+      {/* PAGINATION */}
       <div className="mt-6 flex justify-center items-center gap-4">
-        <ChevronLeft className="text-green-700 cursor-pointer" />
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((p) => p - 1)}
+          className="disabled:opacity-40"
+        >
+          <ChevronLeft className="text-green-700" />
+        </button>
 
         <div className="flex gap-2">
-          {["1", "2", "3", "...", "9", "10"].map((num, i) => (
-            <button
-              key={i}
-              className={`w-9 h-9 flex items-center justify-center rounded-md border text-sm ${
-                num === "1"
-                  ? "bg-[#0A4D27] text-white border-[#0A4D27]"
-                  : "bg-white hover:bg-gray-100"
-              }`}
-            >
-              {num}
-            </button>
-          ))}
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .slice(
+              Math.max(0, page - 3),
+              Math.min(totalPages, page + 2)
+            )
+            .map((num) => (
+              <button
+                key={num}
+                onClick={() => setPage(num)}
+                className={`w-9 h-9 rounded-md border ${
+                  num === page
+                    ? "bg-[#0A4D27] text-white"
+                    : "bg-white"
+                }`}
+              >
+                {num}
+              </button>
+            ))}
         </div>
 
-        <ChevronRight className="text-green-700 cursor-pointer" />
+        <button
+          disabled={page === totalPages}
+          onClick={() => setPage((p) => p + 1)}
+          className="disabled:opacity-40"
+        >
+          <ChevronRight className="text-green-700" />
+        </button>
       </div>
     </div>
   );

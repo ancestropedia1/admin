@@ -25,7 +25,7 @@ const sections = [
       },
       { 
         icon: "/blogs-management.svg", 
-        link: "/blogManagement", 
+        link: "/blogmanagement", 
         text: "Blogs Management" 
       },
     ],
@@ -40,7 +40,7 @@ const sections = [
       },
       {
         icon: "/Wall-art-order.svg",
-        link: "/wall-art",
+        link: "/wallart",
         text: "Wall Art",
       },
     ],
@@ -115,7 +115,7 @@ export default function AdminSideBar({ onNavigate }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showLogoutConfirm, loggingOut]);
 
-  const handleLogout = async () => {
+  /**const handleLogout = async () => {
     setLoggingOut(true);
     try {
       console.log("Logging out...");
@@ -130,7 +130,46 @@ export default function AdminSideBar({ onNavigate }) {
     } finally {
       setLoggingOut(false);
     }
-  };
+  }; **/
+
+
+  const handleLogout = async () => {
+  setLoggingOut(true);
+
+  const role = localStorage.getItem("role"); // admin | executive
+
+  try {
+    console.log("Logging out...", role);
+
+    let logoutUrl = "";
+
+    if (role === "executive") {
+      logoutUrl = "/admin/executive/auth/logout";
+    } else {
+      logoutUrl = "/admin/auth/logout"; // admin logout
+    }
+
+    const res = await axiosInstance.post(logoutUrl, {}, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    console.log("Logout success:", res.data);
+  } catch (error) {
+    console.log("Error in logging out", error);
+  } finally {
+    // 🔥 MUST clear storage for both
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("permissions");
+
+    setLoggingOut(false);
+
+    // 🚀 Redirect
+    window.location.href = "/login";
+  }
+};
 
   const handleNavigation = (link) => {
     router.push(link);
@@ -219,7 +258,7 @@ export default function AdminSideBar({ onNavigate }) {
                 {loggingOut ? "Logging Out..." : "Log Out"}
               </button>
               <button
-                onClick={() => setShowLogoutConfirm(false)}
+                onClick={() => setShowLogoutConfirm(true)}
                 disabled={loggingOut}
                 className="p-2 bg-gray-200 rounded-xl cursor-pointer text-gray-800 flex-1 hover:bg-gray-300 disabled:bg-gray-100"
               >

@@ -102,18 +102,18 @@ export default function EditTokenPage() {
         <p className="text-xl font-semibold text-gray-800">120 Tokens</p>
         <p className="text-sm text-gray-700 mb-4">18/07/2025</p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+        <div className="flex gap-4 mt-3">
 
           <input
             type="text"
             placeholder="Tokens"
-            className="border rounded-lg p-3 w-full"
+            className="border bg-white rounded-lg p-3 w-full"
           />
 
           <input
             type="text"
             placeholder="Comments"
-            className="border rounded-lg p-3 w-full"
+            className="border bg-white rounded-lg p-3 w-full"
           />
 
           <div className="flex gap-3">
@@ -174,7 +174,7 @@ export default function EditTokenPage() {
                   row.where === "Admin"
                     ? "bg-purple-500"
                     : row.where === "Web"
-                    ? "bg-red-500"
+                    ? "bg-yellow-500"
                     : "bg-green-600"
                 }`}
               >

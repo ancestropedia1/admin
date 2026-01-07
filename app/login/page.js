@@ -7,17 +7,15 @@ import { Eye, EyeOff } from "lucide-react";
 import { axiosInstance, axiosInstanceLocal } from "../../config/axios.js";
 import { useRouter } from "next/navigation.js";
 
-
 const inter = Inter({ subsets: ["latin"] });
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700"] });
 
 export default function Page() {
-
   const router = useRouter();
   // State for form fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
   // State for UI interactions
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -43,8 +41,6 @@ export default function Page() {
   const handleLogin = async (e) => {
     e.preventDefault(); // Prevent default form submission
 
-    
-    
     // Basic validation
     if (!email || !password) {
       setError(true);
@@ -60,8 +56,6 @@ export default function Page() {
       return;
     }
 
-
-
     setIsLoading(true);
     setError(false);
     setErrorMessage("");
@@ -69,38 +63,87 @@ export default function Page() {
     try {
       // API call to login endpoint
 
-      
+      const response = await axiosInstance.post("admin/auth/login", {
+        email,
+        password,
+      });
 
-      const response = await axiosInstance.post("admin/auth/login",{email,password});
+      console.log(
+        response.data,
+        " data from login response (inside frontend login2 page)"
+      );
 
-      console.log(response.data," data from login response (inside frontend login2 page)");
-
-        
-    
       // Check if login was successful
-      if(response.data && response.data.success){
+      if (response.data && response.data.success) {
         // Redirect to dashboard on successful login
         console.log("Login successful, redirecting to dashboard...");
         router.push("/dashboard");
       }
-      
     } catch (error) {
       // Network error or other issues
       console.error("Login error:", error);
       setError(true);
       setErrorMessage("incorrect details. Please check email and password.");
-
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Handle form submission (same as handleLogin but for form onSubmit)
 
-   // Handle form submission (same as handleLogin but for form onSubmit)
+  const handleSubmit = (e) => { handleLogin(e); };
 
-  const handleSubmit = (e) => {
-    handleLogin(e);
-  };
+  const handleExecutiveLogin = async () => {
+  // Basic validation like admin
+  if (!email || !password) {
+    setError(true);
+    setErrorMessage("Please enter both email and password");
+    return;
+  }
+
+  setIsLoading(true);
+  setError(false);
+  setErrorMessage("");
+
+  try {
+    const res = await axiosInstanceLocal.post("admin/executive/auth/login", {
+      email,
+      password,
+    });
+
+    const { user, token } = res.data;
+
+    // 💾 Store login info
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", user.role);
+    localStorage.setItem("permissions", JSON.stringify(user.permissions));
+
+    const p = user.permissions;
+
+    // 🚀 PERMISSION BASED REDIRECT
+    if (p.includes("usermanagement")) return router.push("/usermanagement");
+    if (p.includes("blogmanagement")) return router.push("/blogmanagement");
+    if (p.includes("wallart")) return router.push("/wall-art");
+    if (p.includes("dna-kit")) return router.push("/dna-kit");
+    if (p.includes("supportmanagement")) return router.push("/supportmanagement");
+    if (p.includes("adduser")) return router.push("/adduser");
+    if (p.includes("vaultmanagement")) return router.push("/vaultmanagement");
+    if (p.includes("reportmanagement")) return router.push("/reportmanagement");
+    
+
+
+    // No module access — go to unauthorized
+    return router.push("/unauthorized");
+
+  } catch (error) {
+    console.log("Executive Login Error:", error);
+    setError(true);
+    setErrorMessage(error.response?.data?.message || "Executive login failed.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // Image assets for the right side panel
   const roverImages = [
@@ -220,8 +263,9 @@ export default function Page() {
             </button>
             <button
               type="button"
-              className="bg-[#F2FAF7] w-full py-[13px] rounded-md hover:bg-[#F9FAF8] shadow-md text-xl text-[#265A46] mt-1 border border-black"
+              onClick={handleExecutiveLogin} // ⬅️ ADD THIS
               disabled={isLoading}
+              className="bg-[#F2FAF7] w-full py-[13px] rounded-md hover:bg-[#F9FAF8] shadow-md text-xl text-[#265A46] mt-1 border border-black"
             >
               Executive Login
             </button>
@@ -232,20 +276,36 @@ export default function Page() {
       {/* RIGHT SIDE - Branding and Images */}
       {!hideRightSide && (
         <div className="flex flex-col justify-center bg-[#265A46] text-white p-8 sm:p-10 items-center">
-           <h2
+          <h2
             className={`${playfair.className} text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-center`}
           >
             Anestropedia
-             <span className="mt-10" style={{display:"inline-block", marginTop:"10px",marginLeft:"15px"}}> Admin</span>
+            <span
+              className="mt-10"
+              style={{
+                display: "inline-block",
+                marginTop: "10px",
+                marginLeft: "15px",
+              }}
+            >
+              {" "}
+              Admin
+            </span>
             <br></br>
-            <span className="mt-10" style={{display:"block", marginTop:"10px"}}> Panel</span>
+            <span
+              className="mt-10"
+              style={{ display: "block", marginTop: "10px" }}
+            >
+              {" "}
+              Panel
+            </span>
           </h2>
 
           <p
             className={`${inter.className} text-center leading-relaxed mt-5 sm:mt-7 text-sm sm:text-base`}
           >
-            Powering the preservation of heritage, family stories, and DNA insights
-            across generations.
+            Powering the preservation of heritage, family stories, and DNA
+            insights across generations.
           </p>
           <p
             className={`${inter.className} text-center leading-relaxed mb-6 text-sm sm:text-base`}

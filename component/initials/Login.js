@@ -80,10 +80,12 @@ const Login = () => {
           <button href="/login" className="bg-[#FFC300] hover:bg-yellow-500 w-full py-4 rounded-md font-bold text-lg sm:text-xl md:text-2xl shadow-md text-[#265A46] transition-all duration-200">
             Admin Login
           </button>
-            </Link>
-          <button className="bg-[#FFC300] hover:bg-yellow-500 w-full py-4 rounded-md font-bold text-lg sm:text-xl md:text-2xl shadow-md text-[#265A46] mt-2 transition-all duration-200">
+
+          <button href="/login"  className="bg-[#FFC300] hover:bg-yellow-500 w-full py-4 rounded-md font-bold text-lg sm:text-xl md:text-2xl shadow-md text-[#265A46] mt-2 transition-all duration-200">
             Executive Login
           </button>
+            </Link>
+          
         </div>
       </div>
 

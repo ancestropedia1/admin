@@ -164,31 +164,27 @@ export default function TokenManagement() {
                       Decline
                     </button>
                   </td>
-
+                  
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-
         {/* ---------- PAGINATION ---------- */}
         <div className="p-4 flex justify-between items-center">
           <span className="text-sm text-gray-500">
             Page {page} of {totalPages}
           </span>
-
           <div className="flex gap-2">
             <button className="px-3 py-1 border rounded opacity-40">
               <ChevronLeft />
             </button>
-
             <button className="px-3 py-1 border rounded opacity-40">
               <ChevronRight />
             </button>
           </div>
         </div>
       </div>
-
       {/* ---------- TOKEN PLANS (STATIC) ---------- */}
       <div className="mt-12 grid bg-[#F6F1E9] gap-5 p-5 rounded-md border-2 border-gray-300">
         <h2 className="text-2xl font-bold mb-4">Token Plan Allocations</h2>
@@ -204,11 +200,10 @@ export default function TokenManagement() {
           ))}
         </div>
       </div>
-
       {/* ---------- STATUS POPUP UI (FIGMA STYLE) ---------- */}
       {showPopup && selectedRequest && (
         <div className="fixed inset-0  flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-[20%] h-[50%] max-w-md border-2 border-gray-300">
+          <div className="bg-white rounded-lg shadow-xl w-[15%] h-[45%] max-w-md border-2 border-gray-300">
 
             {/* HEADER */}
             <div className="bg-green-900 text-white p-3 rounded-t-lg text-lg font-semibold">
@@ -231,15 +226,15 @@ export default function TokenManagement() {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Add comments for your response..."
-                className="w-full border rounded-md p-2 h-24 outline-none focus:ring"
+                className="w-full border rounded-md p-2 h-20 outline-none focus:ring"
               ></textarea>
             </div>
 
             {/* FOOTER BUTTONS */}
-            <div className="flex justify-end gap-3 p-4">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowPopup(false)}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                className="px-2 py-2 bg-gray-200 rounded hover:bg-gray-300"
               >
                 Cancel
               </button>
@@ -249,7 +244,7 @@ export default function TokenManagement() {
                   alert("Status updated!");
                   setShowPopup(false);
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                className="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
                 Decline
               </button>
@@ -257,7 +252,6 @@ export default function TokenManagement() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

@@ -1,10 +1,10 @@
-import BlogManagement from '@/component/blogManagement/BlogManagement'
-import React from 'react'
+"use client";
+import BlogManagement from "@/component/blogManagement/BlogManagement";
+import protectPage from "../utils/protectPage";
 
-const page = () => {
-  return (
-    <div><BlogManagement/></div>
-  )
+function Page() {
+  return <div><BlogManagement/></div>;
 }
 
-export default page
+// 🚨 ONLY users with "blogmanagement" permission can open this page
+export default protectPage("blogmanagement")(Page);

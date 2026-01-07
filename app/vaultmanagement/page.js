@@ -1,10 +1,11 @@
-import HeritageVaultManagement from '@/component/vaultmanagement/HeritageVaultManagement'
-import React from 'react'
+"use client";
+import BlogManagement from "@/component/blogManagement/BlogManagement";
+import protectPage from "../utils/protectPage";
+import HeritageVaultManagement from "@/component/vaultmanagement/HeritageVaultManagement";
 
 function Page() {
-  return (
-    <div><HeritageVaultManagement/></div>
-  )
+  return <div><HeritageVaultManagement/></div>;
 }
 
-export default Page
+// 🚨 ONLY users with "blogmanagement" permission can open this page
+export default protectPage("vaultmanagement")(Page);

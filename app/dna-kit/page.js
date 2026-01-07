@@ -1,10 +1,11 @@
-import DnaKit from '@/component/dna-kit/DnaKit'
-import React from 'react'
+"use client";
+import BlogManagement from "@/component/blogManagement/BlogManagement";
+import protectPage from "../utils/protectPage";
+import DnaKit from "@/component/dna-kit/DnaKit";
 
 function Page() {
-  return (
-    <div><DnaKit/></div>
-  )
+  return <div><DnaKit/></div>;
 }
 
-export default Page
+// 🚨 ONLY users with "blogmanagement" permission can open this page
+export default protectPage("dna-kit")(Page);

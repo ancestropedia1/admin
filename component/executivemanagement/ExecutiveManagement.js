@@ -1,23 +1,25 @@
-'use client'
-import Card from "../Cards";
-import React, { useState } from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import CreateExecutive from "./CreateExecutive";
+import { axiosInstanceLocal } from "@/config/axios";
+import { useRouter } from "next/navigation";
 import { Lato, Playfair_Display } from "next/font/google";
 import {
+  Users,
   CalendarDays,
   ChevronDown,
   Search,
-  Coins,
-  Clock4,
   CheckCircle,
   XCircle,
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
 
+/* ---------------- FONTS ---------------- */
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  display: "swap",
 });
 
 const lato = Lato({
@@ -25,112 +27,153 @@ const lato = Lato({
   weight: ["400", "700"],
 });
 
-
-
 const ExecutiveManagement = () => {
+  const router = useRouter();
+
+  /* ---------------- MODAL ---------------- */
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  /* ---------------- DATA ---------------- */
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  /* ---------------- STATS ---------------- */
+  const [stats, setStats] = useState({
+    totalExecutives: 0,
+    activeExecutives: 0,
+    disabledExecutives: 0,
+    performancePercent: 0,
+  });
+
+  /* ---------------- PAGINATION ---------------- */
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 4;
+
+  const [pagination, setPagination] = useState({
+    totalExecutives: 0,
+    totalPages: 1,
+    currentPage: 1,
+  });
+
+  /* ---------------- FETCH EXECUTIVES (PAGINATED) ---------------- */
+  const fetchExecutives = async (pageNumber = 1) => {
+    try {
+      setLoading(true);
+
+      const res = await axiosInstanceLocal.get("/admin/executive", {
+        params: {
+          page: pageNumber,
+          limit: rowsPerPage,
+        },
+      });
+
+      setUsers(res.data.data || []);
+      setPagination(res.data.pagination);
+      setPage(pageNumber);
+    } catch (error) {
+      console.error("Failed to fetch executives", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ---------------- FETCH STATS ---------------- */
+  const fetchExecutiveStats = async () => {
+    try {
+      const res = await axiosInstanceLocal.get("/admin/executive/stats");
+      setStats(res.data.data);
+    } catch (error) {
+      console.error("Failed to fetch stats", error);
+    }
+  };
+
+  /* ---------------- INITIAL LOAD ---------------- */
+  useEffect(() => {
+    fetchExecutives(1);
+    fetchExecutiveStats();
+  }, []);
 
 
-    // ⭐ DYNAMIC USER TABLE DATA
-      // ----------------------------
-      const [users, setUsers] = useState([
-        {
-          id: "813764",
-          name: "Gaurav Singh",
-          plan: "Standard",
-          used: 7,
-          total: 10,
-          files: 400,
-          avatar: "/avatar-placeholder.jpg",
-        },
-        {
-          id: "813765",
-          name: "Aarav Sharma",
-          plan: "Pro",
-          used: 6,
-          total: 10,
-          files: 600,
-          avatar: "/avatar-placeholder.jpg",
-        },
-        {
-          id: "813766",
-          name: "Kunal Verma",
-          plan: "Standard",
-          used: 8,
-          total: 10,
-          files: 800,
-          avatar: "/avatar-placeholder.jpg",
-        },
-        {
-          id: "813767",
-          name: "Rahul Singh",
-          plan: "Pro",
-          used: 9,
-          total: 10,
-          files: 1000,
-          avatar: "/avatar-placeholder.jpg",
-        },
-      ]);
-    
-      // ----------------------------
-      // ⭐ PAGINATION STATES
-      // ----------------------------
-      const [page, setPage] = useState(1);
-      const rowsPerPage = 4;
-    
-      const paginatedUsers = users.slice(
-        (page - 1) * rowsPerPage,
-        page * rowsPerPage
-      );
-    
-      const totalPages = Math.ceil(users.length / rowsPerPage)
+  const filteredUsers = users.filter((user) => {
+  if (!searchQuery) return true;
+
+  const q = searchQuery.toLowerCase();
 
   return (
-    <div className='w-full min-h-screen'>
-        {/* ---------------------------------- HEADER ---------------------------------- */}
-        <div className="bg-[#F6F1E9] border border-gray-400 p-8 mt-10 rounded-xl shadow-sm w-full">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div className="flex-1">
-              <h1
-                className={`${playfair.className} text-4xl font-extrabold text-gray-800`}
-              >
-                Executive Account Management
-              </h1>
+    user.fullName?.toLowerCase().includes(q) ||
+    user.email?.toLowerCase().includes(q) ||
+    user.role?.toLowerCase().includes(q) ||
+    user.permissions?.join(" ").toLowerCase().includes(q) ||
+    user._id?.toLowerCase().includes(q) ||
+    (q === "active" && user.isActive) ||
+    (q === "disabled" && !user.isActive)
+  );
+});
 
-              <p
-                className={`${lato.className} text-base md:text-lg text-gray-600 mt-3 max-w-lg`}
-              >
-                Manage all administrative users and assign appropriate roles and permissions.
-              </p>
-            </div>
 
-            <button
-              className="bg-[#265A46] text-white px-5 md:px-6 py-3 rounded-lg hover:bg-green-700 transition font-semibold shadow-md"
-            >
-              + Create Executive Account
-            </button>
+  return (
+    <div className="w-full min-h-screen">
+      {/* ---------------- HEADER ---------------- */}
+      <div className="bg-[#F6F1E9] border border-gray-300 p-8 mt-10 rounded-xl shadow-sm">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className={`${playfair.className} text-4xl font-extrabold`}>
+              Executive Account Management
+            </h1>
+            <p className={`${lato.className} text-gray-600 mt-2`}>
+              Manage all administrative users and assign appropriate roles.
+            </p>
           </div>
-    </div>
- {/* ---------- TOP STATS CARDS ---------- */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4 p-2">
-  <Card icon={<Coins className="w-7 h-7 text-yellow-600" />} value="120" label="Total Token Request" />
-  <Card icon={<Clock4 className="w-7 h-7 text-orange-500" />} value="45" label="Pending Requests" />
-  <Card icon={<CheckCircle className="w-7 h-7 text-green-600" />} value="68" label="Approved Request" />
-  <Card icon={<XCircle className="w-7 h-7 text-red-500" />} value="7" label="Declined Request" />
-</div>
 
-{/* ---------- FILTERS UI (unchanged) ---------- */}
-      <div className="bg-[#F6F1E9] border border-gray-400 p-4 rounded-md shadow mt-4 flex flex-col md:flex-row justify-between gap-4">
-        <div className="flex justify-center gap-2">
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="bg-[#265A46] text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700"
+          >
+            + Create Executive Account
+          </button>
+        </div>
+      </div>
+
+      {/* ---------------- STATS ---------------- */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+        <StatCard
+          icon={<Users className="text-yellow-600" />}
+          bg="bg-yellow-100"
+          value={stats.totalExecutives}
+          label="Total Executives"
+        />
+        <StatCard
+          icon={<CheckCircle className="text-green-600" />}
+          bg="bg-green-100"
+          value={stats.activeExecutives}
+          label="Active Executives"
+        />
+        <StatCard
+          icon={<XCircle className="text-orange-600" />}
+          bg="bg-orange-100"
+          value={stats.disabledExecutives}
+          label="Disabled Executives"
+        />
+        <StatCard
+          icon={<ChevronRight className="text-purple-600" />}
+          bg="bg-purple-100"
+          value={`↑ ${stats.performancePercent}%`}
+          label="Executive Performance"
+        />
+      </div>
+
+      {/* ---------------- FILTER BAR ---------------- */}
+      <div className="bg-[#F6F1E9] border border-gray-300 p-4 rounded-md shadow mt-6 flex flex-col md:flex-row justify-between gap-4">
+        <div className="flex gap-2">
           <button className="flex gap-2 bg-white px-4 py-2 rounded-md shadow-sm">
-            By Date <CalendarDays size={18} className="mt-1" />
+            By Date <CalendarDays size={18} />
           </button>
-
-          <button className="flex bg-white px-4 py-2 rounded-md shadow-sm">
-            By Status <ChevronDown size={18} className="mt-1" />
+          <button className="flex gap-2 bg-white px-4 py-2 rounded-md shadow-sm">
+            By Status <ChevronDown size={18} />
           </button>
-
-          <button className="flex bg-white px-4 py-2 rounded-md shadow-sm">
-           By Category <ChevronDown size={18} className="mt-1" />
+          <button className="flex gap-2 bg-white px-4 py-2 rounded-md shadow-sm">
+            By Category <ChevronDown size={18} />
           </button>
         </div>
 
@@ -138,122 +181,177 @@ const ExecutiveManagement = () => {
           <Search className="text-gray-500" />
           <input
             type="text"
-            placeholder="Search added user..."
+            placeholder="Search executive..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full ml-2 outline-none"
           />
         </div>
       </div>
-      {/* --------------------------- */}
-      {/* ⭐ SUPPORT TICKETS TABLE (Figma Exact) */}
-      {/* --------------------------- */}
-      <div className="bg-white rounded-xl border-2 border-gray-300 shadow-sm mt-10 overflow-x-auto">
-        <div className="bg-[#F6F1E9]">
 
-          <h3 className="text-lg font-bold Created p-3 md:text-xl  text-[#1B3B2F]">
-                Executive List
-              </h3>
+      {/* ---------------- TABLE ---------------- */}
+
+      {/* ---------------- TABLE ---------------- */}
+      <div className="bg-white rounded-lg mt-10 shadow-lg border-2 border-gray-200">
+        <div className="px-6 py-4 rounded-lg  bg-[#F6F1E9]">
+          <h2 className={`${playfair.className} text-xl font-semibold`}>
+            Executive List
+          </h2>
         </div>
-              
-      
-              <div className="overflow-x-auto">
-                <table className="w-full font-light text-left">
-                <thead className="bg-[#F6F1E9] border-t-2">
+
+        {loading && (
+          <p className="p-6 text-center text-gray-500">Loading executives...</p>
+        )}
+
+        {!loading && users.length === 0 && (
+          <p className="p-6 text-center text-gray-500">No executives found</p>
+        )}
+
+        {!loading && users.length > 0 && (
+          <>
+            {/* DESKTOP TABLE */}
+            <div className="hidden md:block">
+              <table className="w-full border-t-2">
+                <thead className="bg-[#F6F1E9]">
                   <tr>
-                    
-                    <th className="text-left text-gray-70 p-3">Executive</th>
-                    <th className="text-left text-gray-70  p-3">Assignment</th>
-                    <th className="text-left text-gray-70  p-3">Status</th>
-                    <th className="text-left text-gray-70 p-3">Created</th>
-                    <th className="text-left text-gray-70 p-3">Action</th>
-                    
-                    
+                    <th className="p-4 text-left">Executive</th>
+                    <th className="p-4 text-left">Assignment</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4">Created</th>
+                    <th className="p-4">Action</th>
                   </tr>
                 </thead>
-      
+
                 <tbody>
-                  {paginatedUsers.map((user) => {
-                    const percent = (user.used / user.total) * 100;
-      
-                    return (
-                      <tr key={user.id} className="border-b bg-white">
-                        <td className="p-3 flex items-center gap-3">
-                          <img
-                            src={user.avatar}
-                            className="w-10 h-10 rounded-full border"
-                          />
-                          <div>
-                            <p className="font-medium text-gray-700">{user.name}</p>
-                            <p className="text-xs text-gray-500">ID-{user.id}</p>
-                          </div>
-                        </td>
-      
-                        <td className="p-3">
-                          <span
-                            className={`px-3 py-1 rounded-md text-xs font-medium 
-                              ${
-                                user.plan === "Standard"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-blue-100 text-blue-700"
-                              }`}
-                          >
-                            {user.plan}
-                          </span>
-                        </td>
-      
-                        <td className="p-3">
-                          <div className="text-xs text-gray-600 mb-1">
-                            {user.used} GB of {user.total} GB
-                          </div>
-                          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-green-600"
-                              style={{ width: `${percent}%` }}
-                            ></div>
-                          </div>
-                        </td>
-      
-                        <td className="p-3 text-gray-700">{user.files}</td>
-      
-                        <td className="p-3">
-                          <button className="px-4 py-1 bg-[#E6ECFF] text-[#4A63C0] rounded-md text-xs font-medium hover:bg-[#dce3ff]">
-                            Manage
+                  {filteredUsers.map((user) => (
+                    <tr key={user._id} className="border-b">
+                      <td className="p-4 flex gap-3 items-center">
+                        <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold">
+                          {user.fullName?.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-medium">{user.fullName}</p>
+                          <p className="text-xs text-gray-500">ID-{user._id}</p>
+                        </div>
+                      </td>
+
+                      <td className="p-4 text-sm">
+                        {user.permissions?.join(", ") || "—"}
+                      </td>
+
+                      <td className="p-4">
+                        {user.isActive ? (
+                          <span className="text-green-600">Active</span>
+                        ) : (
+                          <span className="text-red-500">Disabled</span>
+                        )}
+                      </td>
+
+                      <td className="p-4 text-sm">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </td>
+
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <button className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded">
+                            {" "}
+                            Assign{" "}
                           </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          <button
+                            onClick={() =>
+                              router.push(`/executive-management/${user._id}`)
+                            }
+                            className="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded"
+                          >
+                            View
+                          </button>
+
+                          <button className="px-3 py-1 text-xs bg-red-100 text-red-600 rounded">
+                            Disable
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-      
-              </div>
-              
-              {/* --------------------------- */}
-              {/* PAGINATION */}
-              {/* --------------------------- */}
-              <div className="flex justify-end mt-4 gap-2 text-sm items-center p-4">
+            </div>
+
+            {/* MOBILE CARDS */}
+            <div className="md:hidden p-4 space-y-4">
+              {users.map((user) => (
+                <div key={user._id} className="border rounded-xl p-4 shadow-sm">
+                  <p className="font-semibold">{user.fullName}</p>
+                  <p className="text-xs text-gray-500 mb-2">ID-{user._id}</p>
+                  <p className="text-sm">
+                    Status: {user.isActive ? "Active" : "Disabled"}
+                  </p>
+                  <button
+                    onClick={() =>
+                      router.push(`/executive-management/${user._id}`)
+                    }
+                    className="mt-3 w-full bg-indigo-100 text-indigo-700 py-2 rounded"
+                  >
+                    View
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* ---------------- PAGINATION ---------------- */}
+            <div className="flex justify-between items-center p-4">
+              <p className="text-xs text-gray-500">
+                Showing {(pagination.currentPage - 1) * rowsPerPage + 1} to{" "}
+                {Math.min(
+                  pagination.currentPage * rowsPerPage,
+                  pagination.totalExecutives
+                )}{" "}
+                of {pagination.totalExecutives} executives
+              </p>
+
+              <div className="flex gap-2">
                 <button
                   disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                  className="p-2 border rounded-md bg-white hover:bg-gray-100 disabled:opacity-40"
+                  onClick={() => fetchExecutives(page - 1)}
+                  className="p-1 border rounded disabled:opacity-40"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft />
                 </button>
-      
-                <span className="px-3 py-1 bg-[#1D7A48] text-white rounded-md">
+
+                <span className="px-3 py-1 bg-[#265A46] text-white rounded">
                   {page}
                 </span>
-      
+
                 <button
-                  disabled={page === totalPages}
-                  onClick={() => setPage(page + 1)}
-                  className="p-2 border rounded-md bg-white hover:bg-gray-100 disabled:opacity-40"
+                  disabled={page === pagination.totalPages}
+                  onClick={() => fetchExecutives(page + 1)}
+                  className="p-1 border rounded disabled:opacity-40"
                 >
-                  <ChevronRight size={16} />
+                  <ChevronRight />
                 </button>
               </div>
             </div>
-    </div>
-  )
-}
+          </>
+        )}
+      </div>
 
-export default ExecutiveManagement
+      {/* ---------------- CREATE MODAL ---------------- */}
+      {isCreateOpen && (
+        <CreateExecutive onClose={() => setIsCreateOpen(false)} />
+      )}
+    </div>
+  );
+};
+
+/* ---------------- STAT CARD ---------------- */
+const StatCard = ({ icon, bg, value, label }) => (
+  <div className="bg-white border rounded-xl p-5 flex items-center gap-4 shadow-sm">
+    <div className={`${bg} p-3 rounded-lg`}>{icon}</div>
+    <div>
+      <p className="text-2xl font-bold">{value}</p>
+      <p className="text-sm text-gray-500">{label}</p>
+    </div>
+  </div>
+);
+
+export default ExecutiveManagement;

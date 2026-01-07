@@ -1,10 +1,11 @@
-import UserManagement from '@/component/usermanagement/UserManagement'
-import React from 'react'
+"use client";
+import BlogManagement from "@/component/blogManagement/BlogManagement";
+import protectPage from "../utils/protectPage";
+import UserManagement from "@/component/usermanagement/UserManagement";
 
 function Page() {
-  return (
-    <div><UserManagement/></div>
-  )
+  return <div><UserManagement/></div>;
 }
 
-export default Page
+// 🚨 ONLY users with "blogmanagement" permission can open this page
+export default protectPage("usermanagement")(Page);
