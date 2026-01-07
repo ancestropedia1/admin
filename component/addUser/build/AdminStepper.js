@@ -47,11 +47,11 @@ const AdminStepper = ({ currentStep, setCurrentStep }) => {
       {/* Progress Line */}
       <div className="relative w-full mt-3">
         {/* Base Line (gray) */}
-        <div className="absolute top-0 left-0 h-[2px] w-full bg-gray-300"></div>
+        <div className="absolute top-0 left-0 h-0.5 w-full bg-gray-300"></div>
 
         {/* Active Line (brown) */}
         <div
-          className="absolute top-0 left-0 h-[2px] bg-[#A86A10] transition-all duration-300"
+          className="absolute top-0 left-0 h-0.5 bg-[#A86A10] transition-all duration-300"
           style={{ width: `${(uiStep / (steps.length - 1)) * 100}%` }}
         ></div>
       </div>

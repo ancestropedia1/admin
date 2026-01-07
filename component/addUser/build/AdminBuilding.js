@@ -46,9 +46,10 @@ const handleSubmit = async () => {
 
     if (response.data.success) {
       setSubmitStatus("success");
+      console.log("person created successfully:", response.data);
       setTimeout(() => {
-        router.push("/admin/users");
-      }, 3000);
+        router.push("/adduser");
+      }, 1000);
     } else {
       setSubmitStatus("error");
     }

@@ -37,6 +37,7 @@ const AdminSiblingsForm = ({
         skinTone: "",
         eyeColor: "",
         highestEducation: "",
+        occupation: "",
         profession: "",
         living: true,
         siblingOrder: currentSiblingIndex + 1
@@ -82,7 +83,12 @@ const AdminSiblingsForm = ({
     }
   };
 
-  if (totalSiblings === 0 || !siblingsData.enterDetails) {
+  console.log("siblingsData:", siblingsData);
+console.log("haveSiblings:", siblingsData?.haveSiblings);
+console.log("totalSiblings (raw):", siblingsData?.totalSiblings);
+console.log("totalSiblings (parsed):", totalSiblings);
+
+  if (siblingsData.haveSiblings !== 'yes' || totalSiblings === 0) {
     return (
       <div className="w-full mx-auto p-6 bg-white rounded-lg">
         <div className="flex items-center mb-8">

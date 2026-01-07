@@ -37,6 +37,7 @@ const AdminKidsForm = ({
         skinTone: "",
         eyeColor: "",
         highestEducation: "",
+        occupation: "",
         profession: "",
         isAlive: true,
         birthOrder: currentKidIndex + 1

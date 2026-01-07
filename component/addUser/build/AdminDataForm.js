@@ -58,8 +58,6 @@ export default function AdminDataForm({
     weight: personalDetails.weight || "",
     eyeColor: personalDetails.eyeColor || "",
     highestEducation: personalDetails.highestEducation || "",
-    profession: personalDetails.profession || "",
-    // email: personalDetails.email || "",
     phone: personalDetails.phone || "",
     living: personalDetails.living  !== false,
     bodyType: personalDetails.bodyType || "",
@@ -94,7 +92,7 @@ export default function AdminDataForm({
       'birthCity',
       'residenceCity',
       'highestEducation',
-      'profession'
+      'occupation'
     ];
     
     // Check each base field
@@ -523,15 +521,15 @@ export default function AdminDataForm({
               />
             </div>
 
-            {/* Profession */}
+            {/* occupation */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Profession
+                occupation
               </label>
               <input
                 type="text"
-                name="profession"
-                value={formData.profession || ''}
+                name="occupation"
+                value={formData.occupation || ''}
                 onChange={handleChange}
                 placeholder="e.g. Software Engineer"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-[#FFC300] bg-white"
