@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import CreateExecutive from "./CreateExecutive";
-import { axiosInstanceLocal } from "@/config/axios";
+import { axiosInstance, axiosInstanceLocal } from "@/config/axios";
 import { useRouter } from "next/navigation";
 import { Lato, Playfair_Display } from "next/font/google";
 import {
@@ -61,7 +61,7 @@ const ExecutiveManagement = () => {
     try {
       setLoading(true);
 
-      const res = await axiosInstanceLocal.get("/admin/executive", {
+      const res = await axiosInstance.get("/admin/executive", {
         params: {
           page: pageNumber,
           limit: rowsPerPage,

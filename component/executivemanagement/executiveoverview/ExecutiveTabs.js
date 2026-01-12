@@ -41,9 +41,9 @@ export default function ExecutiveTabs() {
         
            <ResponsibilitiesTable />
             <StatsCards />
-            {activeTab === "Performances" && <PerformanceSection />}
+            {/* {activeTab === "Performances" && <PerformanceSection />}
 
-            {activeTab === "Activity Logs" && <ActivityLogs />}
+            {activeTab === "Activity Logs" && <ActivityLogs />} */}
           </>
         )}
       </div>
