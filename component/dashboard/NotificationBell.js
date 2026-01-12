@@ -30,7 +30,7 @@ export default function NotificationBell() {
         onClick={() => setOpen(!open)}
         className="relative focus:outline-none"
       >
-        <Bell className="text-gray-600" size={20} />
+        <Bell className="text-gray-600 cursor-pointer" size={20} />
 
         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
           3
@@ -42,7 +42,7 @@ export default function NotificationBell() {
         <div className="fixed top-[72px] w-[600px] bg-white border rounded-xl shadow-2xl z-[999]">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b">
+          <div className="flex items-center justify-center px-4 py-3 border-b">
             <h3 className="text-sm font-semibold">Notifications</h3>
             <button onClick={() => setOpen(false)}>
               <X size={16} />

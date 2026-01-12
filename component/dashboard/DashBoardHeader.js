@@ -51,7 +51,7 @@ const DashBoardHeader = ({ sidebarOpen, onMenuToggle }) => {
         </div>
 
         {/* Right: Profile and Notifications */}
-        <div className="flex items-center gap-3 sm:gap-5">
+        <div className="flex items-center gap-3 sm:gap-5 cursor-pointer">
          <NotificationBell/>
          <ProfileButton />
         </div>
