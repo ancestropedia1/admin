@@ -91,7 +91,69 @@ export default function Page() {
 
   // Handle form submission (same as handleLogin but for form onSubmit)
 
-  const handleSubmit = (e) => { handleLogin(e); };
+  const handleSubmit = (e) => { handleAdminUser(e) };
+  
+const handleAdminUser = async (e) => {
+
+  e.preventDefault();
+  // Basic validation
+  if (!email || !password) {
+    setError(true);
+    setErrorMessage("Please enter both email and password");
+    return;
+  }
+
+  setIsLoading(true);
+  setError(false);
+  setErrorMessage("");
+
+  try {
+    const res = await axiosInstance.post(
+      "/adminUser/auth/adminUserlogin",
+      { email, password },
+      { withCredentials: true } // 👈 REQUIRED (cookie-based auth)
+    );
+
+    const { user } = res.data;
+
+    // 🔐 Store minimal auth state (cookie is source of truth)
+    localStorage.setItem("role", user.role);
+    localStorage.setItem("permissions", JSON.stringify(user.permissions || []));
+
+    // 🚀 REDIRECT LOGIC
+    // Admin → dashboard (full access)
+    if (user.role === "admin") {
+      return router.push("/dashboard");
+    }
+
+    // Executive → permission-based landing
+    const p = user.permissions || [];
+
+    if (p.includes("usermanagement")) return router.push("/usermanagement");
+    if (p.includes("blogmanagement")) return router.push("/blogmanagement");
+    if (p.includes("wallart")) return router.push("/wall-art");
+    if (p.includes("dna-kit")) return router.push("/dna-kit");
+    if (p.includes("supportmanagement")) return router.push("/supportmanagement");
+    if (p.includes("adduser")) return router.push("/adduser");
+    if (p.includes("vaultmanagement")) return router.push("/vaultmanagement");
+    if (p.includes("reportmanagement")) return router.push("/reportmanagement");
+
+    // No permissions → unauthorized
+    return router.push("/unauthorized");
+
+  } catch (error) {
+    console.error("AdminUser Login Error:", error);
+    setError(true);
+    setErrorMessage(
+      error.response?.data?.message || "Login failed. Please try again."
+    );
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  
+
 
   const handleExecutiveLogin = async () => {
   // Basic validation like admin

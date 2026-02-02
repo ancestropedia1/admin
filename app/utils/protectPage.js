@@ -1,30 +1,48 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export default function protectPage(requiredPermission) {
+const protectPage = (requiredPermission = null) => {
   return (Component) => {
-    return function Protected(props) {
+    return function ProtectedPage(props) {
       const router = useRouter();
-      const token = typeof window !== "undefined" && localStorage.getItem("token");
-      const role = typeof window !== "undefined" && localStorage.getItem("role");
-      const permissions = typeof window !== "undefined" 
-        ? JSON.parse(localStorage.getItem("permissions") || "[]")
-        : [];
 
       useEffect(() => {
-        if (!token) return router.replace("/login");
+        const token = localStorage.getItem("adminUserToken");
+        const role = localStorage.getItem("role");
 
-        // ADMIN CAN ACCESS EVERYTHING
-        if (role === "Admin") return;
-
-        // EXECUTIVE: ONLY IF PAGE PERMISSION MATCHES
-        if (!permissions.includes(requiredPermission)) {
-          return router.replace("/unauthorized");
+        let permissions = [];
+        try {
+          permissions = JSON.parse(localStorage.getItem("permissions")) || [];
+        } catch {
+          permissions = [];
         }
-      }, []);
+
+        // ❌ Not logged in
+        // if (!token) {
+        //   router.replace("/login");
+        //   return;
+        // }
+
+        // ✅ Admin → full access
+        if (role === "admin") {
+          return;
+        }
+
+        // ❌ Executive but permission missing
+        if (
+          requiredPermission &&
+          !permissions.includes(requiredPermission)
+        ) {
+          router.replace("/unauthorized");
+          return;
+        }
+      }, [router]);
 
       return <Component {...props} />;
     };
   };
-}
+};
+
+export default protectPage;
