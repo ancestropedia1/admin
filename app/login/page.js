@@ -116,6 +116,8 @@ const handleAdminUser = async (e) => {
 
     const { user } = res.data;
 
+    
+
     // 🔐 Store minimal auth state (cookie is source of truth)
     localStorage.setItem("role", user.role);
     localStorage.setItem("permissions", JSON.stringify(user.permissions || []));

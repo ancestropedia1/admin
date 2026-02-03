@@ -1,7 +1,7 @@
 "use client";
 import { X, RefreshCcw } from "lucide-react";
 import { useState } from "react";
-import { axiosInstanceLocal } from "@/config/axios";
+import { axiosInstance, axiosInstanceLocal } from "@/config/axios";
 
 const PERMISSION_MAP = {
   "User Management": "usermanagement",
@@ -49,7 +49,7 @@ export default function CreateExecutive({ onClose }) {
     };
 
     try {
-      const res = await axiosInstanceLocal.post(
+      const res = await axiosInstance.post(
         "/admin/executive/executivemanage",
         payload
       );
