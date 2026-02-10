@@ -1,5 +1,5 @@
 "use client";
-import BlogManagement from "@/component/blogmanagement/BlogManagement.js";
+import BlogManagement from "../../component/blogmanagement/BlogManagement.js";
 import protectPage from "../utils/protectPage";
 import DnaKit from "@/component/dna-kit/DnaKit";
 
