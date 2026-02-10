@@ -10,7 +10,7 @@ import {
   CalendarDays,
   Eye,
 } from "lucide-react";
-import { axiosInstance } from "@/config/axios";
+import { axiosInstance } from "../../config/axios.js";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
