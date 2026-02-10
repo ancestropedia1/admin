@@ -1,11 +1,10 @@
 "use client";
-import BlogManagement from "../../component/blogmanagement/BlogManagement.js";
 import protectPage from "../utils/protectPage";
 import WallArt from "@/component/wallart/WallArt";
 
-function BlogsPage() {
+function page() {
   return <div><WallArt/></div>;
 }
 
 // 🚨 ONLY users with "blogmanagement" permission can open this page
-export default protectPage("wallart")(BlogsPage);
+export default protectPage("wallart")(page);
