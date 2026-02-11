@@ -23,7 +23,7 @@ const lato = Lato({
   weight: ["400", "700"],
 });
 
-const BlogManagement = () => {
+export const BlogManagement = () => {
   const [showEditor, setShowEditor] = useState(false);
 
   
@@ -522,7 +522,7 @@ const BlogManagement = () => {
   );
 };
 
-export default BlogManagement;
+// export default BlogManagement;
 
  /*"use client";
 import { useState, useEffect } from "react";
