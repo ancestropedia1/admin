@@ -10,7 +10,7 @@ import {
   CalendarDays,
   Eye,
 } from "lucide-react";
-import { axiosInstance } from "@/config/axios";
+import { axiosInstance } from "../../config/axios.js";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -23,7 +23,7 @@ const lato = Lato({
   weight: ["400", "700"],
 });
 
-const BlogManagement = () => {
+export const BlogManagement = () => {
   const [showEditor, setShowEditor] = useState(false);
 
   
@@ -522,7 +522,7 @@ const BlogManagement = () => {
   );
 };
 
-export default BlogManagement;
+// export default BlogManagement;
 
  /*"use client";
 import { useState, useEffect } from "react";

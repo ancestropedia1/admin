@@ -1,10 +1,11 @@
 "use client";
-import BlogManagement from "@/component/blogManagement/BlogManagement";
-import protectPage from "../utils/protectPage";
+import { BlogManagement } from "@/component/blogManagement/BlogManagement";
+// import protectPage from "../utils/protectPage.js";
 
-function Page() {
+function page() {
   return <div><BlogManagement/></div>;
 }
 
 // 🚨 ONLY users with "blogmanagement" permission can open this page
-export default protectPage("blogmanagement")(Page);
+// export default protectPage("blogmanagement")(page);
+export default page;
