@@ -5,11 +5,10 @@ import {
   ArrowRightFromLine,
   CalendarDays,
   ChevronDown,
-  Search,
-  Eye,
-  Truck,
-  CheckCircle,
 } from "lucide-react";
+
+import OrderList from "./OrderList";
+import OrderDetailsModal from "./OrderDetailsModal";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -22,19 +21,28 @@ const lato = Lato({
   weight: ["400", "700"],
 });
 
+const ReportsList = () => {
+  return (
+    <div className="bg-white border border-gray-300 mt-6 rounded-xl shadow-sm p-6">
+      <h2 className="text-xl font-bold text-gray-700 mb-4">Reports</h2>
+      <p className="text-gray-600">No reports available right now.</p>
+    </div>
+  );
+};
+
 const DnaKit = () => {
   const [activeTab, setActiveTab] = useState("orders");
+  const [selectedOrder, setSelectedOrder] = useState(null); // ✅ MODAL STATE
 
   return (
     <div className="w-full min-h-screen p-4 md:p-6">
-      {/* ----------------------------- HEADER ------------------------------- */}
+      {/* HEADER */}
       <div className="bg-[#F6F1E9] border mt-4 border-gray-300 p-8 rounded-xl shadow-sm">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
             <h1 className={`${playfair.className} text-4xl font-extrabold text-gray-800`}>
               DNA Kit
             </h1>
-
             <p className={`${lato.className} text-gray-600 mt-3 text-lg max-w-xl`}>
               Upload, verify, and publish DNA reports with complete accuracy and control.
             </p>
@@ -47,51 +55,45 @@ const DnaKit = () => {
         </div>
       </div>
 
-      {/* ----------------------------- TABS ------------------------------- */}
+      {/* TABS */}
       <div className="border-b mt-6 p-2 flex gap-3">
-
-        {/* Orders Tab */}
         <button
           onClick={() => setActiveTab("orders")}
           className={`px-6 py-3 rounded-md font-semibold transition ${
             activeTab === "orders"
-              ? "bg-[]"
+              ? "border-b-2 border-[#99512F] text-[#99512F]"
               : "text-gray-700"
           }`}
         >
           Orders
         </button>
 
-        {/* Reports Tab */}
         <button
           onClick={() => setActiveTab("reports")}
           className={`px-6 py-3 font-semibold transition ${
             activeTab === "reports"
-              ? "border-b border-red-200 text-gray-700"
-              : " text-gray-700"
+              ? "border-b-2 border-[#99512F] text-[#99512F]"
+              : "text-gray-700"
           }`}
         >
           Reports
         </button>
       </div>
 
-      {/* ----------------------------- FILTER BAR ------------------------------- */}
+      {/* FILTER BAR */}
       <div className="bg-[#F6F1E9] border border-gray-400 p-4 rounded-xl shadow-sm mt-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-wrap gap-3">
             <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border shadow-sm">
-              By Date
-              <CalendarDays size={18} className="text-gray-600" />
+              By Date <CalendarDays size={18} className="text-gray-600" />
             </button>
 
             <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border shadow-sm">
-              By Status
-              <ChevronDown size={18} className="text-gray-600" />
+              By Status <ChevronDown size={18} className="text-gray-600" />
             </button>
 
             <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border shadow-sm">
-              By Category
-              <ChevronDown size={18} className="text-gray-600" />
+              By Category <ChevronDown size={18} className="text-gray-600" />
             </button>
           </div>
 
@@ -101,76 +103,23 @@ const DnaKit = () => {
         </div>
       </div>
 
-      {/* ----------------------------- SEARCH ------------------------------- */}
-      
-      {/* ----------------------------- MAIN CONTENT ------------------------------- */}
+      {/* MAIN CONTENT */}
+     {activeTab === "orders" ? (
+  <>
+    {/* PASS HANDLER */}
+    <OrderList onView={setSelectedOrder} />
+  </>
+) : (
+  <ReportsList />
+)}
 
-      {activeTab === "orders" ? (
-        <OrderList />
-      ) : (
-        <ReportsList />
+      {/* ORDER DETAILS MODAL */}
+      {selectedOrder && (
+        <OrderDetailsModal
+          orderId={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
       )}
-    </div>
-  );
-};
-
-/* ----------------------- ORDER LIST COMPONENT ----------------------- */
-const OrderList = () => {
-  return (
-    <div className="bg-white border border-gray-300 mt-6 rounded-xl shadow-sm">
-      <div className="px-6 py-4 border-b">
-        <h2 className="text-xl font-bold text-gray-700">Order List</h2>
-      </div>
-
-      {/* Table Header */}
-      <div className="grid grid-cols-6 px-6 py-3 text-gray-600 font-semibold border-b bg-[#F6F1E9]">
-        <p>Order ID</p>
-        <p>Customer</p>
-        <p>Sample ID</p>
-        <p>Value</p>
-        <p>Order Date</p>
-        <p>Status</p>
-      </div>
-
-      {[1, 2, 3, 4].map((x) => (
-        <div
-          key={x}
-          className="grid grid-cols-6 px-6 py-4 border-b items-center hover:bg-[#FFF9E8]"
-        >
-          <p className="font-semibold text-gray-700">#8834</p>
-
-          <div>
-            <p className="font-semibold">Gaurav Singh</p>
-            <p className="text-gray-500 text-sm">ID - 83764</p>
-          </div>
-
-          <p className="text-gray-700">SPL-374</p>
-
-          <p className="text-[#99512F] font-semibold">Rs. 12,99</p>
-
-          <p className="text-gray-700">12/05/2025</p>
-
-          <div className="flex items-center gap-3">
-            <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-md text-sm">
-              New Order
-            </span>
-
-            <Eye size={18} className="cursor-pointer text-gray-600 hover:text-black" />
-            <Truck size={18} className="cursor-pointer text-gray-600 hover:text-black" />
-            <CheckCircle size={18} className="cursor-pointer text-green-700" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-/* ----------------------- REPORTS LIST COMPONENT ----------------------- */
-const ReportsList = () => {
-  return (
-    <div className="bg-white border border-gray-300 mt-6 rounded-xl shadow-sm p-6">
-      <h2 className="text-xl font-bold text-gray-700 mb-4">Reports</h2>
-      <p className="text-gray-600">No reports available right now.</p>
     </div>
   );
 };
