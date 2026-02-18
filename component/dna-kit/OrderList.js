@@ -1,7 +1,7 @@
 "use client";
 import { Eye, Truck, CheckCircle, Printer } from "lucide-react";
 import { useEffect, useState } from "react";
-import { axiosInstanceLocal } from "@/config/axios";
+import { axiosInstanceLocal, axiosInstance } from "@/config/axios";
 
 const OrderList = ({ onView }) => {
   const [orders, setOrders] = useState([]);
@@ -16,7 +16,7 @@ const OrderList = ({ onView }) => {
     try {
       setLoading(true);
 
-      const res = await axiosInstanceLocal.get("/admin/dna-orders");
+      const res = await axiosInstance.get("/admin/dna-orders");
 
       console.log("✅ API RESPONSE:", res.data);
 
@@ -61,7 +61,7 @@ const OrderList = ({ onView }) => {
     console.log("🔄 Updating Status:", { id, dnaStatus });
 
     try {
-      await axiosInstanceLocal.patch(`/admin/dna-orders/${id}/status`, {
+      await axiosInstance.patch(`/admin/dna-orders/${id}/status`, {
         dnaStatus, // backend expects THIS
       });
 
