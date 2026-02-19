@@ -1,19 +1,35 @@
 "use client";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { axiosInstanceLocal, axiosInstance } from "@/config/axios";
+import { axiosInstance } from "@/config/axios";
 
 import OverviewTab from "./tabs/OverviewTab";
 import StatusTab from "./tabs/StatusTab";
 import LabTab from "./tabs/LabTab";
 import ReportTab from "./tabs/ReportTab";
 
+/* ================= STATUS BADGE STYLE ================= */
+const getStatusStyle = (status) => {
+  switch (status) {
+    case "order_confirmed":
+      return "bg-yellow-100 text-yellow-700";
+    case "order_dispatched":
+      return "bg-blue-100 text-blue-700";
+    case "order_pickedup":
+      return "bg-purple-100 text-purple-700";
+    case "out_for_delivery":
+      return "bg-orange-100 text-orange-700";
+    case "delivered":
+      return "bg-green-100 text-green-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
 const OrderDetailsModal = ({ orderId, onClose }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  console.log("📦 Opening Order:", orderId);
 
   /* -------- FETCH ORDER -------- */
   const fetchOrder = async () => {
@@ -22,11 +38,11 @@ const OrderDetailsModal = ({ orderId, onClose }) => {
     try {
       setLoading(true);
 
+      // 🔥 Disable caching to always get latest status
       const res = await axiosInstance.get(
-        `/admin/dna-orders/${orderId}`
+        `/admin/dna-orders/${orderId}`,
+        { headers: { "Cache-Control": "no-cache" } }
       );
-
-      console.log("✅ Single Order:", res.data);
 
       setOrder(res.data.order);
     } catch (err) {
@@ -37,7 +53,7 @@ const OrderDetailsModal = ({ orderId, onClose }) => {
   };
 
   useEffect(() => {
-    fetchOrder();
+    if (orderId) fetchOrder();
   }, [orderId]);
 
   if (!order) return null;
@@ -52,20 +68,22 @@ const OrderDetailsModal = ({ orderId, onClose }) => {
               Order #{order.orderId || order._id.slice(-5)}
             </h2>
 
-            {/* Status Badge (Figma) */}
-            <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded">
-              Uploaded
+            {/* ✅ Dynamic Status Badge */}
+            <span
+              className={`text-xs px-3 py-1 rounded capitalize ${getStatusStyle(order.status)}`}
+            >
+              {order.status.replaceAll("_", " ")}
             </span>
           </div>
 
           <X className="cursor-pointer" onClick={onClose} />
         </div>
 
-        {/* ================= TABS (FIGMA STYLE) ================= */}
+        {/* ================= TABS ================= */}
         <div className="flex gap-3 mt-6 border-b pb-4">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`px-5 py-2 rounded-md border transition text-sm font-medium
+            className={`px-5 py-2 rounded-md border text-sm font-medium transition
               ${
                 activeTab === "overview"
                   ? "bg-[#265A46] text-white border-[#265A46]"
@@ -77,7 +95,7 @@ const OrderDetailsModal = ({ orderId, onClose }) => {
 
           <button
             onClick={() => setActiveTab("status")}
-            className={`px-5 py-2 rounded-md border transition text-sm font-medium
+            className={`px-5 py-2 rounded-md border text-sm font-medium transition
               ${
                 activeTab === "status"
                   ? "bg-[#265A46] text-white border-[#265A46]"
@@ -89,7 +107,7 @@ const OrderDetailsModal = ({ orderId, onClose }) => {
 
           <button
             onClick={() => setActiveTab("lab")}
-            className={`px-5 py-2 rounded-md border transition text-sm font-medium
+            className={`px-5 py-2 rounded-md border text-sm font-medium transition
               ${
                 activeTab === "lab"
                   ? "bg-[#265A46] text-white border-[#265A46]"
@@ -101,7 +119,7 @@ const OrderDetailsModal = ({ orderId, onClose }) => {
 
           <button
             onClick={() => setActiveTab("report")}
-            className={`px-5 py-2 rounded-md border transition text-sm font-medium
+            className={`px-5 py-2 rounded-md border text-sm font-medium transition
               ${
                 activeTab === "report"
                   ? "bg-[#265A46] text-white border-[#265A46]"

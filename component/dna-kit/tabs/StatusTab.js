@@ -2,39 +2,42 @@
 
 import { useState } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
-import { axiosInstanceLocal } from "@/config/axios";
+import { axiosInstance } from "@/config/axios";
 
+/* ✅ REAL STATUS FLOW (SHARED WITH CLIENT) */
 const STATUS_LIST = [
-  { label: "Order Received", value: "new_order" },
-  { label: "Sample Received", value: "sample_received" },
-  { label: "Kit Delivered", value: "kit_delivered" },
-  { label: "Report Ready", value: "report_ready" },
-  { label: "Completed", value: "completed" },
+  { label: "Order Confirmed", value: "order_confirmed" },
+  { label: "Order Dispatched", value: "order_dispatched" },
+  { label: "Order Picked Up", value: "order_pickedup" },
+  { label: "Out For Delivery", value: "out_for_delivery" },
+  { label: "Delivered", value: "delivered" },
 ];
 
 const StatusTab = ({ order, refreshOrder }) => {
   const [loading, setLoading] = useState(false);
 
+  /* ---------------- UPDATE STATUS ---------------- */
   const handleUpdateStatus = async (status) => {
-    console.log("🔄 Updating Status →", status);
-
     try {
       setLoading(true);
 
-      await axiosInstanceLocal.patch(
+      await axiosInstance.patch(
         `/admin/dna-orders/${order._id}/status`,
-        { dnaStatus: status } // 🔥 backend expects dnaStatus
+        { status } // ✅ IMPORTANT (NOT dnaStatus)
       );
 
-      console.log("✅ Status Updated");
-
-      refreshOrder(); // refetch order so timeline updates
+      await refreshOrder(); // refetch updated order
     } catch (err) {
       console.error("❌ Status Update Failed", err);
     } finally {
       setLoading(false);
     }
   };
+
+  /* ---------------- FIND CURRENT STEP ---------------- */
+  const currentIndex = STATUS_LIST.findIndex(
+    (s) => s.value === order.status
+  );
 
   return (
     <div className="grid grid-cols-2 gap-6">
@@ -43,8 +46,7 @@ const StatusTab = ({ order, refreshOrder }) => {
         <h3 className="text-lg font-semibold mb-6">Order Status Timeline</h3>
 
         {STATUS_LIST.map((step, i) => {
-          const completed =
-            STATUS_LIST.findIndex(s => s.value === order.dnaStatus) >= i;
+          const completed = i <= currentIndex;
 
           return (
             <div key={i} className="flex gap-4 mb-5 items-start">
@@ -60,15 +62,9 @@ const StatusTab = ({ order, refreshOrder }) => {
 
               <div>
                 <p className="font-semibold text-gray-800">{step.label}</p>
-                {completed ? (
-                  <p className="text-sm text-gray-500">
-                    Completed
-                  </p>
-                ) : (
-                  <p className="text-sm text-gray-400">
-                    Not Yet Completed
-                  </p>
-                )}
+                <p className="text-sm text-gray-500">
+                  {completed ? "Completed" : "Pending"}
+                </p>
               </div>
             </div>
           );
@@ -78,11 +74,11 @@ const StatusTab = ({ order, refreshOrder }) => {
       {/* ================= RIGHT : SELECT STATUS ================= */}
       <div className="rounded-xl overflow-hidden border">
         <div className="bg-[#265A46] text-white p-4 font-semibold text-lg">
-          Select Status
+          Update Status
         </div>
 
         {STATUS_LIST.map((s, i) => {
-          const active = order.dnaStatus === s.value;
+          const active = order.status === s.value;
 
           return (
             <div

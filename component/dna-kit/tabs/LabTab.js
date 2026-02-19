@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { axiosInstanceLocal, axiosInstance } from "@/config/axios";
+import { useEffect, useState } from "react";
+import { axiosInstance } from "@/config/axios";
 
 const LABS = [
   "JRP Genetic Lab",
@@ -11,14 +11,17 @@ const LABS = [
 ];
 
 const LabTab = ({ order, refreshOrder }) => {
-  const [selectedLab, setSelectedLab] = useState(order.labAssigned || "");
+  const [selectedLab, setSelectedLab] = useState("");
   const [loading, setLoading] = useState(false);
+
+  /* ✅ Sync when order changes */
+  useEffect(() => {
+    setSelectedLab(order.labAssigned || "");
+  }, [order]);
 
   /* -------- ASSIGN LAB -------- */
   const handleAssignLab = async () => {
     if (!selectedLab) return alert("Please select a lab");
-
-    console.log("🏥 Assigning Lab:", selectedLab);
 
     try {
       setLoading(true);
@@ -28,9 +31,7 @@ const LabTab = ({ order, refreshOrder }) => {
         { labAssigned: selectedLab }
       );
 
-      console.log("✅ Lab Assigned Successfully");
-
-      refreshOrder(); // reload modal data
+      await refreshOrder(); // reload modal data
     } catch (err) {
       console.error("❌ Assign Lab Failed:", err);
     } finally {
@@ -70,8 +71,7 @@ const LabTab = ({ order, refreshOrder }) => {
                 selectedLab === lab
                   ? "bg-green-100 font-semibold"
                   : "bg-white hover:bg-gray-50"
-              }
-            `}
+              }`}
           >
             {lab}
           </div>
@@ -82,7 +82,7 @@ const LabTab = ({ order, refreshOrder }) => {
           <button
             onClick={handleAssignLab}
             disabled={loading}
-            className="w-full bg-[#265A46] text-white py-3 rounded-md hover:bg-green-800 transition"
+            className="w-full bg-[#265A46] text-white py-3 rounded-md hover:bg-green-800 transition disabled:opacity-60"
           >
             {loading ? "Assigning..." : "Assign Lab"}
           </button>
