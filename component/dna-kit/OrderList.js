@@ -119,9 +119,12 @@ const OrderList = ({ onView }) => {
               className="cursor-pointer hover:text-black"
               onClick={() => onView(order._id)}
             />
-            <Printer size={18} className="cursor-pointer hover:text-black" />
-            <Truck size={18} className="cursor-pointer hover:text-black" />
-            <CheckCircle size={18} className="cursor-pointer text-green-700" />
+            <Printer size={18} className="cursor-pointer hover:text-black" 
+             onClick={() => onView(order._id)}/>
+            <Truck size={18} className="cursor-pointer hover:text-black"
+             onClick={() => onView(order._id)} />
+            <CheckCircle size={18} className="cursor-pointer text-green-700" 
+             onClick={() => onView(order._id)}/>
           </div>
         </div>
       ))}

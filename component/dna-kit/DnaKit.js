@@ -56,10 +56,10 @@ const DnaKit = () => {
       </div>
 
       {/* TABS */}
-      <div className="border-b mt-6 p-2 flex gap-3">
+      <div className="border-b border-gray-400 bg-[#F6F1E9] mt-6 rounded-sm flex gap-3">
         <button
           onClick={() => setActiveTab("orders")}
-          className={`px-6 py-3 rounded-md font-semibold transition ${
+          className={`px-6 py-3 font-semibold transition ${
             activeTab === "orders"
               ? "border-b-2 border-[#99512F] text-[#99512F]"
               : "text-gray-700"
@@ -81,23 +81,23 @@ const DnaKit = () => {
       </div>
 
       {/* FILTER BAR */}
-      <div className="bg-[#F6F1E9] border border-gray-400 p-4 rounded-xl shadow-sm mt-6">
+      <div className="bg-[#F6F1E9] border border-gray-400 p-3 rounded-xl shadow-sm mt-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-wrap gap-3">
-            <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border shadow-sm">
+            <button className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border shadow-sm">
               By Date <CalendarDays size={18} className="text-gray-600" />
             </button>
 
-            <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border shadow-sm">
+            <button className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border shadow-sm">
               By Status <ChevronDown size={18} className="text-gray-600" />
             </button>
 
-            <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border shadow-sm">
+            <button className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border shadow-sm">
               By Category <ChevronDown size={18} className="text-gray-600" />
             </button>
           </div>
 
-          <button className="bg-[#99512F] text-white px-6 py-3 rounded-md shadow hover:bg-[#7c3f23] transition">
+          <button className="bg-[#99512F] text-white px-5 py-1.5 rounded-md shadow hover:bg-[#7c3f23] transition">
             Apply Filter
           </button>
         </div>
