@@ -32,7 +32,27 @@ const ReportsList = () => {
 
 const DnaKit = () => {
   const [activeTab, setActiveTab] = useState("orders");
-  const [selectedOrder, setSelectedOrder] = useState(null); // ✅ MODAL STATE
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  /* ✅ FILTER STATE */
+  const [filters, setFilters] = useState({
+    date: "",
+    status: "",
+    category: "",
+  });
+
+  const [appliedFilters, setAppliedFilters] = useState(null);
+
+  /* ✅ APPLY FILTER */
+  const applyFilters = () => {
+    setAppliedFilters({ ...filters });
+  };
+
+  /* ✅ RESET FILTER */
+  const resetFilters = () => {
+    setFilters({ date: "", status: "", category: "" });
+    setAppliedFilters(null);
+  };
 
   return (
     <div className="w-full min-h-screen p-4 md:p-6">
@@ -59,7 +79,7 @@ const DnaKit = () => {
       <div className="border-b border-gray-400 bg-[#F6F1E9] mt-6 rounded-sm flex gap-3">
         <button
           onClick={() => setActiveTab("orders")}
-          className={`px-6 py-3 font-semibold transition ${
+          className={`px-6 py-3 font-semibold ${
             activeTab === "orders"
               ? "border-b-2 border-[#99512F] text-[#99512F]"
               : "text-gray-700"
@@ -70,7 +90,7 @@ const DnaKit = () => {
 
         <button
           onClick={() => setActiveTab("reports")}
-          className={`px-6 py-3 font-semibold transition ${
+          className={`px-6 py-3 font-semibold ${
             activeTab === "reports"
               ? "border-b-2 border-[#99512F] text-[#99512F]"
               : "text-gray-700"
@@ -80,40 +100,84 @@ const DnaKit = () => {
         </button>
       </div>
 
-      {/* FILTER BAR */}
+      {/* ✅ FILTER BAR */}
       <div className="bg-[#F6F1E9] border border-gray-400 p-3 rounded-xl shadow-sm mt-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-wrap gap-3">
-            <button className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border shadow-sm">
-              By Date <CalendarDays size={18} className="text-gray-600" />
-            </button>
 
-            <button className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border shadow-sm">
-              By Status <ChevronDown size={18} className="text-gray-600" />
-            </button>
+            {/* DATE */}
+            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border shadow-sm">
+              <CalendarDays size={18} />
+              <input
+                type="date"
+                value={filters.date}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, date: e.target.value }))
+                }
+                className="outline-none"
+              />
+            </div>
 
-            <button className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-md border shadow-sm">
-              By Category <ChevronDown size={18} className="text-gray-600" />
-            </button>
+            {/* STATUS */}
+            <select
+              value={filters.status}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, status: e.target.value }))
+              }
+              className="bg-white px-3 py-1.5 rounded-md border shadow-sm"
+            >
+              <option value="">All Status</option>
+              <option value="order_confirmed">Confirmed</option>
+              <option value="order_dispatched">Dispatched</option>
+              <option value="order_pickedup">Picked Up</option>
+              <option value="out_for_delivery">Out for Delivery</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+
+            {/* CATEGORY */}
+            <select
+              value={filters.category}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, category: e.target.value }))
+              }
+              className="bg-white px-3 py-1.5 rounded-md border shadow-sm"
+            >
+              <option value="">All Category</option>
+              <option value="dna">DNA Kit</option>
+              <option value="tree">Tree Art</option>
+            </select>
           </div>
 
-          <button className="bg-[#99512F] text-white px-5 py-1.5 rounded-md shadow hover:bg-[#7c3f23] transition">
-            Apply Filter
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={applyFilters}
+              className="bg-[#99512F] text-white px-5 py-1.5 rounded-md shadow"
+            >
+              Apply Filter
+            </button>
+
+            <button
+              onClick={resetFilters}
+              className="bg-gray-200 px-4 py-1.5 rounded-md"
+            >
+              Reset
+            </button>
+          </div>
         </div>
       </div>
 
       {/* MAIN CONTENT */}
-     {activeTab === "orders" ? (
-  <>
-    {/* PASS HANDLER */}
-    <OrderList onView={setSelectedOrder} />
-  </>
-) : (
-  <ReportsList />
-)}
+      {activeTab === "orders" ? (
+        <OrderList
+          onView={setSelectedOrder}
+          filters={appliedFilters}   // ✅ pass filters
+        />
+      ) : (
+        <ReportsList />
+      )}
 
-      {/* ORDER DETAILS MODAL */}
+      {/* MODAL */}
       {selectedOrder && (
         <OrderDetailsModal
           orderId={selectedOrder}
