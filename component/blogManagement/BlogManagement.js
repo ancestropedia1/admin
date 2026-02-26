@@ -76,24 +76,37 @@ export const BlogManagement = () => {
   }, []);
 
   const fetchBlogs = async () => {
-    try {
-      const res = await axiosInstance.get("/admin/blog/myBlogs");
+  try {
+    const res = await axiosInstance.get("/admin/blog/myBlogs");
 
-      const formattedBlogs = res.data.blogs.map((blog) => ({
-        title: blog.title,
-        shortDesc: blog.description?.slice(0, 100),
-        author: blog.author || "Admin",
-        date: blog.createdAt?.split("T")[0],
-        fullContent: blog.description,
-        featured: blog.featured || false,
-        image: blog.image,
-      }));
+    console.log("API RESPONSE:", res.data);
 
-      setBlogList(formattedBlogs);
-    } catch (error) {
-      console.log("Error fetching blogs:", error);
+    const blogsArray = res.data.data; // ✅ correct key
+
+    if (!Array.isArray(blogsArray)) {
+      console.log("No blogs array found");
+      return;
     }
-  };
+
+    const formattedBlogs = blogsArray.map((blog) => ({
+      _id: blog._id,
+      title: blog.title,
+      shortDesc: blog.description?.slice(0, 100),
+      author: blog.author || "Admin",
+      date: blog.createdAt
+        ? new Date(blog.createdAt).toLocaleDateString()
+        : "",
+      fullContent: blog.description,
+      featured: blog.featured || false,
+      image: blog.image,
+    }));
+
+    setBlogList(formattedBlogs);
+
+  } catch (error) {
+    console.log("Error fetching blogs:", error);
+  }
+};
 
   const openEditor = () => {
     setShowEditor(true);
