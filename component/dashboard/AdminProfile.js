@@ -45,8 +45,13 @@ export default function AdminProfilePage() {
           setDateOfBirth(formatted);
         }
       } catch (error) {
-        alert("Unauthorized. Please login again.");
-      } finally {
+  console.log("ERROR:", error);
+  console.log("STATUS:", error?.response?.status);
+  console.log("DATA:", error?.response?.data);
+  console.log("HEADERS:", error?.response?.headers);
+
+  alert(error?.response?.data?.message || "Request failed");
+} finally {
         setInitialLoading(false);
       }
     };
