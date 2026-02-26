@@ -526,6 +526,6 @@ export const BlogManagement = () => {
   );
 };
 
-export default BlogManagement;
+
 
  
