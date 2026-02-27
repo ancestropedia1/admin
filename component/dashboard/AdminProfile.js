@@ -26,7 +26,7 @@ export default function AdminProfilePage() {
     const fetchProfile = async () => {
       try {
       const res = await axiosInstance.get(
-  "/admin/myprofile",
+  "/admin/profile/myprofile",
   { withCredentials: true }
 );
 
@@ -65,7 +65,7 @@ export default function AdminProfilePage() {
       setProfileLoading(true);
 
       const res = await axiosInstance.put(
-        "/admin/updateprofile",
+        "/admin/profile/updateprofile",
         {
           fullName,
           gender,
