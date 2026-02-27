@@ -365,51 +365,54 @@ export const BlogManagement = () => {
               </div>
             </div>
 
-            <div className="flex-1 p-4">
-              <div className="grid grid-cols-12 bg-[#C6C1C1] p-3 rounded-lg mb-4 font-semibold">
-                <div className="col-span-5">Author</div>
-                <div className="col-span-4">Date</div>
-                <div className="col-span-3 text-right">Action</div>
-              </div>
+            {/* ✅ RIGHT SIDE NOW ALSO SCROLLS */}
+  <div className="flex-1 p-4">
+  <div className="grid grid-cols-12 bg-[#C6C1C1] p-3 rounded-lg mb-4 font-semibold">
+    <div className="col-span-5">Author</div>
+    <div className="col-span-4">Date</div>
+    <div className="col-span-3 text-right">Action</div>
+  </div>
 
-              <div className="space-y-3">
-                {filteredBlogs.map((blog, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-12 items-center bg-white p-4 rounded-lg"
-                  >
-                    <div className="col-span-5">{blog.author}</div>
-                    <div className="col-span-4">{blog.date}</div>
+  {/* ✅ Same scroll style as Blogs */}
+  <div className="space-y-3 max-h-[320px] overflow-y-auto pr-2">
+    {filteredBlogs.map((blog, index) => (
+      <div
+        key={index}
+        className="grid grid-cols-12 items-center bg-white p-4 rounded-lg"
+      >
+        <div className="col-span-5">{blog.author}</div>
+        <div className="col-span-4">{blog.date}</div>
 
-                    <div className="col-span-3 flex justify-end gap-4">
-                      <Pencil
-                        onClick={() => {
-                          setEditIndex(index);
-                          setShowEditor(true);
-                          setTitle(blog.title);
-                          setShortDesc(blog.shortDesc);
-                          setContent(blog.fullContent);
-                          setAuthorName(blog.author);
-                          setPostDate(blog.date);
-                          setImage(blog.image);
-                          setImagePreview(blog.image);
-                        }}
-                        className="cursor-pointer hover:text-blue-700"
-                      />
-                      <Eye
-                        onClick={() => setViewBlog(blog)}
-                        className="cursor-pointer hover:text-gray-700"
-                      />
-                      <Trash2
-                        onClick={() => handleDelete(index)}
-                        className="cursor-pointer hover:text-red-700"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        <div className="col-span-3 flex justify-end gap-4">
+          <Pencil
+            onClick={() => {
+              setEditIndex(index);
+              setShowEditor(true);
+              setTitle(blog.title);
+              setShortDesc(blog.shortDesc);
+              setContent(blog.fullContent);
+              setAuthorName(blog.author);
+              setPostDate(blog.date);
+              setImage(blog.image);
+              setImagePreview(blog.image);
+            }}
+            className="cursor-pointer hover:text-blue-700"
+          />
+          <Eye
+            onClick={() => setViewBlog(blog)}
+            className="cursor-pointer hover:text-gray-700"
+          />
+          <Trash2
+            onClick={() => handleDelete(index)}
+            className="cursor-pointer hover:text-red-700"
+          />
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+</div>
 
           {/* MOBILE */}
           <div className="md:hidden space-y-4 mt-6">
