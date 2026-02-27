@@ -26,11 +26,14 @@ export default function AdminProfilePage() {
     const fetchProfile = async () => {
       try {
       const res = await axiosInstance.get(
-  "/admin/profile",
+  "/admin/profile/myprofile",
   { withCredentials: true }
 );
 
         const data = res.data.data;
+
+        console.log(data);
+        console.log(data.data);
 
         setFullName(data.fullName || "");
         setGender(data.gender || "");
@@ -45,8 +48,13 @@ export default function AdminProfilePage() {
           setDateOfBirth(formatted);
         }
       } catch (error) {
-        alert("Unauthorized. Please login again.");
-      } finally {
+  console.log("ERROR:", error);
+  console.log("STATUS:", error?.response?.status);
+  console.log("DATA:", error?.response?.data);
+  console.log("HEADERS:", error?.response?.headers);
+
+  alert(error?.response?.data?.message || "Request failed");
+} finally {
         setInitialLoading(false);
       }
     };
@@ -60,7 +68,7 @@ export default function AdminProfilePage() {
       setProfileLoading(true);
 
       const res = await axiosInstance.put(
-        "/admin/profile",
+        "/admin/profile/updateprofile",
         {
           fullName,
           gender,
