@@ -32,6 +32,9 @@ export default function AdminProfilePage() {
 
         const data = res.data;
 
+        console.log(data);
+        console.log(data.data);
+
         setFullName(data.fullName || "");
         setGender(data.gender || "");
         setCity(data.city || "");
