@@ -30,7 +30,7 @@ export default function AdminProfilePage() {
   { withCredentials: true }
 );
 
-        const data = res.data;
+        const data = res.data.data;
 
         console.log(data);
         console.log(data.data);
