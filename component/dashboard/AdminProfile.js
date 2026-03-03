@@ -11,6 +11,7 @@ export default function AdminProfilePage() {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [city, setCity] = useState("");
   const [email, setEmail] = useState("");
+  const [profileImage, setProfileImage] = useState("");
   const [contact, setContact] = useState("");
   const [profileLoading, setProfileLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -25,21 +26,19 @@ export default function AdminProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-      const res = await axiosInstance.get(
-  "/admin/profile/myprofile",
-  { withCredentials: true }
-);
+        const res = await axiosInstance.get(
+          "/admin/profile/myprofile",
+          { withCredentials: true }
+        );
 
         const data = res.data.data;
-
-        console.log(data);
-        console.log(data.data);
 
         setFullName(data.fullName || "");
         setGender(data.gender || "");
         setCity(data.city || "");
         setEmail(data.email || "");
         setContact(data.contact || "");
+        setProfileImage(data.profileImage || "");
 
         if (data.dateOfBirth) {
           const formatted = new Date(data.dateOfBirth)
@@ -48,19 +47,32 @@ export default function AdminProfilePage() {
           setDateOfBirth(formatted);
         }
       } catch (error) {
-  console.log("ERROR:", error);
-  console.log("STATUS:", error?.response?.status);
-  console.log("DATA:", error?.response?.data);
-  console.log("HEADERS:", error?.response?.headers);
-
-  alert(error?.response?.data?.message || "Request failed");
-} finally {
+        alert(error?.response?.data?.message || "Request failed");
+      } finally {
         setInitialLoading(false);
       }
     };
 
     fetchProfile();
   }, []);
+
+  /* ================= CONVERT IMAGE TO BASE64 ================= */
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+    });
+  };
+
+  const handleImageSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const base64 = await convertToBase64(file);
+    setProfileImage(base64); // send base64 to backend
+  };
 
   /* ================= UPDATE PROFILE ================= */
   const handleProfileUpdate = async () => {
@@ -76,9 +88,15 @@ export default function AdminProfilePage() {
           city,
           email,
           contact,
+          profileImage, // base64 OR existing URL
         },
         { withCredentials: true }
       );
+
+      // After save, backend returns URL
+      if (res.data.data?.profileImage) {
+        setProfileImage(res.data.data.profileImage);
+      }
 
       alert(res.data.message);
     } catch (error) {
@@ -141,15 +159,34 @@ export default function AdminProfilePage() {
 
   return (
     <div className="p-4 sm:p-6 bg-[#F8F6E7] min-h-screen">
-      {/* HEADER CARD */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="h-36 bg-gradient-to-r from-red-900 to-red-700 relative">
-          <img
-            src="https://i.pravatar.cc/150"
-            alt="Profile"
-            className="w-28 h-28 rounded-full border-4 border-white absolute -bottom-14 left-6"
+  {/* HEADER CARD */}
+  <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="h-36 bg-gradient-to-r from-red-900 to-red-700 relative">
+
+      {/* PROFILE IMAGE */}
+      <div className="absolute -bottom-16 left-6 flex flex-col items-center">
+        <img
+          src={
+            profileImage?.startsWith("data:image")
+              ? profileImage
+              : profileImage || "https://i.pravatar.cc/150"
+          }
+          alt="Profile"
+          className="w-28 h-28 rounded-full border-4 border-white object-cover"
+        />
+
+        {/* IMAGE UPLOAD INPUT */}
+        <label className="mt-2 text-xs bg-white px-3 py-1 rounded-md shadow cursor-pointer hover:bg-gray-100">
+          Change Photo
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="hidden"
           />
-        </div>
+        </label>
+      </div>
+    </div>
 
         <div className="pt-16 px-6 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
