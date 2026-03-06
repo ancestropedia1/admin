@@ -202,22 +202,24 @@ export const BlogManagement = () => {
                 className="w-full p-3 border bg-white rounded-lg min-h-[200px]"
               ></textarea>
 
-              <div>
-                <label className="font-semibold">Upload Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="w-full mt-2 "
-                />
+             <div>
+  <label className="font-semibold">Upload Image</label>
 
-                {imagePreview && (
-                  <img
-                    src={imagePreview}
-                    className="mt-3 h-40  rounded-lg border"
-                  />
-                )}
-              </div>
+  <input
+    type="file"
+    accept="image/*"
+    onChange={handleImageUpload}
+    className="w-full mt-2"
+  />
+
+  {imagePreview && (
+    <img
+      src={imagePreview}
+      alt="Image preview"
+      className="mt-3 h-40 rounded-lg border object-cover"
+    />
+  )}
+</div>
 
               <input
                 type="text"
@@ -460,43 +462,66 @@ export const BlogManagement = () => {
         </div>
 
         {/* POPUPS */}
-        {showPopup && (
-          <div className="fixed top-5 right-5 bg-green-600 text-white px-6 py-3 rounded shadow-lg z-50">
-            {popupMessage}
-          </div>
-        )}
+{showPopup && (
 
-        {showDeletePopup && (
-          <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-xl w-80">
-              <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
-              <p className="mb-6">Are you sure you want to delete this blog?</p>
+  <div className="fixed top-5 right-5 bg-green-600 text-white px-6 py-3 rounded shadow-lg ">
+    {popupMessage}
+  </div>
+)}
 
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => setShowDeletePopup(false)}
-                  className="px-4 py-2 bg-gray-300 rounded-md"
-                >
-                  Cancel
-                </button>
+{showDeletePopup && (
 
-                <button
-                  onClick={() => {
-                    setBlogList((prev) =>
-                      prev.filter((_, i) => i !== deleteIndex)
-                    );
-                    setShowDeletePopup(false);
-                    setDeleteIndex(null);
-                    showPopupMessage("Blog Deleted Successfully!");
-                  }}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+  <div className="fixed inset-0 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-xl w-80">
+      <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
+      <p className="mb-6">Are you sure you want to delete this blog?</p>
+
+```
+  <div className="flex justify-end gap-3">
+    <button
+      onClick={() => setShowDeletePopup(false)}
+      className="px-4 py-2 bg-gray-300 rounded-md"
+    >
+      Cancel
+    </button>
+
+    <button
+      onClick={async () => {
+        try {
+          const blog = blogList[deleteIndex];
+
+          console.log("Deleting blog:", blog._id);
+
+           await axiosInstance.delete(
+        `/admin/blog/remove`,
+        {
+          params: { blogId: blog._id }
+        }
+      );
+
+          // refresh blogs from backend
+          await fetchBlogs();
+
+          setShowDeletePopup(false);
+          setDeleteIndex(null);
+
+          showPopupMessage("Blog Deleted Successfully!");
+        } catch (error) {
+          console.error("Delete error:", error);
+          showPopupMessage("Failed to delete blog");
+        }
+      }}
+      className="px-4 py-2 bg-red-600 text-white rounded-md"
+    >
+      Delete
+    </button>
+  </div>
+</div>
+```
+
+  </div>
+)}
+
 
         {/* VIEW BLOG POPUP */}
         {viewBlog && (
