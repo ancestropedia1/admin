@@ -14,7 +14,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import { axiosInstance } from "../../lib/axios"; // Adjust path as needed
+import { axiosInstance } from "../../config/axios.js"; // Adjust path as needed
 
 export default function TokenManagement() {
   const router = useRouter();
