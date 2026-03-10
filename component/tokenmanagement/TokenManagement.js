@@ -14,6 +14,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
+import { axiosInstance } from "../../lib/axios"; // Adjust path as needed
 
 export default function TokenManagement() {
   const router = useRouter();
@@ -26,15 +27,11 @@ export default function TokenManagement() {
     { _id: "4", user: "Aditya", userId: "USR104", tokens: 300, date: new Date(), status: "Pending" },
   ];
 
-  const dummyPlans = [
-    { _id: "p1", title: "Starter Plan", tokens: 100 },
-    { _id: "p2", title: "Silver Plan", tokens: 500 },
-    { _id: "p3", title: "Gold Plan", tokens: 1000 },
-  ];
-
   // ---------------- STATE ----------------
   const [requests, setRequests] = useState(dummyRequests);
-  const [plans] = useState(dummyPlans);
+  const [plans, setPlans] = useState([]); // Changed from dummyPlans
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [page, setPage] = useState(1);
   const limit = 5;
@@ -44,6 +41,52 @@ export default function TokenManagement() {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [comment, setComment] = useState("");
+
+  // ---------------- FETCH TOKEN PLANS ----------------
+  useEffect(() => {
+    const fetchTokenPlans = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get("/admin/tokenplan/getAdminTokenPlans");
+        
+        if (response.data.success) {
+          // Transform the API data into the format expected by PlanCard
+          const planData = [
+            {
+              _id: "free",
+              title: "Free Plan",
+              tokens: response.data.data.FreePlan
+            },
+            {
+              _id: "standard",
+              title: "Standard Plan",
+              tokens: response.data.data.StandardPlan
+            },
+            {
+              _id: "pro",
+              title: "Pro Plan",
+              tokens: response.data.data.ProPlan
+            }
+          ];
+          setPlans(planData);
+        }
+      } catch (err) {
+        console.error("Error fetching token plans:", err);
+        setError("Failed to load token plans");
+        
+        // Fallback to dummy data if API fails
+        setPlans([
+          { _id: "p1", title: "Free Plan", tokens: 200 },
+          { _id: "p2", title: "Standard Plan", tokens: 1200 },
+          { _id: "p3", title: "Pro Plan", tokens: 2500 },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTokenPlans();
+  }, []);
 
   return (
     <div className="w-full p-4 sm:p-6 md:p-8 bg-[#F1FFF8] min-h-screen">
@@ -185,21 +228,29 @@ export default function TokenManagement() {
           </div>
         </div>
       </div>
-      {/* ---------- TOKEN PLANS (STATIC) ---------- */}
+
+      {/* ---------- TOKEN PLANS (FROM DATABASE) ---------- */}
       <div className="mt-12 grid bg-[#F6F1E9] gap-5 p-5 rounded-md border-2 border-gray-300">
         <h2 className="text-2xl font-bold mb-4">Token Plan Allocations</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {plans.map((plan) => (
-            <PlanCard
-              key={plan._id}
-              title={plan.title}
-              tokens={`${plan.tokens} Tokens`}
-              color="bg-white"
-            />
-          ))}
-        </div>
+        
+        {loading ? (
+          <div className="text-center py-8">Loading plans...</div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">{error}</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {plans.map((plan) => (
+              <PlanCard
+                key={plan._id}
+                title={plan.title}
+                tokens={`${plan.tokens} Tokens`}
+                color="bg-white"
+              />
+            ))}
+          </div>
+        )}
       </div>
+
       {/* ---------- STATUS POPUP UI (FIGMA STYLE) ---------- */}
       {showPopup && selectedRequest && (
         <div className="fixed inset-0  flex items-center justify-center z-50">
