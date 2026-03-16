@@ -8,4 +8,4 @@ function Page() {
 }
 
 // 🚨 ONLY users with "blogmanagement" permission can open this page
-export default protectPage("tokenmanagement")(Page);
+export default Page;

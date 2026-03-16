@@ -1,5 +1,5 @@
 "use client";
-import PlanCard from "../PlanCards";
+import PlanCard from "../tokenmanagement/PlanCards";
 
 import React, { useState } from "react";
 import {
