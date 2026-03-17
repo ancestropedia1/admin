@@ -15,9 +15,11 @@ import {
   ChevronLeft,
   Save,
   X,
-  User
-} from "lucide-react"; // Add User icon for fallback
+  User,
+  Loader2
+} from "lucide-react";
 import { axiosInstance } from "../../config/axios.js";
+import toast from 'react-hot-toast'; // You'll need to install: npm install react-hot-toast
 
 export default function TokenManagement() {
   const router = useRouter();
@@ -33,6 +35,7 @@ export default function TokenManagement() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [requestsLoading, setRequestsLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState(null);
   const [mounted, setMounted] = useState(false);
 
@@ -60,6 +63,7 @@ export default function TokenManagement() {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [comment, setComment] = useState("");
+  const [popupAction, setPopupAction] = useState(null); // 'approve' or 'reject'
 
   // Track failed images to avoid retrying
   const [failedImages, setFailedImages] = useState(new Set());
@@ -96,6 +100,7 @@ export default function TokenManagement() {
     } catch (err) {
       console.error("Error fetching token requests:", err);
       setError("Failed to load token requests");
+      toast.error("Failed to load token requests");
     } finally {
       setRequestsLoading(false);
     }
@@ -131,6 +136,7 @@ export default function TokenManagement() {
       } catch (err) {
         console.error("Error fetching token plans:", err);
         setError("Failed to load token plans");
+        toast.error("Failed to load token plans");
       } finally {
         setLoading(false);
       }
@@ -145,6 +151,82 @@ export default function TokenManagement() {
       fetchTokenRequests();
     }
   }, [page, statusFilter, planFilter, searchQuery, dateRange.start, dateRange.end, mounted]);
+
+  // ---------------- APPROVE REQUEST ----------------
+  const handleApprove = async (requestId, comment = "") => {
+    try {
+      setActionLoading(true);
+      const response = await axiosInstance.post(`/admin/tokenrequest/approve/${requestId}`, {
+        comment
+      });
+
+      if (response.data.success) {
+        toast.success("Token request approved successfully!");
+        // Refresh the list
+        fetchTokenRequests();
+        // Close popup if open
+        setShowPopup(false);
+        setSelectedRequest(null);
+        setComment("");
+        setPopupAction(null);
+      }
+    } catch (err) {
+      console.error("Error approving request:", err);
+      toast.error(err.response?.data?.message || "Failed to approve request");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // ---------------- REJECT REQUEST ----------------
+  const handleReject = async (requestId, comment) => {
+    if (!comment.trim()) {
+      toast.error("Rejection reason is required");
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      const response = await axiosInstance.post(`/admin/tokenrequest/reject/${requestId}`, {
+        comment: comment.trim()
+      });
+
+      if (response.data.success) {
+        toast.success("Token request rejected successfully!");
+        // Refresh the list
+        fetchTokenRequests();
+        // Close popup
+        setShowPopup(false);
+        setSelectedRequest(null);
+        setComment("");
+        setPopupAction(null);
+      }
+    } catch (err) {
+      console.error("Error rejecting request:", err);
+      toast.error(err.response?.data?.message || "Failed to reject request");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // ---------------- OPEN ACTION POPUP ----------------
+  const openActionPopup = (request, action) => {
+    setSelectedRequest(request);
+    setPopupAction(action);
+    setComment("");
+    setShowPopup(true);
+  };
+
+  // ---------------- HANDLE POPUP SUBMIT ----------------
+  const handlePopupSubmit = () => {
+    if (!selectedRequest) return;
+
+    if (popupAction === 'approve') {
+      handleApprove(selectedRequest._id, comment);
+    } else if (popupAction === 'reject') {
+      handleReject(selectedRequest._id, comment);
+    }
+  };
 
   const handleModifyClick = (plan) => {
     setEditingPlan(plan);
@@ -167,11 +249,11 @@ export default function TokenManagement() {
           { _id: "pro", title: "Pro Plan", tokens: editValues.ProPlan }
         ]);
         setEditingPlan(null);
-        alert("Token plans updated successfully!");
+        toast.success("Token plans updated successfully!");
       }
     } catch (error) {
       console.error("Error updating plans:", error);
-      alert("Failed to update token plans");
+      toast.error("Failed to update token plans");
     } finally {
       setIsUpdating(false);
     }
@@ -218,10 +300,10 @@ export default function TokenManagement() {
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'pending': return 'text-yellow-600';
-      case 'alloted': return 'text-green-600';
-      case 'rejected': return 'text-red-600';
-      default: return 'text-blue-600';
+      case 'pending': return 'text-yellow-600 bg-yellow-50';
+      case 'alloted': return 'text-green-600 bg-green-50';
+      case 'rejected': return 'text-red-600 bg-red-50';
+      default: return 'text-blue-600 bg-blue-50';
     }
   };
 
@@ -487,31 +569,43 @@ export default function TokenManagement() {
                         <td className="p-4">
                           <span
                             onClick={() => {
-                              setSelectedRequest(item);
-                              setShowPopup(true);
+                              if (item.status === 'pending') {
+                                setSelectedRequest(item);
+                                setShowPopup(true);
+                              }
                             }}
-                            className={`cursor-pointer px-3 py-1 text-sm hover:bg-orange-200 transition ${getStatusColor(item.status)}`}
+                            className={`inline-block px-3 py-1 text-sm rounded-full ${getStatusColor(item.status)} ${item.status === 'pending' ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
                           >
                             {getStatusText(item.status)}
                           </span>
                         </td>
-                        <td className="p-4 flex gap-2">
-                          <button
-                            onClick={() => router.push(`/token-management/${item._id}`)}
-                            className="px-3 py-1 hover:bg-gray-300 transition text-sm rounded bg-purple-200 text-purple-700"
-                          >
-                            Edit
-                          </button>
-                          {item.status === 'pending' && (
-                            <>
-                              <button className="px-3 py-1 hover:bg-gray-300 transition text-sm rounded bg-green-200 text-green-700">
-                                Approve
-                              </button>
-                              <button className="px-3 py-1 hover:bg-gray-300 transition text-sm rounded bg-red-200 text-red-700">
-                                Decline
-                              </button>
-                            </>
-                          )}
+                        <td className="p-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => router.push(`/token-management/${item._id}`)}
+                              className="px-3 py-1 hover:bg-gray-300 transition text-sm rounded bg-purple-200 text-purple-700"
+                            >
+                              View
+                            </button>
+                            {item.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => openActionPopup(item, 'approve')}
+                                  disabled={actionLoading}
+                                  className="px-3 py-1 hover:bg-gray-300 transition text-sm rounded bg-green-200 text-green-700 disabled:opacity-50"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => openActionPopup(item, 'reject')}
+                                  disabled={actionLoading}
+                                  className="px-3 py-1 hover:bg-gray-300 transition text-sm rounded bg-red-200 text-red-700 disabled:opacity-50"
+                                >
+                                  Decline
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -537,18 +631,18 @@ export default function TokenManagement() {
             <div className="flex gap-2">
               <button 
                 onClick={handlePrevPage}
-                disabled={page === 1}
+                disabled={page === 1 || actionLoading}
                 className={`px-3 py-1 border rounded flex items-center ${
-                  page === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-100'
+                  page === 1 || actionLoading ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-100'
                 }`}
               >
                 <ChevronLeft size={18} />
               </button>
               <button 
                 onClick={handleNextPage}
-                disabled={page === totalPages}
+                disabled={page === totalPages || actionLoading}
                 className={`px-3 py-1 border rounded flex items-center ${
-                  page === totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-100'
+                  page === totalPages || actionLoading ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-100'
                 }`}
               >
                 <ChevronRight size={18} />
@@ -648,7 +742,7 @@ export default function TokenManagement() {
               >
                 {isUpdating ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <Loader2 size={18} className="animate-spin" />
                     Updating...
                   </>
                 ) : (
@@ -663,48 +757,111 @@ export default function TokenManagement() {
         </div>
       )}
 
-      {/* ---------- STATUS POPUP UI ---------- */}
-      {showPopup && selectedRequest && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-[15%] h-[45%] max-w-md border-2 border-gray-300">
-            <div className="bg-green-900 text-white p-3 rounded-t-lg text-lg font-semibold">
-              Comments
+      {/* ---------- APPROVE/REJECT POPUP ---------- */}
+      {showPopup && selectedRequest && popupAction && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            
+            {/* Header */}
+            <div className={`p-4 rounded-t-lg ${
+              popupAction === 'approve' ? 'bg-green-600' : 'bg-red-600'
+            } text-white`}>
+              <h3 className="text-xl font-semibold">
+                {popupAction === 'approve' ? 'Approve' : 'Reject'} Token Request
+              </h3>
+              <p className="text-sm opacity-90 mt-1">
+                {popupAction === 'approve' 
+                  ? 'This will add tokens to user\'s balance' 
+                  : 'Please provide a reason for rejection'}
+              </p>
             </div>
-            <div className="p-4 space-y-3">
-              <p className="text-gray-700">
-                <strong>User:</strong> {getUserFullName(selectedRequest.userId)}
-              </p>
-              <p className="text-gray-700">
-                <strong>Email:</strong> {getUserEmail(selectedRequest.userId)}
-              </p>
-              <p className="text-gray-700">
-                <strong>Token Request:</strong> {selectedRequest.amount}
-              </p>
-              <p className="text-gray-700">
-                <strong>Plan:</strong> {selectedRequest.plan?.replace('Plan', '') || "N/A"}
-              </p>
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Add comments for your response..."
-                className="w-full border rounded-md p-2 h-20 outline-none focus:ring"
-              ></textarea>
+
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              <div className="bg-gray-50 p-3 rounded-md">
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold">User:</span> {getUserFullName(selectedRequest.userId)}
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  <span className="font-semibold">Email:</span> {getUserEmail(selectedRequest.userId)}
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  <span className="font-semibold">Token Request:</span> {selectedRequest.amount} Tokens
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  <span className="font-semibold">Plan:</span> {selectedRequest.plan?.replace('Plan', '') || "N/A"}
+                </p>
+              </div>
+
+              {popupAction === 'reject' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Rejection Reason <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Enter reason for rejection..."
+                    className="w-full border rounded-md p-3 h-24 outline-none focus:ring-2 focus:ring-red-500"
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {comment.length}/500 characters
+                  </p>
+                </div>
+              )}
+
+              {popupAction === 'approve' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Comment (Optional)
+                  </label>
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Add any comments..."
+                    className="w-full border rounded-md p-3 h-24 outline-none focus:ring-2 focus:ring-green-500"
+                    maxLength={500}
+                  />
+                </div>
+              )}
             </div>
-            <div className="flex justify-end gap-3 p-4">
+
+            {/* Footer Buttons */}
+            <div className="flex justify-end gap-3 p-4 border-t">
               <button
-                onClick={() => setShowPopup(false)}
-                className="px-2 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                onClick={() => {
+                  setShowPopup(false);
+                  setSelectedRequest(null);
+                  setComment("");
+                  setPopupAction(null);
+                }}
+                disabled={actionLoading}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition flex items-center gap-2 disabled:opacity-50"
               >
+                <X size={18} />
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  alert("Status updated!");
-                  setShowPopup(false);
-                }}
-                className="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                onClick={handlePopupSubmit}
+                disabled={actionLoading || (popupAction === 'reject' && !comment.trim())}
+                className={`px-4 py-2 text-white rounded-md transition flex items-center gap-2 disabled:opacity-50 ${
+                  popupAction === 'approve' 
+                    ? 'bg-green-600 hover:bg-green-700' 
+                    : 'bg-red-600 hover:bg-red-700'
+                }`}
               >
-                Decline
+                {actionLoading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    {popupAction === 'approve' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                    {popupAction === 'approve' ? 'Approve' : 'Reject'}
+                  </>
+                )}
               </button>
             </div>
           </div>
