@@ -1,7 +1,7 @@
 "use client";
 
 import protectPage from "../utils/protectPage";
-import SupportManagement from "@/component/supportmanagement.js/SupportMnagement";
+import SupportManagement from "@/component/support/SupportMnagement";
 
 function Page() {
   return <div><SupportManagement/></div>;
