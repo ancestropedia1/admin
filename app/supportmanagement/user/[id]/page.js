@@ -25,6 +25,9 @@ export default function UserDetailsPage() {
         axiosInstance.get(`/admin/tickets/${id}`)
       ]);
 
+      console.log("USER:", userRes.data);   // 🔥 debug
+    console.log("TICKETS:", ticketRes.data);
+
       setUser(userRes.data.user);
       setTickets(ticketRes.data.tickets);
 
