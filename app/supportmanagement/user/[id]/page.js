@@ -21,8 +21,8 @@ export default function UserDetailsPage() {
     try {
 
       const [userRes, ticketRes] = await Promise.all([
-        axiosInstance.get(`/admin/users/${id}`),
-        axiosInstance.get(`/admin/tickets/user/${id}`)
+        axiosInstance.get(`/admin/users/users/${id}`),
+        axiosInstance.get(`/admin/tickets/${id}`)
       ]);
 
       setUser(userRes.data.user);
