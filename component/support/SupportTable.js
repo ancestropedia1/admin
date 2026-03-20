@@ -52,66 +52,73 @@ export default function SupportTable({ tickets }) {
 
             <tr key={ticket.ticketId} className="border-t hover:bg-gray-50">
 
-             <td
-  className="p-5 cursor-pointer"
-  onClick={() => {
-    if (ticket.userId) {
-      router.push(`/supportmanagement/user/${ticket.userId}`);
-    }
-  }}
->
-  <div className="flex items-center gap-3">
+  {/* ✅ Ticket ID */}
+  <td className="p-5">{ticket.ticketId}</td>
 
+  {/* ✅ USER (UPDATED UI) */}
+  <td
+    className="p-5 cursor-pointer"
+    onClick={() => {
+      if (ticket.userId) {
+        router.push(`/supportmanagement/user/${ticket.userId}`);
+      }
+    }}
+  >
+    <div className="flex items-center gap-3">
 
-    {/* NAME + EMAIL */}
-    <div className="flex flex-col">
-      <span className="text-blue-600 hover:underline text-sm font-medium">
-        {ticket.userName || "N/A"}
-      </span>
+      {/* Avatar (optional) */}
+      <img
+        src={ticket.profilePicture || "https://ui-avatars.com/api/?name=" + ticket.userName}
+        className="w-8 h-8 rounded-full"
+      />
 
-      <span className="text-xs text-gray-500">
-        {ticket.email || ""}
-      </span>
+      {/* Name + Email */}
+      <div className="flex flex-col">
+        <span className="text-blue-600 hover:underline text-sm font-medium">
+          {ticket.userName || "N/A"}
+        </span>
+
+        {ticket.email && (
+          <span className="text-xs text-gray-500">
+            {ticket.email}
+          </span>
+        )}
+      </div>
+
     </div>
+  </td>
 
-  </div>
-</td>
+  {/* CATEGORY */}
+  <td className="p-5">{ticket.category}</td>
 
-              {/* CATEGORY */}
-              <td className="p-5">{ticket.category}</td>
+  {/* STATUS */}
+  <td className="p-5">
+    <span
+      className={`px-2 py-1 rounded text-xs
+        ${ticket.status === "Open" && "bg-orange-100 text-orange-600"}
+        ${ticket.status === "In Progress" && "bg-blue-100 text-blue-600"}
+        ${ticket.status === "Resolved" && "bg-green-100 text-green-600"}
+      `}
+    >
+      {ticket.status}
+    </span>
+  </td>
 
-              {/* STATUS */}
-              <td className="p-5">
-                <span
-                  className={`px-2 py-1 rounded text-xs
-                    ${ticket.status === "Open" && "bg-orange-100 text-orange-600"}
-                    ${ticket.status === "In Progress" && "bg-blue-100 text-blue-600"}
-                    ${ticket.status === "Resolved" && "bg-green-100 text-green-600"}
-                  `}
-                >
-                  {ticket.status}
-                </span>
-              </td>
+  {/* DATE */}
+  <td className="p-5">{ticket.createdAt}</td>
 
-              {/* DATE */}
-              <td className="p-5">{ticket.createdAt}</td>
+  {/* ACTION */}
+  <td className="p-5">
+    <button className="px-3 py-1 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-xs">
+      Assign
+    </button>
 
-              {/* ACTION */}
-              <td className="p-5">
-                <button
-                  className="px-3 py-1 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-xs hover:opacity-80"
-                >
-                  Assign
-                </button>
+    <button className="px-3 py-1 ml-2 bg-[#ffd8da] text-red-500 rounded-md text-xs">
+      Resolve
+    </button>
+  </td>
 
-                 <button
-                  className="px-3 py-1 m-1 bg-[#ffd8da] text-red-400 rounded-md text-xs hover:opacity-80"
-                >
-                  Resolve
-                </button>
-              </td>
-
-            </tr>
+</tr>
 
           ))}
         </tbody>
