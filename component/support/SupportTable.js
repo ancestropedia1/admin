@@ -65,24 +65,13 @@ export default function SupportTable({ tickets }) {
     }}
   >
     <div className="flex items-center gap-3">
-
-      {/* Avatar (optional) */}
-      <img
-        src={ticket.profilePicture || "https://ui-avatars.com/api/?name=" + ticket.userName}
-        className="w-8 h-8 rounded-full"
-      />
+    
 
       {/* Name + Email */}
       <div className="flex flex-col">
         <span className="text-blue-600 hover:underline text-sm font-medium">
           {ticket.userName || "N/A"}
         </span>
-
-        {ticket.email && (
-          <span className="text-xs text-gray-500">
-            {ticket.email}
-          </span>
-        )}
       </div>
 
     </div>
