@@ -64,7 +64,7 @@ export default function SupportTable({ tickets }) {
                   }
                 }}
               >
-                {ticket.userName || "N/A"}
+               {ticket.userName || "N/A"}
               </td>
 
               {/* CATEGORY */}
