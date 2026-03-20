@@ -52,20 +52,30 @@ export default function SupportTable({ tickets }) {
 
             <tr key={ticket.ticketId} className="border-t hover:bg-gray-50">
 
-              {/* ID */}
-              <td className="p-5">{ticket.ticketId}</td>
+             <td
+  className="p-5 cursor-pointer"
+  onClick={() => {
+    if (ticket.userId) {
+      router.push(`/supportmanagement/user/${ticket.userId}`);
+    }
+  }}
+>
+  <div className="flex items-center gap-3">
 
-              {/* USER */}
-              <td
-                className="p-5 text-blue-600 cursor-pointer hover:underline"
-                onClick={() => {
-                  if (ticket.userId) {
-                    router.push(`/supportmanagement/user/${ticket.userId}`);
-                  }
-                }}
-              >
-               {ticket.userName || "N/A"}
-              </td>
+
+    {/* NAME + EMAIL */}
+    <div className="flex flex-col">
+      <span className="text-blue-600 hover:underline text-sm font-medium">
+        {ticket.userName || "N/A"}
+      </span>
+
+      <span className="text-xs text-gray-500">
+        {ticket.email || ""}
+      </span>
+    </div>
+
+  </div>
+</td>
 
               {/* CATEGORY */}
               <td className="p-5">{ticket.category}</td>

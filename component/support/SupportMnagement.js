@@ -18,16 +18,20 @@ export default function SupportManagement() {
 
       const res = await axiosInstance.get("/admin/tickets");
 
-      // 🔥 map backend → UI format
-     const formatted = res.data.tickets.map((t) => ({
-  ticketId: "#" + t._id.slice(-4),
-  userId: t.user?._id,
-  userName:
-    `${t.user?.firstName || ""} ${t.user?.lastName || ""}`.trim() || "N/A",
-  category: t.category,
-  status: t.status,
-  createdAt: new Date(t.createdAt).toLocaleDateString(),
-}));
+     const formatted = res.data.tickets.map((t) => {
+  const fullName = `${t.user?.firstName || ""} ${t.user?.lastName || ""}`.trim();
+
+  return {
+    ticketId: "#" + t._id.slice(-4),
+    userId: t.user?._id,
+    userName: t.name || fullName || "N/A",
+    email: t.email || t.user?.email, // ✅ ADD THIS
+    profilePicture: t.user?.profilePicture, // ✅ ADD THIS
+    category: t.category,
+    status: t.status,
+    createdAt: new Date(t.createdAt).toLocaleDateString(),
+  };
+});
 
       setTickets(formatted);
 
