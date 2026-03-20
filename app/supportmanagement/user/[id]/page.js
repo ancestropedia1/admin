@@ -22,7 +22,7 @@ export default function UserDetailsPage() {
 
       const [userRes, ticketRes] = await Promise.all([
         axiosInstance.get(`/admin/users/users/${id}`),
-        axiosInstance.get(`/admin/tickets/${id}`)
+        axiosInstance.get(`/admin/tickets/user${id}`)
       ]);
 
       console.log("USER:", userRes.data);   // 🔥 debug
