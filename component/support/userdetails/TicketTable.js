@@ -1,6 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
+
+
 export default function TicketTable({ tickets = [] }) {
+    const router = useRouter();
   return (
     <div className="bg-white rounded-xl shadow overflow-x-auto">
 
@@ -31,7 +36,11 @@ export default function TicketTable({ tickets = [] }) {
 
           {tickets.map((ticket) => (
 
-            <tr key={ticket._id} className="border-t hover:bg-gray-50">
+            <tr key={ticket._id} className="border-t hover:bg-gray-50 cursor-pointer"
+            onClick={() =>
+  router.push(`/supportmanagement/ticket/${ticket._id}`)
+}
+            >
 
               {/* ID */}
               <td className="p-4">
