@@ -13,54 +13,66 @@ import Attachments from "@/component/support/usersupportdetails/Attachments";
 import QuickActions from "@/component/support/usersupportdetails/QuickActions";
 import StatusManagement from "@/component/support/usersupportdetails/StatusManagement";
 
-export default function UserDetailPage() {
+export default function UserSupportDetailPage() {
   const { id } = useParams();
 
   const [user, setUser] = useState(null);
+  const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 FETCH USER DATA
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axiosInstance.get(`/users/users${id}`);
-        setUser(res.data);
-      } catch (err) {
-        console.error("Error fetching user:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // 🔥 FETCH DATA (same style as your previous page)
+  const fetchData = async () => {
+    try {
+      const [userRes, ticketRes] = await Promise.all([
+        axiosInstance.get(`/admin/users/users/${id}`),
+        axiosInstance.get(`/admin/tickets/${id}`) // 👈 single ticket
+      ]);
 
-    if (id) fetchUser();
+      console.log("USER:", userRes.data);
+      console.log("TICKET:", ticketRes.data);
+
+      setUser(userRes.data.user);
+      setTicket(ticketRes.data.ticket);
+
+    } catch (error) {
+      console.error("Error fetching support details", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) fetchData();
   }, [id]);
+
+  // 🔄 LOADING
+  if (loading) return <p className="p-6">Loading...</p>;
+
+  if (!user || !ticket) return <p className="p-6">Data not found</p>;
 
   return (
     <div className="bg-[#EAF3EE] min-h-screen p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* ✅ USER PROFILE CARD */}
-        {loading ? (
-          <div className="h-32 bg-gray-200 animate-pulse rounded-xl" />
-        ) : (
-          <UserProfileCard user={user} />
-        )}
+        {/* ✅ USER */}
+        <UserProfileCard user={user} />
 
-        <QueryCard />
+        {/* ✅ QUERY CARD */}
+        <QueryCard ticket={ticket} />
 
         <div className="grid md:grid-cols-2 gap-6">
-          <QueryDetails />
-          <ChatSection />
+          <QueryDetails ticket={ticket} />
+          <ChatSection messages={ticket.messages} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <QueryHistory />
-          <Attachments />
+          <QueryHistory history={ticket.history} />
+          <Attachments files={ticket.attachments} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <QuickActions />
-          <StatusManagement />
+          <QuickActions ticket={ticket} />
+          <StatusManagement ticket={ticket} />
         </div>
 
       </div>
