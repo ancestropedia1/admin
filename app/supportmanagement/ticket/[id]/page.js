@@ -20,19 +20,19 @@ export default function UserSupportDetailPage() {
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 FETCH DATA (same style as your previous page)
+  
   const fetchData = async () => {
     try {
       const [userRes, ticketRes] = await Promise.all([
         axiosInstance.get(`/admin/users/users/${id}`),
-        axiosInstance.get(`/admin/tickets/${id}`) // 👈 single ticket
+        axiosInstance.get(`/admin/tickets/${id}`) 
       ]);
 
       console.log("USER:", userRes.data);
       console.log("TICKET:", ticketRes.data);
 
       setUser(userRes.data.user);
-      setTicket(ticketRes.data.ticket);
+      setTicket(ticketRes.data.tickets[0]); // ✅ FIX
 
     } catch (error) {
       console.error("Error fetching support details", error);
