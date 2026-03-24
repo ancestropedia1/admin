@@ -22,24 +22,34 @@ export default function UserSupportDetailPage() {
 
   
   const fetchData = async () => {
-    try {
-      const [userRes, ticketRes] = await Promise.all([
-        axiosInstance.get(`/admin/users/users/${id}`),
-        axiosInstance.get(`/admin/tickets/${id}`) 
-      ]);
+  try {
+    const [userRes, ticketRes] = await Promise.all([
+      axiosInstance.get(`/admin/users/users/${id}`),
+      axiosInstance.get(`/admin/tickets/user/${id}`) // ✅ FIXED
+    ]);
 
-      console.log("USER:", userRes.data);
-      console.log("TICKET:", ticketRes.data);
+    console.log("USER:", userRes.data);
+    console.log("TICKETS:", ticketRes.data);
 
-      setUser(userRes.data.user);
-      setTicket(ticketRes.data.tickets[0]); // ✅ FIX
+    setUser(userRes.data.user);
 
-    } catch (error) {
-      console.error("Error fetching support details", error);
-    } finally {
-      setLoading(false);
+    const tickets = ticketRes.data.tickets;
+
+    if (tickets && tickets.length > 0) {
+      setTicket(tickets[0]); // ✅ FIRST TICKET
+    } else {
+      setTicket(null);
     }
-  };
+
+  } catch (error) {
+    console.error(
+      "Error fetching support details:",
+      error.response?.data || error.message
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (id) fetchData();
@@ -58,21 +68,21 @@ export default function UserSupportDetailPage() {
         <UserProfileCard user={user} />
 
         {/* ✅ QUERY CARD */}
-        <QueryCard ticket={ticket} />
+        <QueryCard />
 
         <div className="grid md:grid-cols-2 gap-6">
-          <QueryDetails ticket={ticket} />
-          <ChatSection messages={ticket.messages} />
+          <QueryDetails/>
+          <ChatSection/>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <QueryHistory history={ticket.history} />
-          <Attachments files={ticket.attachments} />
+          <QueryHistory />
+          <Attachments/>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <QuickActions ticket={ticket} />
-          <StatusManagement ticket={ticket} />
+          <QuickActions />
+          <StatusManagement />
         </div>
 
       </div>
