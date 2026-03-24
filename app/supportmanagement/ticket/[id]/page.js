@@ -19,42 +19,48 @@ export default function UserDetailPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 FETCH USER DATA
+  // 🔥 FETCH USER DATA (SAME AS WORKING PAGE)
   useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      const res = await axiosInstance.get(`/admin/users/users/${id}`);
+    const fetchUser = async () => {
+      try {
+        const res = await axiosInstance.get(`/admin/users/users/${id}`);
 
-      console.log("USER RESPONSE:", res.data);
+        console.log("USER:", res.data);
 
-      const userData =
-        res.data.user ||
-        res.data.data ||
-        res.data;
+        // ✅ SIMPLE + CORRECT
+        setUser(res.data.user);
 
-      setUser(userData);
+      } catch (err) {
+        console.error(
+          "Error fetching user:",
+          err.response?.data || err.message
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    } catch (err) {
-      console.error("Error fetching user:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (id) fetchUser();
+  }, [id]);
 
-  if (id) fetchUser();
-}, [id]);
+  // 🔄 LOADING
+  if (loading) {
+    return <p className="p-6">Loading...</p>;
+  }
+
+  // ❌ USER NOT FOUND
+  if (!user) {
+    return <p className="p-6">User not found</p>;
+  }
 
   return (
     <div className="bg-[#EAF3EE] min-h-screen p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* ✅ USER PROFILE CARD */}
-        {loading ? (
-          <div className="h-32 bg-gray-200 animate-pulse rounded-xl" />
-        ) : (
-          <UserProfileCard user={user} />
-        )}
+        {/* ✅ USER PROFILE */}
+        <UserProfileCard user={user} />
 
+        {/* 🔥 KEEP THESE STATIC FOR NOW */}
         <QueryCard />
 
         <div className="grid md:grid-cols-2 gap-6">
