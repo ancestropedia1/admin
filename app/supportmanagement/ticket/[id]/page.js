@@ -21,19 +21,28 @@ export default function UserDetailPage() {
 
   // 🔥 FETCH USER DATA
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axiosInstance.get(`/admin/users/users/${id}`);
-        setUser(res.data);
-      } catch (err) {
-        console.error("Error fetching user:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchUser = async () => {
+    try {
+      const res = await axiosInstance.get(`/admin/users/users/${id}`);
 
-    if (id) fetchUser();
-  }, [id]);
+      console.log("USER RESPONSE:", res.data);
+
+      const userData =
+        res.data.user ||
+        res.data.data ||
+        res.data;
+
+      setUser(userData);
+
+    } catch (err) {
+      console.error("Error fetching user:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (id) fetchUser();
+}, [id]);
 
   return (
     <div className="bg-[#EAF3EE] min-h-screen p-4 md:p-6">
