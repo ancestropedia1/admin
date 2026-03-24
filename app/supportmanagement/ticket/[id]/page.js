@@ -21,7 +21,7 @@ export default function UserDetailPage() {
         console.log("USER:", res.data);
 
         // ✅ SAME AS WORKING PAGE
-        setUser(res.data.user);
+       setUser(userRes.data.user);
 
       } catch (err) {
         console.error(
