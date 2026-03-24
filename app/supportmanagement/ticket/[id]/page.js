@@ -23,7 +23,7 @@ export default function UserDetailPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axiosInstance.get(`/user/${id}`);
+        const res = await axiosInstance.get(`/users/users/${id}`);
         setUser(res.data);
       } catch (err) {
         console.error("Error fetching user:", err);
