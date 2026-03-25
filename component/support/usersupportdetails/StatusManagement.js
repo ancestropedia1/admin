@@ -1,18 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { axiosInstance } from "@/config/axios";
 
 export default function StatusManagement({ ticket, refresh }) {
 
   // ✅ STATE
-  const [status, setStatus] = useState(ticket?.status || "Open");
-  const [priority, setPriority] = useState(ticket?.priority || "Medium");
-  const [assignedTo, setAssignedTo] = useState(ticket?.assignedTo?._id || "");
-  const [comment, setComment] = useState(ticket?.adminComment || "");
+  const [status, setStatus] = useState("Open");
+  const [priority, setPriority] = useState("Medium");
+  const [assignedTo, setAssignedTo] = useState("");
+  const [comment, setComment] = useState("");
+
+  // ✅ SYNC STATE WHEN TICKET LOADS
+  useEffect(() => {
+    if (ticket) {
+      setStatus(ticket.status || "Open");
+      setPriority(ticket.priority || "Medium");
+      setAssignedTo(ticket.assignedTo?._id || "");
+      setComment(ticket.adminComment || "");
+    }
+  }, [ticket]);
 
   // 🔥 SAVE HANDLER
   const handleSave = async () => {
+    if (!ticket?._id) {
+      alert("❌ Ticket not loaded yet");
+      return;
+    }
+
     try {
       const res = await axiosInstance.put(`/admin/tickets/${ticket._id}`, {
         status,
@@ -22,10 +37,8 @@ export default function StatusManagement({ ticket, refresh }) {
       });
 
       console.log("UPDATED:", res.data);
-
       alert("✅ Updated successfully");
 
-      // 🔄 REFRESH DATA (VERY IMPORTANT)
       if (refresh) refresh();
 
     } catch (error) {
@@ -50,7 +63,7 @@ export default function StatusManagement({ ticket, refresh }) {
         <option value="Resolved">Resolved</option>
       </select>
 
-      {/* ✅ ASSIGNED ADMIN (STATIC FOR NOW) */}
+      {/* ✅ ASSIGNED ADMIN */}
       <select
         className="w-full border p-2 rounded"
         value={assignedTo}
@@ -71,9 +84,10 @@ export default function StatusManagement({ ticket, refresh }) {
         <option value="High">High</option>
       </select>
 
-      {/* 🔥 OPTIONAL FIELD */}
+      {/* OPTIONAL */}
       <select className="w-full border p-2 rounded">
         <option>Token Type: DAN Order</option>
+         <option> DAN Order</option>
       </select>
 
       {/* ✅ COMMENT */}
@@ -84,7 +98,7 @@ export default function StatusManagement({ ticket, refresh }) {
         onChange={(e) => setComment(e.target.value)}
       />
 
-      {/* ✅ SAVE BUTTON */}
+      {/* ✅ SAVE */}
       <button
         onClick={handleSave}
         className="w-full bg-green-800 text-white p-2 rounded"

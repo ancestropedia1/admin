@@ -16,51 +16,51 @@ import StatusManagement from "@/component/support/usersupportdetails/StatusManag
 export default function UserDetailPage() {
   const { id } = useParams();
 
-  const [user, setUser] = useState(null);
+  const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 FETCH USER DATA
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axiosInstance.get(`/admin/users/users/${id}`);
-        setUser(res.data);
-      } catch (err) {
-        console.error("Error fetching user:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // ✅ FETCH TICKET DATA (NOT USER)
+  const fetchTicket = async () => {
+    try {
+      const res = await axiosInstance.get(`/admin/tickets/${id}`);
+      setTicket(res.data);
+    } catch (err) {
+      console.error("Error fetching ticket:", err.response?.data || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    if (id) fetchUser();
+  useEffect(() => {
+    if (id) fetchTicket();
   }, [id]);
 
   return (
     <div className="bg-[#EAF3EE] min-h-screen p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* ✅ USER PROFILE CARD */}
+        {/* ✅ PROFILE (from ticket.user) */}
         {loading ? (
           <div className="h-32 bg-gray-200 animate-pulse rounded-xl" />
         ) : (
-          <UserProfileCard user={user} />
+          <UserProfileCard user={ticket?.user} />
         )}
 
-        <QueryCard />
+        <QueryCard ticket={ticket} />
 
         <div className="grid md:grid-cols-2 gap-6">
-          <QueryDetails />
-          <ChatSection />
+          <QueryDetails ticket={ticket} />
+          <ChatSection ticket={ticket} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <QueryHistory />
-          <Attachments />
+          <QueryHistory ticket={ticket} />
+          <Attachments ticket={ticket} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <QuickActions />
-          <StatusManagement />
+          <QuickActions ticket={ticket} />
+          <StatusManagement ticket={ticket} refresh={fetchTicket} />
         </div>
 
       </div>
