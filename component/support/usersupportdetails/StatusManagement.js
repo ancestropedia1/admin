@@ -9,6 +9,7 @@ export default function StatusManagement({ ticket, refresh }) {
   const [priority, setPriority] = useState("Medium");
   const [assignedTo, setAssignedTo] = useState("");
   const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(false); // ✅ NEW
 
   // ✅ Sync state when ticket loads
   useEffect(() => {
@@ -22,25 +23,35 @@ export default function StatusManagement({ ticket, refresh }) {
 
   // 🔥 SAVE HANDLER
   const handleSave = async () => {
-    if (!ticket?._id) {
-      console.warn("Ticket not loaded yet");
+
+    console.log("CLICKED"); // ✅ DEBUG
+
+    if (!ticket || !ticket._id) {
+      alert("❌ Ticket not loaded yet");
       return;
     }
 
     try {
+      setLoading(true); // ✅ disable while saving
+
       const res = await axiosInstance.put(`/admin/tickets/${ticket._id}`, {
         status,
         priority,
-        assignedTo,
+        assignedTo: assignedTo || null, // ✅ FIX
         adminComment: comment,
       });
 
       console.log("UPDATED:", res.data);
 
+      alert("✅ Updated successfully");
+
       if (refresh) refresh();
 
     } catch (error) {
       console.error("Update error:", error.response?.data || error.message);
+      alert("❌ Update failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -98,10 +109,10 @@ export default function StatusManagement({ ticket, refresh }) {
       {/* SAVE */}
       <button
         onClick={handleSave}
-        disabled={!ticket?._id}
+        disabled={!ticket?._id || loading} // ✅ FIXED
         className="w-full bg-green-800 text-white p-2 rounded disabled:opacity-50"
       >
-        Save Changes
+        {loading ? "Saving..." : "Save Changes"}
       </button>
 
     </div>
