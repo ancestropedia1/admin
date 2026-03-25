@@ -6,7 +6,6 @@ export default function Attachments({ ticket, refresh }) {
 
   const attachments = ticket?.attachments || [];
 
-  // 🔥 Upload (matches your backend)
   const handleUpload = async (e) => {
     const file = e.target.files[0];
 
@@ -19,13 +18,16 @@ export default function Attachments({ ticket, refresh }) {
 
     reader.onloadend = async () => {
       try {
-        console.log("Uploading to:", `/admin/tickets/${ticket._id}/attachment`);
-
         await axiosInstance.post(
           `/admin/tickets/${ticket._id}/attachment`,
           {
             image: reader.result, // ✅ base64
             name: file.name,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json", // ✅ IMPORTANT
+            },
           }
         );
 
@@ -35,7 +37,7 @@ export default function Attachments({ ticket, refresh }) {
 
       } catch (err) {
         console.error("Upload error:", err.response?.data || err.message);
-        alert("❌ Upload failed");
+        alert(err.response?.data?.message || "❌ Upload failed");
       }
     };
 
