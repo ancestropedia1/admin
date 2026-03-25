@@ -9,7 +9,8 @@ export default function StatusManagement({ ticket, refresh }) {
   const [priority, setPriority] = useState("Medium");
   const [assignedTo, setAssignedTo] = useState("");
   const [comment, setComment] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ NEW
+  const [category, setCategory] = useState(""); // ✅ NEW
+  const [loading, setLoading] = useState(false);
 
   // ✅ Sync state when ticket loads
   useEffect(() => {
@@ -18,31 +19,29 @@ export default function StatusManagement({ ticket, refresh }) {
       setPriority(ticket.priority || "Medium");
       setAssignedTo(ticket.assignedTo?._id || "");
       setComment(ticket.adminComment || "");
+      setCategory(ticket.category || ""); // ✅ NEW
     }
   }, [ticket]);
 
   // 🔥 SAVE HANDLER
   const handleSave = async () => {
-
-    console.log("CLICKED"); // ✅ DEBUG
-
-    if (!ticket || !ticket._id) {
+    if (!ticket?._id) {
       alert("❌ Ticket not loaded yet");
       return;
     }
 
     try {
-      setLoading(true); // ✅ disable while saving
+      setLoading(true);
 
       const res = await axiosInstance.put(`/admin/tickets/${ticket._id}`, {
         status,
         priority,
-        assignedTo: assignedTo || null, // ✅ FIX
+        assignedTo: assignedTo || null,
         adminComment: comment,
+        category, // ✅ SEND CATEGORY
       });
 
       console.log("UPDATED:", res.data);
-
       alert("✅ Updated successfully");
 
       if (refresh) refresh();
@@ -71,6 +70,19 @@ export default function StatusManagement({ ticket, refresh }) {
         <option value="Resolved">Resolved</option>
       </select>
 
+      {/* CATEGORY ✅ FIXED */}
+      <select
+        className="w-full border p-2 rounded"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+      >
+        <option value="">Select Category</option>
+        <option value="DNA Kit">DNA Kit</option>
+        <option value="Heritage Vault">Heritage Vault</option>
+        <option value="Token">Token</option>
+        <option value="Family Tree">Family Tree</option>
+      </select>
+
       {/* ASSIGNED ADMIN */}
       <select
         className="w-full border p-2 rounded"
@@ -92,12 +104,6 @@ export default function StatusManagement({ ticket, refresh }) {
         <option value="High">High</option>
       </select>
 
-      {/* OPTIONAL */}
-      <select className="w-full border p-2 rounded">
-        <option value="">Token Type</option>
-        <option value="DAN">DAN Order</option>
-      </select>
-
       {/* COMMENT */}
       <textarea
         className="w-full border p-2 rounded"
@@ -109,7 +115,7 @@ export default function StatusManagement({ ticket, refresh }) {
       {/* SAVE */}
       <button
         onClick={handleSave}
-        disabled={!ticket?._id || loading} // ✅ FIXED
+        disabled={!ticket?._id || loading}
         className="w-full bg-green-800 text-white p-2 rounded disabled:opacity-50"
       >
         {loading ? "Saving..." : "Save Changes"}
