@@ -5,13 +5,12 @@ import { axiosInstance } from "@/config/axios";
 
 export default function StatusManagement({ ticket, refresh }) {
 
-  // ✅ STATE
   const [status, setStatus] = useState("Open");
   const [priority, setPriority] = useState("Medium");
   const [assignedTo, setAssignedTo] = useState("");
   const [comment, setComment] = useState("");
 
-  // ✅ SYNC STATE WHEN TICKET LOADS
+  // ✅ Sync state when ticket loads
   useEffect(() => {
     if (ticket) {
       setStatus(ticket.status || "Open");
@@ -24,7 +23,7 @@ export default function StatusManagement({ ticket, refresh }) {
   // 🔥 SAVE HANDLER
   const handleSave = async () => {
     if (!ticket?._id) {
-      alert("❌ Ticket not loaded yet");
+      console.warn("Ticket not loaded yet");
       return;
     }
 
@@ -37,13 +36,11 @@ export default function StatusManagement({ ticket, refresh }) {
       });
 
       console.log("UPDATED:", res.data);
-      alert("✅ Updated successfully");
 
       if (refresh) refresh();
 
     } catch (error) {
       console.error("Update error:", error.response?.data || error.message);
-      alert("❌ Failed to update");
     }
   };
 
@@ -52,7 +49,7 @@ export default function StatusManagement({ ticket, refresh }) {
 
       <h3 className="font-semibold">Status Management</h3>
 
-      {/* ✅ STATUS */}
+      {/* STATUS */}
       <select
         className="w-full border p-2 rounded"
         value={status}
@@ -63,7 +60,7 @@ export default function StatusManagement({ ticket, refresh }) {
         <option value="Resolved">Resolved</option>
       </select>
 
-      {/* ✅ ASSIGNED ADMIN */}
+      {/* ASSIGNED ADMIN */}
       <select
         className="w-full border p-2 rounded"
         value={assignedTo}
@@ -73,7 +70,7 @@ export default function StatusManagement({ ticket, refresh }) {
         <option value="adminId">Admin</option>
       </select>
 
-      {/* ✅ PRIORITY */}
+      {/* PRIORITY */}
       <select
         className="w-full border p-2 rounded"
         value={priority}
@@ -86,11 +83,11 @@ export default function StatusManagement({ ticket, refresh }) {
 
       {/* OPTIONAL */}
       <select className="w-full border p-2 rounded">
-        <option>Token Type: DAN Order</option>
-         <option> DAN Order</option>
+        <option value="">Token Type</option>
+        <option value="DAN">DAN Order</option>
       </select>
 
-      {/* ✅ COMMENT */}
+      {/* COMMENT */}
       <textarea
         className="w-full border p-2 rounded"
         placeholder="Write comments..."
@@ -98,10 +95,11 @@ export default function StatusManagement({ ticket, refresh }) {
         onChange={(e) => setComment(e.target.value)}
       />
 
-      {/* ✅ SAVE */}
+      {/* SAVE */}
       <button
         onClick={handleSave}
-        className="w-full bg-green-800 text-white p-2 rounded"
+        disabled={!ticket?._id}
+        className="w-full bg-green-800 text-white p-2 rounded disabled:opacity-50"
       >
         Save Changes
       </button>
