@@ -1,15 +1,35 @@
 "use client";
 
+import { useState } from "react";
 import { axiosInstance } from "@/config/axios";
 
 export default function Attachments({ ticket, refresh }) {
+
   const attachments = ticket?.attachments || [];
 
-  const handleUpload = async (e) => {
-    const file = e.target.files[0];
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-    if (!file || !ticket?._id) {
-      alert("❌ Ticket not loaded");
+  // 🔥 PAGINATION STATE
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 4;
+
+  const totalPages = Math.ceil(attachments.length / itemsPerPage);
+
+  const paginatedData = attachments.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
+  // ✅ HANDLE FILE SELECT
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
+  // ✅ HANDLE SAVE BUTTON
+  const handleUpload = async () => {
+    if (!selectedFile || !ticket?._id) {
+      alert("❌ Select file first");
       return;
     }
 
@@ -17,11 +37,13 @@ export default function Attachments({ ticket, refresh }) {
 
     reader.onloadend = async () => {
       try {
+        setLoading(true);
+
         await axiosInstance.post(
           `/admin/tickets/${ticket._id}/attachment`,
           {
             image: reader.result,
-            name: file.name,
+            name: selectedFile.name,
           },
           {
             headers: {
@@ -30,104 +52,128 @@ export default function Attachments({ ticket, refresh }) {
           }
         );
 
-        alert("✅ File uploaded");
+        alert("✅ Uploaded");
+        setSelectedFile(null);
+
         if (refresh) refresh();
 
       } catch (err) {
-        console.error("Upload error:", err.response?.data || err.message);
-        alert(err.response?.data?.message || "❌ Upload failed");
+        console.error(err);
+        alert("❌ Upload failed");
+      } finally {
+        setLoading(false);
       }
     };
 
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(selectedFile);
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-md border space-y-6">
+    <div className="bg-white rounded-2xl p-6 shadow-md border grid md:grid-cols-2 gap-6">
 
-      {/* HEADER */}
-      <div className="border-b pb-3">
-        <h3 className="text-2xl font-semibold text-gray-800">
-          Attachment file
-        </h3>
-      </div>
+      {/* ================= LEFT SIDE (UPLOAD) ================= */}
+      <div className="space-y-4">
 
-      {/* GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-        {attachments.length === 0 && (
-          <p className="text-gray-500 text-sm">
-            No attachments yet
-          </p>
-        )}
-
-        {attachments.map((file, i) => (
-          <div
-            key={i}
-            className="bg-[#F9FAFB] rounded-xl shadow-sm border p-4 hover:shadow-md transition"
-          >
-            {/* IMAGE */}
-            <div className="rounded-lg overflow-hidden border">
-              <img
-                src={file.url}
-                alt={file.name}
-                className="w-full h-44 object-cover"
-              />
-            </div>
-
-            {/* TITLE */}
-            <p className="mt-3 font-medium text-gray-800">
-              {file.name || "Payment related: Documents"}
-            </p>
-
-            {/* DATE */}
-            <p className="text-sm text-gray-500">
-              Upload On:{" "}
-              {file.createdAt
-                ? new Date(file.createdAt).toDateString()
-                : "N/A"}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* PAGINATION UI (STATIC LIKE FIGMA) */}
-      <div className="flex justify-center items-center gap-2 mt-4">
-
-        <button className="px-2 py-1 text-gray-600">
-          {"<"}
-        </button>
-
-        <button className="px-3 py-1 bg-green-800 text-white rounded">
-          1
-        </button>
-
-        <button className="px-3 py-1 border rounded text-gray-700">
-          ...
-        </button>
-
-        <button className="px-3 py-1 border rounded text-gray-700">
-          2
-        </button>
-
-        <button className="px-2 py-1 text-gray-600">
-          {">"}
-        </button>
-
-      </div>
-
-      {/* UPLOAD */}
-      <div className="border-t pt-4 flex flex-col gap-2">
-
-        <label className="text-sm text-gray-600 font-medium">
+        <h3 className="text-xl font-semibold border-b pb-2">
           Upload Attachment
-        </label>
+        </h3>
 
         <input
           type="file"
-          onChange={handleUpload}
-          className="border rounded-lg p-2 bg-gray-50"
+          onChange={handleFileChange}
+          className="border rounded-lg p-2 bg-gray-50 w-full"
         />
+
+        {selectedFile && (
+          <p className="text-sm text-gray-600">
+            Selected: {selectedFile.name}
+          </p>
+        )}
+
+        <button
+          onClick={handleUpload}
+          disabled={!selectedFile || loading}
+          className="bg-green-800 text-white px-4 py-2 rounded-lg disabled:opacity-50"
+        >
+          {loading ? "Saving..." : "Save"}
+        </button>
+
+      </div>
+
+      {/* ================= RIGHT SIDE (ATTACHMENTS) ================= */}
+      <div className="space-y-4">
+
+        <h3 className="text-xl font-semibold border-b pb-2">
+          Attachment file
+        </h3>
+
+        {/* GRID */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          {paginatedData.length === 0 && (
+            <p className="text-gray-500 text-sm">
+              No attachments yet
+            </p>
+          )}
+
+          {paginatedData.map((file, i) => (
+            <div
+              key={i}
+              className="bg-gray-50 p-3 rounded-lg shadow-sm border"
+            >
+              <img
+                src={file.url}
+                alt={file.name}
+                className="w-full h-32 object-cover rounded"
+              />
+
+              <p className="mt-2 text-sm font-medium">
+                {file.name}
+              </p>
+
+              <p className="text-xs text-gray-500">
+                {new Date(file.createdAt).toDateString()}
+              </p>
+            </div>
+          ))}
+
+        </div>
+
+        {/* ================= PAGINATION ================= */}
+        <div className="flex justify-center items-center gap-2 mt-4">
+
+          <button
+            onClick={() => setPage(page - 1)}
+            disabled={page === 1}
+            className="px-2 py-1 border rounded disabled:opacity-50"
+          >
+            {"<"}
+          </button>
+
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              className={`px-3 py-1 rounded ${
+                page === i + 1
+                  ? "bg-green-800 text-white"
+                  : "border"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setPage(page + 1)}
+            disabled={page === totalPages}
+            className="px-2 py-1 border rounded disabled:opacity-50"
+          >
+            {">"}
+          </button>
+
+        </div>
+
       </div>
 
     </div>
