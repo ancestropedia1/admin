@@ -1,36 +1,94 @@
-export default function QueryCard() {
+"use client";
+
+export default function QueryCard({ ticket }) {
+
+  if (!ticket) {
+    return (
+      <div className="bg-white rounded-xl p-5 shadow-sm border">
+        Loading...
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-xl p-5 shadow-sm border">
+    <div className="bg-white rounded-2xl p-6 shadow-md border space-y-4">
 
-      <div className="flex justify-between flex-wrap gap-3">
+      {/* TOP SECTION */}
+      <div className="flex justify-between flex-wrap gap-4">
 
+        {/* LEFT */}
         <div>
-          <p className="font-semibold">Query ID: 827-3854-38</p>
-          <p className="text-sm text-gray-600">
-            Failed Token Purchase...
+          <p className="font-semibold text-gray-800">
+            Query ID: {ticket._id?.slice(-8)}
+          </p>
+
+          <p className="text-sm text-gray-600 mt-1">
+            {ticket.subject || "No subject"}
           </p>
         </div>
 
-        {/* 🔥 Added from Figma */}
-        <div className="text-sm text-gray-500 text-right">
-          <p>Created: 15/06/2025</p>
-          <p>Last Update: 2 hours ago</p>
-          <p>Assigned to: Admin.</p>
+        {/* RIGHT */}
+        <div className="text-sm text-gray-500 text-right space-y-1">
+
+          <p>
+            Created:{" "}
+            {ticket.createdAt
+              ? new Date(ticket.createdAt).toLocaleDateString()
+              : "N/A"}
+          </p>
+
+          <p>
+            Last Update:{" "}
+            {ticket.updatedAt
+              ? new Date(ticket.updatedAt).toLocaleTimeString()
+              : "N/A"}
+          </p>
+
+          <p>
+            Assigned to:{" "}
+            {ticket.assignedTo?.firstName || "Unassigned"}
+          </p>
+
         </div>
 
       </div>
 
-      <div className="flex gap-2 mt-3">
-        <span className="bg-blue-100 px-2 py-1 text-xs rounded">
-          Open Token Manager
+      {/* TAGS / BADGES */}
+      <div className="flex flex-wrap gap-2">
+
+        {/* CATEGORY */}
+        <span className="bg-blue-100 text-blue-700 px-3 py-1 text-xs rounded-full">
+          {ticket.category || "General"}
         </span>
-        <span className="bg-red-100 px-2 py-1 text-xs rounded">
-          High Priority
+
+        {/* PRIORITY */}
+        <span
+          className={`px-3 py-1 text-xs rounded-full ${
+            ticket.priority === "High"
+              ? "bg-red-100 text-red-600"
+              : ticket.priority === "Medium"
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-green-100 text-green-700"
+          }`}
+        >
+          {ticket.priority || "Medium"} Priority
         </span>
-        <span className="bg-orange-100 px-2 py-1 text-xs rounded">
-          Pending
+
+        {/* STATUS */}
+        <span
+          className={`px-3 py-1 text-xs rounded-full ${
+            ticket.status === "Resolved"
+              ? "bg-green-100 text-green-700"
+              : ticket.status === "In Progress"
+              ? "bg-orange-100 text-orange-600"
+              : "bg-gray-100 text-gray-600"
+          }`}
+        >
+          {ticket.status || "Open"}
         </span>
+
       </div>
+
     </div>
   );
 }
