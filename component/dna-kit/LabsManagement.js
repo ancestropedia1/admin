@@ -11,7 +11,6 @@ const LabsManagement = () => {
     email: "",
     category: "",
     dnaPrice: "",
-    createdAt: "",
   });
 
   const [labs, setLabs] = useState([]);
@@ -23,7 +22,7 @@ const LabsManagement = () => {
       const res = await axiosInstance.get("/api/labs");
       setLabs(res.data.data);
     } catch (err) {
-      console.error(err);
+      console.error("FETCH ERROR:", err.response?.data || err.message);
     }
   };
 
@@ -34,7 +33,10 @@ const LabsManagement = () => {
   /* SUBMIT */
   const handleSubmit = async () => {
     try {
-      if (!form.name) return alert("Lab name required");
+      if (!form.name) {
+        alert("Lab name required");
+        return;
+      }
 
       if (editId) {
         await axiosInstance.put(`/api/labs/${editId}`, form);
@@ -42,6 +44,7 @@ const LabsManagement = () => {
         await axiosInstance.post("/api/labs", form);
       }
 
+      // reset form
       setForm({
         name: "",
         address: "",
@@ -50,32 +53,42 @@ const LabsManagement = () => {
         email: "",
         category: "",
         dnaPrice: "",
-        createdAt: "",
       });
 
       setEditId(null);
       fetchLabs();
+
     } catch (err) {
-      console.error(err);
+      console.error("SUBMIT ERROR:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Something went wrong");
     }
   };
 
   /* DELETE */
   const handleDelete = async (id) => {
-    await axiosInstance.delete(`/api/labs/${id}`);
-    fetchLabs();
+    try {
+      await axiosInstance.delete(`/api/labs/${id}`);
+      fetchLabs();
+    } catch (err) {
+      console.error("DELETE ERROR:", err.response?.data || err.message);
+    }
   };
 
   /* TOGGLE STATUS */
   const toggleStatus = async (id) => {
-    await axiosInstance.patch(`/api/labs/${id}/toggle`);
-    fetchLabs();
+    try {
+      await axiosInstance.patch(`/api/labs/${id}/toggle`);
+      fetchLabs();
+    } catch (err) {
+      console.error("TOGGLE ERROR:", err.response?.data || err.message);
+    }
   };
 
   /* EDIT */
   const handleEdit = (lab) => {
-    setForm(lab);
-    setEditId(lab._id);
+    const { _id, ...rest } = lab; // ✅ remove _id
+    setForm(rest);
+    setEditId(_id);
   };
 
   return (
@@ -89,43 +102,56 @@ const LabsManagement = () => {
 
         <div className="grid grid-cols-2 gap-4">
 
-          <input placeholder="Lab Name"
+          <input
+            placeholder="Lab Name"
             className="border p-2"
             value={form.name}
             onChange={(e)=>setForm({...form,name:e.target.value})}
           />
 
-          <input placeholder="Contact Person"
+          <input
+            placeholder="Contact Person"
             className="border p-2"
             value={form.contactPerson}
             onChange={(e)=>setForm({...form,contactPerson:e.target.value})}
           />
 
-          <input placeholder="Phone"
+          <input
+            placeholder="Phone"
             className="border p-2"
             value={form.phone}
             onChange={(e)=>setForm({...form,phone:e.target.value})}
           />
 
-          <input placeholder="Email"
+          <input
+            placeholder="Email"
             className="border p-2"
             value={form.email}
             onChange={(e)=>setForm({...form,email:e.target.value})}
           />
 
-          <input placeholder="Address"
+          <input
+            placeholder="Address"
             className="border p-2 col-span-2"
             value={form.address}
             onChange={(e)=>setForm({...form,address:e.target.value})}
           />
 
-          <input placeholder="Category"
+          {/* CATEGORY DROPDOWN (fix enum issue) */}
+          <select
             className="border p-2"
             value={form.category}
             onChange={(e)=>setForm({...form,category:e.target.value})}
-          />
+          >
+            <option value="">Select Category</option>
+            <option value="DNA">DNA</option>
+            <option value="Blood Test">Blood Test</option>
+            <option value="Pathology">Pathology</option>
+          </select>
 
-          <input placeholder="DNA Price"
+          <input
+            placeholder="DNA Price"
+            type="number"
             className="border p-2"
             value={form.dnaPrice}
             onChange={(e)=>setForm({...form,dnaPrice:e.target.value})}
@@ -134,6 +160,7 @@ const LabsManagement = () => {
         </div>
 
         <button
+          type="button"  // ✅ important
           onClick={handleSubmit}
           className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
         >
@@ -167,10 +194,12 @@ const LabsManagement = () => {
                   <button
                     onClick={()=>toggleStatus(lab._id)}
                     className={`px-2 py-1 rounded ${
-                      lab.active ? "bg-green-500" : "bg-red-500"
+                      lab.status === "active"
+                        ? "bg-green-500"
+                        : "bg-red-500"
                     } text-white`}
                   >
-                    {lab.active ? "Active" : "Inactive"}
+                    {lab.status === "active" ? "Active" : "Hold"}
                   </button>
                 </td>
 
