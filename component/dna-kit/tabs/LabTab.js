@@ -11,7 +11,7 @@ const LabTab = ({ order, refreshOrder }) => {
   /* ---------------- FETCH LABS ---------------- */
   const fetchLabs = async () => {
     try {
-      const res = await axiosInstance.get("/api/labs");
+      const res = await axiosInstance.get("/labs");
       setLabs(res.data.data);
     } catch (err) {
       console.error("❌ Fetch labs failed:", err);
