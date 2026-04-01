@@ -19,7 +19,7 @@ const LabsManagement = () => {
   /* FETCH */
   const fetchLabs = async () => {
     try {
-      const res = await axiosInstance.get("/api/labs");
+      const res = await axiosInstance.get("/labs");
       setLabs(res.data.data);
     } catch (err) {
       console.error("FETCH ERROR:", err.response?.data || err.message);
@@ -39,9 +39,9 @@ const LabsManagement = () => {
       }
 
       if (editId) {
-        await axiosInstance.put(`/api/labs/${editId}`, form);
+        await axiosInstance.put(`/labs/${editId}`, form);
       } else {
-        await axiosInstance.post("/api/labs", form);
+        await axiosInstance.post("/labs", form);
       }
 
       // reset form
@@ -67,7 +67,7 @@ const LabsManagement = () => {
   /* DELETE */
   const handleDelete = async (id) => {
     try {
-      await axiosInstance.delete(`/api/labs/${id}`);
+      await axiosInstance.delete(`/labs/${id}`);
       fetchLabs();
     } catch (err) {
       console.error("DELETE ERROR:", err.response?.data || err.message);
@@ -77,7 +77,7 @@ const LabsManagement = () => {
   /* TOGGLE STATUS */
   const toggleStatus = async (id) => {
     try {
-      await axiosInstance.patch(`/api/labs/${id}/toggle`);
+      await axiosInstance.patch(`/labs/${id}/toggle`);
       fetchLabs();
     } catch (err) {
       console.error("TOGGLE ERROR:", err.response?.data || err.message);
