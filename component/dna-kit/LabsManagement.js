@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { axiosInstance } from "@/config/axios";
 
 const LabsManagement = () => {
   const [form, setForm] = useState({
@@ -14,59 +15,67 @@ const LabsManagement = () => {
   });
 
   const [labs, setLabs] = useState([]);
-  const [editIndex, setEditIndex] = useState(null);
+  const [editId, setEditId] = useState(null);
 
-  /* ADD / UPDATE */
-  const handleSubmit = () => {
-    if (!form.name) return alert("Lab name required");
-
-    if (editIndex !== null) {
-      const updated = [...labs];
-      updated[editIndex] = {
-        ...form,
-        status: updated[editIndex].status,
-      };
-      setLabs(updated);
-      setEditIndex(null);
-    } else {
-      setLabs((prev) => [
-        ...prev,
-        {
-          ...form,
-          status: "active",
-          createdAt: form.createdAt || new Date(),
-        },
-      ]);
+  /* FETCH */
+  const fetchLabs = async () => {
+    try {
+      const res = await axiosInstance.get("/api/labs");
+      setLabs(res.data.data);
+    } catch (err) {
+      console.error(err);
     }
-
-    setForm({
-      name: "",
-      address: "",
-      contactPerson: "",
-      phone: "",
-      email: "",
-      category: "",
-      dnaPrice: "",
-      createdAt: "",
-    });
   };
 
-  /* HOLD / UNHOLD */
-  const toggleStatus = (index) => {
-    const updated = [...labs];
-    updated[index].status =
-      updated[index].status === "active" ? "hold" : "active";
-    setLabs(updated);
+  useEffect(() => {
+    fetchLabs();
+  }, []);
+
+  /* SUBMIT */
+  const handleSubmit = async () => {
+    try {
+      if (!form.name) return alert("Lab name required");
+
+      if (editId) {
+        await axiosInstance.put(`/api/labs/${editId}`, form);
+      } else {
+        await axiosInstance.post("/api/labs", form);
+      }
+
+      setForm({
+        name: "",
+        address: "",
+        contactPerson: "",
+        phone: "",
+        email: "",
+        category: "",
+        dnaPrice: "",
+        createdAt: "",
+      });
+
+      setEditId(null);
+      fetchLabs();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* DELETE */
+  const handleDelete = async (id) => {
+    await axiosInstance.delete(`/api/labs/${id}`);
+    fetchLabs();
+  };
+
+  /* TOGGLE STATUS */
+  const toggleStatus = async (id) => {
+    await axiosInstance.patch(`/api/labs/${id}/toggle`);
+    fetchLabs();
   };
 
   /* EDIT */
-  const handleEdit = (index) => {
-    const lab = labs[index];
-    setForm({
-      ...lab,
-      createdAt: lab.createdAt,
-    });
-    setEditIndex(index);
+  const handleEdit = (lab) => {
+    setForm(lab);
+    setEditId(lab._id);
   };
 
   return (
@@ -75,91 +84,60 @@ const LabsManagement = () => {
       {/* FORM */}
       <div className="bg-white p-6 rounded-xl border shadow">
         <h2 className="text-xl font-semibold mb-4">
-          {editIndex !== null ? "Edit Lab" : "Add Lab"}
+          {editId ? "Edit Lab" : "Add Lab"}
         </h2>
 
         <div className="grid grid-cols-2 gap-4">
 
-          <input
-            placeholder="Lab Name"
-            className="border p-2 rounded"
+          <input placeholder="Lab Name"
+            className="border p-2"
             value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            onChange={(e)=>setForm({...form,name:e.target.value})}
           />
 
-          <input
-            placeholder="Contact Person"
-            className="border p-2 rounded"
+          <input placeholder="Contact Person"
+            className="border p-2"
             value={form.contactPerson}
-            onChange={(e) =>
-              setForm({ ...form, contactPerson: e.target.value })
-            }
+            onChange={(e)=>setForm({...form,contactPerson:e.target.value})}
           />
 
-          <input
-            placeholder="Phone Number"
-            className="border p-2 rounded"
+          <input placeholder="Phone"
+            className="border p-2"
             value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            onChange={(e)=>setForm({...form,phone:e.target.value})}
           />
 
-          {/* EMAIL */}
-          <input
-            placeholder="Email"
-            type="email"
-            className="border p-2 rounded"
+          <input placeholder="Email"
+            className="border p-2"
             value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            onChange={(e)=>setForm({...form,email:e.target.value})}
           />
 
-          {/* CATEGORY */}
-          <select
-            className="border p-2 rounded"
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-          >
-            <option value="">Select Category</option>
-            <option value="DNA">DNA</option>
-            <option value="Blood Test">Blood Test</option>
-            <option value="Pathology">Pathology</option>
-          </select>
-
-          <input
-            placeholder="DNA Price"
-            type="number"
-            className="border p-2 rounded"
-            value={form.dnaPrice}
-            onChange={(e) =>
-              setForm({ ...form, dnaPrice: e.target.value })
-            }
-          />
-
-          <input
-            type="date"
-            className="border p-2 rounded"
-            value={
-              form.createdAt
-                ? new Date(form.createdAt).toISOString().split("T")[0]
-                : ""
-            }
-            onChange={(e) =>
-              setForm({ ...form, createdAt: e.target.value })
-            }
-          />
-
-          <input
-            placeholder="Address"
-            className="border p-2 rounded col-span-2"
+          <input placeholder="Address"
+            className="border p-2 col-span-2"
             value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
+            onChange={(e)=>setForm({...form,address:e.target.value})}
           />
+
+          <input placeholder="Category"
+            className="border p-2"
+            value={form.category}
+            onChange={(e)=>setForm({...form,category:e.target.value})}
+          />
+
+          <input placeholder="DNA Price"
+            className="border p-2"
+            value={form.dnaPrice}
+            onChange={(e)=>setForm({...form,dnaPrice:e.target.value})}
+          />
+
         </div>
 
         <button
           onClick={handleSubmit}
-          className="mt-4 bg-[#265A46] text-white px-6 py-2 rounded"
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
         >
-          {editIndex !== null ? "Update Lab" : "Add Lab"}
+          {editId ? "Update" : "Create"}
         </button>
       </div>
 
@@ -167,59 +145,55 @@ const LabsManagement = () => {
       <div className="bg-white p-6 rounded-xl border shadow">
         <h2 className="text-xl font-semibold mb-4">Labs List</h2>
 
-        {labs.length === 0 ? (
-          <p>No labs added yet</p>
-        ) : (
-          <table className="w-full border">
-            <thead className="bg-gray-100">
-              <tr>
-                <th>Lab</th>
-                <th>Email</th>
-                <th>Category</th>
-                <th>Phone</th>
-                <th>Price</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Actions</th>
+        <table className="w-full border">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="p-2">Name</th>
+              <th>Contact</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {labs.map((lab) => (
+              <tr key={lab._id} className="border-t text-center">
+                <td>{lab.name}</td>
+                <td>{lab.contactPerson}</td>
+                <td>{lab.phone}</td>
+
+                <td>
+                  <button
+                    onClick={()=>toggleStatus(lab._id)}
+                    className={`px-2 py-1 rounded ${
+                      lab.active ? "bg-green-500" : "bg-red-500"
+                    } text-white`}
+                  >
+                    {lab.active ? "Active" : "Inactive"}
+                  </button>
+                </td>
+
+                <td className="space-x-2">
+                  <button
+                    onClick={()=>handleEdit(lab)}
+                    className="bg-yellow-400 px-2 py-1 rounded"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={()=>handleDelete(lab._id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
-            </thead>
+            ))}
+          </tbody>
 
-            <tbody>
-              {labs.map((lab, i) => (
-                <tr key={i} className="border-t text-center">
-                  <td>{lab.name}</td>
-                  <td>{lab.email}</td>
-                  <td>{lab.category}</td>
-                  <td>{lab.phone}</td>
-                  <td>₹ {lab.dnaPrice}</td>
-                  <td>
-                    {new Date(lab.createdAt).toLocaleDateString()}
-                  </td>
-
-                  <td>
-                    {lab.status === "hold" ? "On Hold" : "Active"}
-                  </td>
-
-                  <td className="flex gap-2 justify-center">
-                    <button
-                      onClick={() => handleEdit(i)}
-                      className="bg-blue-200 px-2 py-1 rounded"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => toggleStatus(i)}
-                      className="bg-gray-200 px-2 py-1 rounded"
-                    >
-                      {lab.status === "hold" ? "Unhold" : "Hold"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        </table>
       </div>
     </div>
   );
