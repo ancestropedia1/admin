@@ -3,23 +3,31 @@
 import { useEffect, useState } from "react";
 import { axiosInstance } from "@/config/axios";
 
-const LABS = [
-  "JRP Genetic Lab",
-  "IAL Pathlabs",
-  "Aakash Genetic Lab",
-  "DNA New Lab",
-];
-
 const LabTab = ({ order, refreshOrder }) => {
+  const [labs, setLabs] = useState([]);
   const [selectedLab, setSelectedLab] = useState("");
   const [loading, setLoading] = useState(false);
 
-  /* ✅ Sync when order changes */
+  /* ---------------- FETCH LABS ---------------- */
+  const fetchLabs = async () => {
+    try {
+      const res = await axiosInstance.get("/api/labs");
+      setLabs(res.data.data);
+    } catch (err) {
+      console.error("❌ Fetch labs failed:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchLabs();
+  }, []);
+
+  /* ✅ Sync selected lab */
   useEffect(() => {
     setSelectedLab(order.labAssigned || "");
   }, [order]);
 
-  /* -------- ASSIGN LAB -------- */
+  /* ---------------- ASSIGN LAB ---------------- */
   const handleAssignLab = async () => {
     if (!selectedLab) return alert("Please select a lab");
 
@@ -28,10 +36,10 @@ const LabTab = ({ order, refreshOrder }) => {
 
       await axiosInstance.patch(
         `/admin/dna-orders/${order._id}/lab`,
-        { labAssigned: selectedLab }
+        { labAssigned: selectedLab } // now sending labId
       );
 
-      await refreshOrder(); // reload modal data
+      await refreshOrder();
     } catch (err) {
       console.error("❌ Assign Lab Failed:", err);
     } finally {
@@ -41,7 +49,8 @@ const LabTab = ({ order, refreshOrder }) => {
 
   return (
     <div className="grid grid-cols-2 gap-6">
-      {/* LEFT : CURRENT INFO */}
+
+      {/* LEFT */}
       <div className="border rounded-xl p-6 bg-white">
         <h3 className="text-lg font-semibold mb-4">Current Assignment</h3>
 
@@ -56,28 +65,44 @@ const LabTab = ({ order, refreshOrder }) => {
         </p>
       </div>
 
-      {/* RIGHT : LAB SELECTION */}
+      {/* RIGHT */}
       <div className="rounded-xl overflow-hidden border">
         <div className="bg-[#265A46] text-white p-4 font-semibold text-lg">
           Select Lab
         </div>
 
-        {LABS.map((lab, i) => (
+        {labs.map((lab) => (
           <div
-            key={i}
-            onClick={() => setSelectedLab(lab)}
-            className={`px-6 py-4 cursor-pointer border-t transition
+            key={lab._id}
+            onClick={() =>
+              lab.status !== "hold" && setSelectedLab(lab._id)
+            }
+            className={`px-6 py-4 border-t transition
               ${
-                selectedLab === lab
+                lab.status === "hold"
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "cursor-pointer hover:bg-gray-50"
+              }
+              ${
+                selectedLab === lab._id
                   ? "bg-green-100 font-semibold"
-                  : "bg-white hover:bg-gray-50"
+                  : ""
               }`}
           >
-            {lab}
+            <p>{lab.name}</p>
+
+            {/* OPTIONAL SMALL INFO */}
+            <p className="text-sm text-gray-500">
+              ₹ {lab.dnaPrice} • {lab.category}
+            </p>
+
+            {lab.status === "hold" && (
+              <p className="text-red-500 text-sm">On Hold</p>
+            )}
           </div>
         ))}
 
-        {/* ASSIGN BUTTON */}
+        {/* BUTTON */}
         <div className="p-4 border-t">
           <button
             onClick={handleAssignLab}
