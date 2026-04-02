@@ -13,25 +13,31 @@ export default function SupportManagement() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ ADDED: reusable formatter (NO CHANGE to your logic)
+  const formatTickets = (ticketsData) => {
+    return ticketsData.map((t) => {
+      const fullName = `${t.user?.firstName || ""} ${t.user?.lastName || ""}`.trim();
+
+      return {
+        ticketId: "#" + t._id.slice(-4),
+        userId: t.user?._id,
+        userName: t.name || fullName || "N/A",
+        email: t.email || t.user?.email,
+        profilePicture: t.user?.profilePicture,
+        category: t.category,
+        status: t.status,
+        createdAt: new Date(t.createdAt).toLocaleDateString(),
+      };
+    });
+  };
+
   const fetchTickets = async () => {
     try {
 
       const res = await axiosInstance.get("/admin/tickets");
 
-     const formatted = res.data.tickets.map((t) => {
-  const fullName = `${t.user?.firstName || ""} ${t.user?.lastName || ""}`.trim();
-
-  return {
-    ticketId: "#" + t._id.slice(-4),
-    userId: t.user?._id,
-    userName: t.name || fullName || "N/A",
-    email: t.email || t.user?.email, // ✅ ADD THIS
-    profilePicture: t.user?.profilePicture, // ✅ ADD THIS
-    category: t.category,
-    status: t.status,
-    createdAt: new Date(t.createdAt).toLocaleDateString(),
-  };
-});
+      // ✅ replaced map with formatter (same logic)
+      const formatted = formatTickets(res.data.tickets);
 
       setTickets(formatted);
 
@@ -55,7 +61,11 @@ export default function SupportManagement() {
 
       <SupportStats />
 
-      <SupportFilters />
+      {/* ✅ ONLY CHANGE: pass formatTickets */}
+      <SupportFilters 
+        setTickets={setTickets} 
+        formatTickets={formatTickets} 
+      />
 
       {loading ? (
         <p className="p-6">Loading tickets...</p>
