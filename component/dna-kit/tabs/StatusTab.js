@@ -36,47 +36,45 @@ const StatusTab = ({ order, refreshOrder }) => {
   );
 
   return (
-    <div className="grid grid-cols-2 gap-8 bg-[#F3F4F1] p-6 rounded-xl">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#F3F4F1] p-4 rounded-lg">
+      
       {/* ================= LEFT : TIMELINE ================= */}
-      <div className="bg-white border border-[#E4E6E2] rounded-xl p-8">
-        <h3 className="text-[22px] font-semibold text-[#2F3A2F] mb-8">
-          Order Status Timeline
+      <div className="bg-white border border-[#E4E6E2] rounded-lg p-5">
+        <h3 className="text-[16px] font-semibold text-[#2F3A2F] mb-5">
+          Order Timeline
         </h3>
 
         <div className="relative">
           {/* vertical line */}
-          <div className="absolute left-[15px] top-0 bottom-0 w-[2px] bg-[#D9DBD6]" />
+          <div className="absolute left-[10px] top-0 bottom-0 w-[2px] bg-[#D9DBD6]" />
 
           {STATUS_LIST.map((step, i) => {
             const completed = i <= currentIndex;
 
             return (
-              <div key={i} className="flex gap-4 mb-8 relative">
+              <div key={i} className="flex gap-3 mb-5 relative">
+                
                 {/* circle */}
                 <div
                   className={`
-                    w-8 h-8 rounded-full flex items-center justify-center z-10
-                    ${
-                      completed
-                        ? "bg-[#4C8C6B]"
-                        : "bg-[#C9CCC6]"
-                    }
+                    w-5 h-5 rounded-full flex items-center justify-center z-10
+                    ${completed ? "bg-[#4C8C6B]" : "bg-[#C9CCC6]"}
                   `}
                 >
                   {completed ? (
-                    <Check size={16} className="text-white" />
+                    <Check size={12} className="text-white" />
                   ) : (
-                    <X size={14} className="text-white" />
+                    <X size={10} className="text-white" />
                   )}
                 </div>
 
                 {/* text */}
                 <div>
-                  <p className="text-[16px] font-semibold text-[#2F3A2F]">
+                  <p className="text-[14px] font-medium text-[#2F3A2F]">
                     {step.label}
                   </p>
-                  <p className="text-sm text-[#7A7D74]">
-                    {completed ? "Completed" : "Not Yet Completed"}
+                  <p className="text-[11px] text-[#7A7D74]">
+                    {completed ? "Done" : "Pending"}
                   </p>
                 </div>
               </div>
@@ -86,9 +84,10 @@ const StatusTab = ({ order, refreshOrder }) => {
       </div>
 
       {/* ================= RIGHT : STATUS SELECT ================= */}
-      <div className="bg-white border border-[#E4E6E2] rounded-xl overflow-hidden">
-        <div className="bg-[#2F5D50] text-white text-center py-5 text-[20px] font-semibold">
-          Select Status
+      <div className="bg-white border border-[#E4E6E2] rounded-lg overflow-hidden">
+        
+        <div className="bg-[#2F5D50] text-white text-center py-3 text-[15px] font-semibold">
+          Update Status
         </div>
 
         {STATUS_LIST.map((s, i) => {
@@ -99,7 +98,7 @@ const StatusTab = ({ order, refreshOrder }) => {
               key={i}
               onClick={() => handleUpdateStatus(s.value)}
               className={`
-                text-center py-5 text-[17px] border-t border-[#E4E6E2]
+                text-center py-3 text-[14px] border-t border-[#E4E6E2]
                 transition-all duration-150
                 ${
                   active

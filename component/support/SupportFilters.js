@@ -60,7 +60,7 @@ export default function SupportFilters({ setTickets, formatTickets }) {
                 fetchTickets({ date: e.target.value });
                 setShowDate(false);
               }}
-            />
+            />      
           )}
         </div>
 
