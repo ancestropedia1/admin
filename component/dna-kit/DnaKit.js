@@ -116,52 +116,77 @@ const DnaKit = () => {
         </button>
       </div>
 
-      {/* ---------------- FILTER (ONLY ORDERS) ---------------- */}
-      {activeTab === "orders" && (
-        <div className="bg-[#F6F1E9] border p-3 mt-6 rounded-xl">
-          <div className="flex gap-3">
+     {/* ---------------- FILTER (ONLY ORDERS) ---------------- */}
+{activeTab === "orders" && (
+  <div className="bg-[#F6F1E9] border border-[#E4E6E2] p-4 mt-5 rounded-lg">
+    
+    <div className="flex flex-wrap items-center gap-3">
+      
+      {/* Date */}
+      <input
+        type="date"
+        value={filters.date}
+        onChange={(e) =>
+          setFilters((prev) => ({
+            ...prev,
+            date: e.target.value,
+          }))
+        }
+        className="bg-white border border-[#D6D9D3] px-3 py-2 text-sm rounded-md outline-none"
+      />
 
-            <input
-              type="date"
-              value={filters.date}
-              onChange={(e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  date: e.target.value,
-                }))
-              }
-              className="border p-2 rounded"
-            />
+      {/* Status */}
+      <select
+        value={filters.status}
+        onChange={(e) =>
+          setFilters((prev) => ({
+            ...prev,
+            status: e.target.value,
+          }))
+        }
+        className="bg-white border border-[#D6D9D3] px-3 py-2 text-sm rounded-md outline-none"
+      >
+        <option value="">By Status</option>
+        <option value="order_confirmed">Order Confirmed</option>
+        <option value="order_dispatched">Dispatched</option>
+        <option value="delivered">Delivered</option>
+      </select>
 
-            <select
-              onChange={(e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  status: e.target.value,
-                }))
-              }
-              className="border p-2 rounded"
-            >
-              <option value="">All Status</option>
-              <option value="delivered">Delivered</option>
-            </select>
+      {/* Category (optional like design) */}
+      <select
+        value={filters.category || ""}
+        onChange={(e) =>
+          setFilters((prev) => ({
+            ...prev,
+            category: e.target.value,
+          }))
+        }
+        className="bg-white border border-[#D6D9D3] px-3 py-2 text-sm rounded-md outline-none"
+      >
+        <option value="">By Category</option>
+        <option value="dna">DNA</option>
+        <option value="health">Health</option>
+      </select>
 
-            <button
-              onClick={applyFilters}
-              className="bg-[#99512F] text-white px-4 rounded"
-            >
-              Apply
-            </button>
+      {/* Apply Button */}
+      <button
+        onClick={applyFilters}
+        className="ml-auto bg-[#8B4A2F] hover:bg-[#6f3a24] text-white px-4 py-2 text-sm rounded-md"
+      >
+        Apply Filter
+      </button>
 
-            <button
-              onClick={resetFilters}
-              className="bg-gray-200 px-4 rounded"
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Reset */}
+      <button
+        onClick={resetFilters}
+        className="bg-gray-200 hover:bg-gray-300 px-3 py-2 text-sm rounded-md"
+      >
+        Reset
+      </button>
+
+    </div>
+  </div>
+)}
 
       {/* ---------------- MAIN CONTENT ---------------- */}
       {activeTab === "orders" ? (

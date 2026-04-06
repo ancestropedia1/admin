@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
-import { axiosInstanceLocal } from "@/config/axios";
+import { axiosInstance, axiosInstanceLocal } from "@/config/axios";
 
 export default function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,7 +29,7 @@ export default function UserManagement() {
       try {
         setLoading(true);
 
-        const res = await axiosInstanceLocal.get(
+        const res = await axiosInstance.get(
           `/admin/users/users?page=${page}&limit=${limit}`
         );
         console.log("USERS API RESPONSE 👉", res.data);

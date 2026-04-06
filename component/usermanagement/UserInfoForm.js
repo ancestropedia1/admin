@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { MapPin, User } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
-import { axiosInstanceLocal } from "@/config/axios";
+import { axiosInstanceLocal, axiosInstance } from "@/config/axios";
 
 export default function UserInfoForm() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function UserInfoForm() {
 
     const fetchUser = async () => {
       try {
-        const res = await axiosInstanceLocal.get(
+        const res = await axiosInstance.get(
           `/admin/users/users/${id}`
         );
 
