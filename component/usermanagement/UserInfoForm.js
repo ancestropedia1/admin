@@ -1,32 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapPin, User } from "lucide-react";
+import { MapPin, User, Pencil } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { axiosInstanceLocal, axiosInstance } from "@/config/axios";
+import EditUserModal from "./EditUserForm";
 
 export default function UserInfoForm() {
   const router = useRouter();
   const { id } = useParams();
 
-  // ---------------- STATES ----------------
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [activeFirstTab, setActiveFirstTab] = useState("User Management");
   const [activeTab, setActiveTab] = useState("User Information");
 
-  // ---------------- FETCH USER FROM API ----------------
+  const [showEdit, setShowEdit] = useState(false);
+
   useEffect(() => {
     if (!id) return;
 
     const fetchUser = async () => {
       try {
         const res = await axiosInstance.get(
-          `/admin/users/users/${id}`
+          `/admin/users/users/${id}` // ❌ left unchanged as you said
         );
 
-        
         setUser(res.data.user);
       } catch (error) {
         console.error("Failed to fetch user", error);
@@ -38,7 +38,6 @@ export default function UserInfoForm() {
     fetchUser();
   }, [id]);
 
-  // ---------------- LOADING / ERROR ----------------
   if (loading) {
     return <div className="p-10">Loading user information...</div>;
   }
@@ -47,7 +46,6 @@ export default function UserInfoForm() {
     return <div className="p-10">User not found</div>;
   }
 
-  // ---------------- TABS ----------------
   const firsttab = [
     "User Management",
     "Vault Management",
@@ -96,7 +94,6 @@ export default function UserInfoForm() {
       {/* PROFILE HEADER */}
       <div className="bg-green-100 p-6 rounded-xl shadow-sm mt-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-          {/* LEFT */}
           <div className="flex gap-4">
             <img
               src={user.profilePicture || "/avatar-placeholder.png"}
@@ -133,7 +130,6 @@ export default function UserInfoForm() {
             </div>
           </div>
 
-          {/* RIGHT */}
           <button className="mt-4 md:mt-0 bg-orange-600 text-white px-4 py-2 rounded-lg">
             Token Balance: {user.tokens || 0}
           </button>
@@ -158,9 +154,16 @@ export default function UserInfoForm() {
       </div>
 
       {/* TAB CONTENT */}
-      <div className="bg-white p-6 rounded-xl shadow-sm mt-4">
+      <div className="bg-white p-6 rounded-xl shadow-sm mt-4 relative">
+        <button
+          onClick={() => setShowEdit(true)}
+          className="absolute top-4 right-4 border px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-100 transition"
+        >
+          ✏️ Edit
+        </button>
+
         {activeTab === "User Information" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-4">
             <div className="space-y-2">
               <Info label="First Name" value={user.firstName} />
               <Info label="Last Name" value={user.lastName} />
@@ -171,9 +174,7 @@ export default function UserInfoForm() {
             <div className="space-y-2">
               <Info
                 label="Joined"
-                value={new Date(
-                  user.createdAt
-                ).toLocaleDateString()}
+                value={new Date(user.createdAt).toLocaleDateString()}
               />
               <Info
                 label="Verified"
@@ -186,11 +187,19 @@ export default function UserInfoForm() {
           <TabPlaceholder title={activeTab} />
         )}
       </div>
+
+      {/* ✅ MODAL */}
+      {showEdit && (
+        <EditUserModal
+          user={user}
+          onClose={() => setShowEdit(false)}
+          onUpdate={(updatedUser) => setUser(updatedUser)}
+        />
+      )}
     </div>
   );
 }
 
-/* SMALL INFO COMPONENT */
 function Info({ label, value }) {
   return (
     <p className="text-sm text-gray-700">
@@ -199,7 +208,6 @@ function Info({ label, value }) {
   );
 }
 
-/* PLACEHOLDER */
 function TabPlaceholder({ title }) {
   return (
     <>

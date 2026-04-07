@@ -1,103 +1,95 @@
 "use client";
 
-import { User } from "lucide-react";
+import { useState } from "react";
+import { X } from "lucide-react";
+import { axiosInstance } from "@/config/axios"; // ✅ added
 
-export default function EditUserForm({ params }) {
-  const { id } = params;
+export default function EditUserModal({ user, onClose, onUpdate }) {
+  const [form, setForm] = useState({
+    firstName: user.firstName || "",
+    lastName: user.lastName || "",
+    email: user.email || "",
+    gender: user.gender || "",
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  // ✅ NOW CONNECTED TO BACKEND
+  const handleSave = async () => {
+    try {
+      const res = await axiosInstance.put(
+        `/admin/users/users/${user._id}`, // ✅ backend API
+        form
+      );
+
+      onUpdate(res.data.user);
+      onClose();
+    } catch (error) {
+      console.error("Update failed", error);
+      alert("Failed to update user ❌");
+    }
+  };
 
   return (
-    <div className="flex justify-center mt-10">
-      <div className="bg-white p-6 rounded-xl shadow-lg w-[480px]">
+    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+      <div className="bg-white w-[600px] rounded-xl p-6 shadow-lg relative">
 
-        {/* TITLE */}
-        <h2 className="text-xl font-semibold text-center">Update Personal Info</h2>
-
-        {/* ICON */}
-        <div className="flex justify-center my-4">
-          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
-            <User size={28} />
-          </div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Update Personal Info</h2>
+          <X className="cursor-pointer" onClick={onClose} />
         </div>
 
-        {/* FORM */}
-        <div className="space-y-5">
+        <div className="space-y-4">
+          <input
+            name="firstName"
+            value={form.firstName}
+            onChange={handleChange}
+            placeholder="First Name"
+            className="w-full border p-3 rounded-lg"
+          />
 
-          {/* Location */}
-          <div>
-            <label className="text-sm font-medium">Current Location</label>
-            <input
-              type="text"
-              className="w-full border p-2 rounded"
-              placeholder="e.g. Noida, UP, India"
-            />
-          </div>
+          <input
+            name="lastName"
+            value={form.lastName}
+            onChange={handleChange}
+            placeholder="Last Name"
+            className="w-full border p-3 rounded-lg"
+          />
 
-          {/* DOB / TO */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Date of Birth</label>
-              <input type="date" className="w-full border p-2 rounded" />
-            </div>
+          <input
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Email"
+            className="w-full border p-3 rounded-lg"
+          />
 
-            <div>
-              <label className="text-sm font-medium">To</label>
-              <input type="text" className="w-full border p-2 rounded" placeholder="Present" />
-            </div>
-          </div>
-
-          {/* Age / Religion */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Age</label>
-              <input type="text" className="w-full border p-2 rounded" />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Religion</label>
-              <select className="w-full border p-2 rounded">
-                <option>Select religion</option>
-                <option>Hinduism</option>
-                <option>Muslim</option>
-                <option>Sikh</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Height / Category */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Height</label>
-              <select className="w-full border p-2 rounded">
-                <option>Select height</option>
-                <option>5.0 – 5.5 ft</option>
-                <option>5.5 – 6.0 ft</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Category</label>
-              <select className="w-full border p-2 rounded">
-                <option>Select category</option>
-              </select>
-            </div>
-          </div>
-
+          <select
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-lg"
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
         </div>
 
-        {/* BUTTONS */}
-        <div className="flex justify-between mt-6">
-          <button className="bg-green-600 text-white px-4 py-2 rounded">
-            Save Changes
+        <div className="flex justify-end gap-3 mt-6">
+          <button onClick={onClose} className="px-5 py-2 border rounded-lg">
+            Cancel
           </button>
 
           <button
-            onClick={() => history.back()}
-            className="border px-4 py-2 rounded"
+            onClick={handleSave}
+            className="px-5 py-2 bg-yellow-400 rounded-lg font-medium"
           >
-            Cancel
+            Save Changes →
           </button>
         </div>
-
       </div>
     </div>
   );
