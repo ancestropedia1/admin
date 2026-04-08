@@ -20,7 +20,7 @@ export default function EditUserModal({ user, onClose, onUpdate }) {
   const handleSave = async () => {
     try {
       const res = await axiosInstance.put(
-        `/admin/users/users/${user._id}`, // ✅ backend API
+        `/admin/users/${user._id}`, // ✅ backend API
         form
       );
 
