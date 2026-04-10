@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 import { MapPin, User } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { axiosInstance } from "@/config/axios";
+
 import EditUserModal from "./EditUserForm";
 import PersonInfo from "./PersonInfo";
+import ParentsInfo from "./ParentsInfo";
+import SpouseInfo from "./SpouseInfo";
+import ChildrenInfo from "./ChildrenInfo";
 
 export default function UserInfoForm() {
   const router = useRouter();
@@ -19,7 +23,7 @@ export default function UserInfoForm() {
 
   const [showEdit, setShowEdit] = useState(false);
 
-  // ✅ FETCH USER ONLY (Person handled inside PersonInfo)
+  // ✅ FETCH USER
   useEffect(() => {
     if (!id) return;
 
@@ -188,9 +192,16 @@ export default function UserInfoForm() {
           </div>
 
         ) : activeTab === "Person Information" ? (
-
-          // ✅ FIXED HERE
           <PersonInfo userId={id} />
+
+        ) : activeTab === "Parent’s Information" ? (
+          <ParentsInfo userId={id} />
+
+        ) : activeTab === "Spouse Information" ? (
+          <SpouseInfo userId={id} />
+
+        ) : activeTab === "Children’s Information" ? (
+          <ChildrenInfo userId={id} />
 
         ) : (
           <TabPlaceholder title={activeTab} />
