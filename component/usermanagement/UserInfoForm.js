@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapPin, User, Pencil } from "lucide-react";
+import { MapPin, User } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
-import { axiosInstanceLocal, axiosInstance } from "@/config/axios";
+import { axiosInstance } from "@/config/axios";
 import EditUserModal from "./EditUserForm";
+import PersonInfo from "./PersonInfo";
 
 export default function UserInfoForm() {
   const router = useRouter();
   const { id } = useParams();
 
   const [user, setUser] = useState(null);
+  const [person, setPerson] = useState(null); // ✅ REAL PERSON STATE
   const [loading, setLoading] = useState(true);
 
   const [activeFirstTab, setActiveFirstTab] = useState("User Management");
@@ -21,13 +23,27 @@ export default function UserInfoForm() {
   useEffect(() => {
     if (!id) return;
 
-    const fetchUser = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axiosInstance.get(
-          `/admin/users/users/${id}` // ❌ left unchanged as you said
+        // ✅ FETCH USER
+        const userRes = await axiosInstance.get(
+          `/admin/users/users/${id}`
         );
 
-        setUser(res.data.user);
+        setUser(userRes.data.user);
+
+        // ✅ FETCH PERSON
+        try {
+          const personRes = await axiosInstance.get(
+            `/admin/person/${id}`
+          );
+
+          setPerson(personRes.data.person);
+        } catch (err) {
+          console.warn("No person found (optional)", err);
+          setPerson(null);
+        }
+
       } catch (error) {
         console.error("Failed to fetch user", error);
       } finally {
@@ -35,7 +51,7 @@ export default function UserInfoForm() {
       }
     };
 
-    fetchUser();
+    fetchData();
   }, [id]);
 
   if (loading) {
@@ -57,6 +73,7 @@ export default function UserInfoForm() {
 
   const tabs = [
     "User Information",
+    "Person Information",
     "Parent’s Information",
     "Spouse Information",
     "Children’s Information",
@@ -163,6 +180,7 @@ export default function UserInfoForm() {
         </button>
 
         {activeTab === "User Information" ? (
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-4">
             <div className="space-y-2">
               <Info label="First Name" value={user.firstName} />
@@ -183,12 +201,17 @@ export default function UserInfoForm() {
               <Info label="Tokens" value={user.tokens || 0} />
             </div>
           </div>
+
+        ) : activeTab === "Person Information" ? (
+
+          <PersonInfo person={person} /> // ✅ REAL DATA
+
         ) : (
           <TabPlaceholder title={activeTab} />
         )}
       </div>
 
-      {/* ✅ MODAL */}
+      {/* MODAL */}
       {showEdit && (
         <EditUserModal
           user={user}
