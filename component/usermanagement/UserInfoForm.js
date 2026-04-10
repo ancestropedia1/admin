@@ -12,7 +12,6 @@ export default function UserInfoForm() {
   const { id } = useParams();
 
   const [user, setUser] = useState(null);
-  const [person, setPerson] = useState(null); // ✅ REAL PERSON STATE
   const [loading, setLoading] = useState(true);
 
   const [activeFirstTab, setActiveFirstTab] = useState("User Management");
@@ -20,30 +19,17 @@ export default function UserInfoForm() {
 
   const [showEdit, setShowEdit] = useState(false);
 
+  // ✅ FETCH USER ONLY (Person handled inside PersonInfo)
   useEffect(() => {
     if (!id) return;
 
-    const fetchData = async () => {
+    const fetchUser = async () => {
       try {
-        // ✅ FETCH USER
-        const userRes = await axiosInstance.get(
+        const res = await axiosInstance.get(
           `/admin/users/users/${id}`
         );
 
-        setUser(userRes.data.user);
-
-        // ✅ FETCH PERSON
-        try {
-          const personRes = await axiosInstance.get(
-            `/admin/person/${id}`
-          );
-
-          setPerson(personRes.data.person);
-        } catch (err) {
-          console.warn("No person found (optional)", err);
-          setPerson(null);
-        }
-
+        setUser(res.data.user);
       } catch (error) {
         console.error("Failed to fetch user", error);
       } finally {
@@ -51,7 +37,7 @@ export default function UserInfoForm() {
       }
     };
 
-    fetchData();
+    fetchUser();
   }, [id]);
 
   if (loading) {
@@ -180,7 +166,6 @@ export default function UserInfoForm() {
         </button>
 
         {activeTab === "User Information" ? (
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-4">
             <div className="space-y-2">
               <Info label="First Name" value={user.firstName} />
@@ -204,7 +189,8 @@ export default function UserInfoForm() {
 
         ) : activeTab === "Person Information" ? (
 
-          <PersonInfo person={person} /> // ✅ REAL DATA
+          // ✅ FIXED HERE
+          <PersonInfo userId={id} />
 
         ) : (
           <TabPlaceholder title={activeTab} />
@@ -223,6 +209,7 @@ export default function UserInfoForm() {
   );
 }
 
+/* INFO COMPONENT */
 function Info({ label, value }) {
   return (
     <p className="text-sm text-gray-700">
@@ -231,6 +218,7 @@ function Info({ label, value }) {
   );
 }
 
+/* PLACEHOLDER */
 function TabPlaceholder({ title }) {
   return (
     <>

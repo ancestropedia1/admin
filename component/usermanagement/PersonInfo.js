@@ -7,19 +7,22 @@ export default function PersonInfo({ userId }) {
   const [person, setPerson] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ FETCH PERSON FROM BACKEND
+  // ✅ FETCH PERSON
   useEffect(() => {
     if (!userId) return;
 
     const fetchPerson = async () => {
       try {
+        setLoading(true); // ✅ important
+
         const res = await axiosInstance.get(
-          `/admin/person/${userId}` // ✅ backend API
+          `/admin/person/${userId}`
         );
 
-        setPerson(res.data.person);
+        setPerson(res.data?.person || null); // ✅ safe
       } catch (error) {
-        console.error("Failed to fetch person", error);
+        console.error("❌ Failed to fetch person", error);
+        setPerson(null); // ✅ prevent crash
       } finally {
         setLoading(false);
       }
@@ -28,12 +31,22 @@ export default function PersonInfo({ userId }) {
     fetchPerson();
   }, [userId]);
 
+  // ✅ LOADING STATE
   if (loading) {
-    return <p className="text-sm text-gray-500">Loading person...</p>;
+    return (
+      <p className="text-sm text-gray-500">
+        Loading person...
+      </p>
+    );
   }
 
+  // ✅ EMPTY STATE
   if (!person) {
-    return <p className="text-sm text-gray-500">No person data found</p>;
+    return (
+      <p className="text-sm text-gray-500">
+        No person data found
+      </p>
+    );
   }
 
   return (
@@ -41,22 +54,31 @@ export default function PersonInfo({ userId }) {
 
       {/* LEFT */}
       <div className="space-y-2">
-        <Info label="First Name" value={person.firstName} />
-        <Info label="Last Name" value={person.lastName} />
-        <Info label="Gender" value={person.gender} />
-        <Info label="Birth Date" value={person.birthDate || "—"} />
-        <Info label="Living Status" value={person.living ? "Yes" : "No"} />
-        <Info label="Marital Status" value={person.maritalStatus || "—"} />
+        <Info label="First Name" value={person?.firstName} />
+        <Info label="Last Name" value={person?.lastName} />
+        <Info label="Gender" value={person?.gender} />
+        <Info label="Birth Date" value={person?.birthDate} />
+        <Info
+          label="Living Status"
+          value={
+            person?.living === undefined
+              ? "—"
+              : person.living
+              ? "Yes"
+              : "No"
+          }
+        />
+        <Info label="Marital Status" value={person?.maritalStatus} />
       </div>
 
       {/* RIGHT */}
       <div className="space-y-2">
-        <Info label="Birth City" value={person.birthCity || "—"} />
-        <Info label="Birth State" value={person.birthState || "—"} />
-        <Info label="Birth Country" value={person.birthCountry || "—"} />
-        <Info label="Residence City" value={person.residenceCity || "—"} />
-        <Info label="Occupation" value={person.occupation || "—"} />
-        <Info label="Religion" value={person.religion || "—"} />
+        <Info label="Birth City" value={person?.birthCity} />
+        <Info label="Birth State" value={person?.birthState} />
+        <Info label="Birth Country" value={person?.birthCountry} />
+        <Info label="Residence City" value={person?.residenceCity} />
+        <Info label="Occupation" value={person?.occupation} />
+        <Info label="Religion" value={person?.religion} />
       </div>
 
     </div>
@@ -67,7 +89,8 @@ export default function PersonInfo({ userId }) {
 function Info({ label, value }) {
   return (
     <p className="text-sm text-gray-700">
-      <b className="text-gray-900">{label}:</b> {value || "—"}
+      <b className="text-gray-900">{label}:</b>{" "}
+      {value || "—"}
     </p>
   );
 }
