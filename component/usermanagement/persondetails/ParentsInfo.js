@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { axiosInstance } from "@/config/axios";
+import EditParentsModal from "./editpersonmodal.js/EditParentsModal"; // ✅ ADD THIS
 
 export default function ParentsInfo({ userId }) {
   const [parents, setParents] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [showEdit, setShowEdit] = useState(false); // ✅ NEW
 
   useEffect(() => {
     if (!userId) return;
@@ -16,7 +19,7 @@ export default function ParentsInfo({ userId }) {
           `/admin/person/${userId}/parents`
         );
 
-        console.log("PARENTS API 👉", res.data); // ✅ DEBUG
+        console.log("PARENTS API 👉", res.data);
 
         setParents(res.data.parents || {});
       } catch (error) {
@@ -30,64 +33,155 @@ export default function ParentsInfo({ userId }) {
     fetchParents();
   }, [userId]);
 
-  // ✅ LOADING
   if (loading) {
-    return (
-      <p className="text-sm text-gray-500">Loading parents...</p>
-    );
-  }
-
-  // ✅ NO DATA AT ALL
-  if (!parents || (!parents.father && !parents.mother)) {
-    return (
-      <p className="text-sm text-gray-500">
-        No parents data available
-      </p>
-    );
+    return <p className="text-sm text-gray-500 mt-4">Loading parents...</p>;
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-4">
+    <>
+      <div className="space-y-6 mt-6">
 
-      {/* FATHER */}
-      <div className="space-y-2 border p-4 rounded-lg">
-        <h2 className="font-semibold text-green-700">Father</h2>
+        {/* ✅ FATHER CARD */}
+        <div className="bg-[#F6F1E9] rounded-xl p-6 shadow-sm">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-green-800 font-semibold flex items-center gap-2">
+              👨 Father’s Information
+            </h2>
 
-        {parents.father ? (
-          <>
-            <Info label="First Name" value={parents.father.firstName} />
-            <Info label="Last Name" value={parents.father.lastName} />
-            <Info label="Gender" value={parents.father.gender} />
-          </>
-        ) : (
-          <p className="text-gray-500 text-sm">No father linked</p>
-        )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowEdit(true)}
+                className="border px-3 py-1 rounded text-sm hover:bg-gray-100"
+              >
+                ✏️ Edit
+              </button>
+
+              <button
+                onClick={() =>
+                  parents?.father?._id &&
+                  window.open(`/user-management/${parents.father._id}`, "_blank")
+                }
+                className="border px-3 py-1 rounded text-sm hover:bg-gray-100"
+              >
+                View Profile
+              </button>
+            </div>
+          </div>
+
+          {parents?.father ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-sm">
+
+              <Field
+                label="Father’s Name"
+                value={`${parents.father.firstName || ""} ${parents.father.lastName || ""}`}
+              />
+
+              <Field
+                label="Birth Date"
+                value={parents.father.birthDate}
+              />
+
+              <Field
+                label="Gender"
+                value={parents.father.gender}
+              />
+
+              <Field
+                label="Occupation"
+                value={parents.father.occupation}
+              />
+
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No father linked</p>
+          )}
+        </div>
+
+        {/* ✅ MOTHER CARD */}
+        <div className="bg-[#F6F1E9] rounded-xl p-6 shadow-sm">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-green-800 font-semibold flex items-center gap-2">
+              👩 Mother’s Information
+            </h2>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowEdit(true)}
+                className="border px-3 py-1 rounded text-sm hover:bg-gray-100"
+              >
+                ✏️ Edit
+              </button>
+
+              <button
+                onClick={() =>
+                  parents?.mother?._id &&
+                  window.open(`/user-management/${parents.mother._id}`, "_blank")
+                }
+                className="border px-3 py-1 rounded text-sm hover:bg-gray-100"
+              >
+                View Profile
+              </button>
+            </div>
+          </div>
+
+          {parents?.mother ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-sm">
+
+              <Field
+                label="Mother’s Name"
+                value={`${parents.mother.firstName || ""} ${parents.mother.lastName || ""}`}
+              />
+
+              <Field
+                label="Birth Date"
+                value={parents.mother.birthDate}
+              />
+
+              <Field
+                label="Gender"
+                value={parents.mother.gender}
+              />
+
+              <Field
+                label="Occupation"
+                value={parents.mother.occupation}
+              />
+
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No mother linked</p>
+          )}
+        </div>
+
       </div>
 
-      {/* MOTHER */}
-      <div className="space-y-2 border p-4 rounded-lg">
-        <h2 className="font-semibold text-green-700">Mother</h2>
-
-        {parents.mother ? (
-          <>
-            <Info label="First Name" value={parents.mother.firstName} />
-            <Info label="Last Name" value={parents.mother.lastName} />
-            <Info label="Gender" value={parents.mother.gender} />
-          </>
-        ) : (
-          <p className="text-gray-500 text-sm">No mother linked</p>
-        )}
-      </div>
-
-    </div>
+      {/* ✅ EDIT MODAL */}
+      {showEdit && (
+        <EditParentsModal
+          parents={parents}
+          userId={userId}
+          onClose={() => setShowEdit(false)}
+          onUpdate={(updatedPerson) => {
+            // 🔥 REFRESH UI AFTER UPDATE
+            setParents({
+              father: updatedPerson.father,
+              mother: updatedPerson.mother,
+            });
+          }}
+        />
+      )}
+    </>
   );
 }
 
-/* SMALL INFO COMPONENT */
-function Info({ label, value }) {
+/* ✅ FIELD COMPONENT */
+function Field({ label, value }) {
   return (
-    <p className="text-sm text-gray-700">
-      <b>{label}:</b> {value || "—"}
-    </p>
+    <div>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-sm font-medium text-gray-900">
+        {value || "—"}
+      </p>
+    </div>
   );
 }

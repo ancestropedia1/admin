@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { axiosInstance } from "@/config/axios";
+import EditPersonModal from "./editpersonmodal.js/EditPersonModal";
 
 export default function PersonInfo({ userId }) {
   const [person, setPerson] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [showEdit, setShowEdit] = useState(false); // ✅ NEW
+
+  // ✅ FETCH PERSON
   useEffect(() => {
     if (!userId) return;
 
@@ -17,8 +21,6 @@ export default function PersonInfo({ userId }) {
         const res = await axiosInstance.get(
           `/admin/person/${userId}`
         );
-
-        console.log("PERSON API 👉", res.data); // ✅ DEBUG
 
         setPerson(res.data?.person || null);
       } catch (error) {
@@ -34,66 +36,98 @@ export default function PersonInfo({ userId }) {
 
   // ✅ LOADING
   if (loading) {
-    return (
-      <p className="text-sm text-gray-500">
-        Loading person...
-      </p>
-    );
+    return <p className="text-sm text-gray-500 mt-4">Loading person...</p>;
   }
 
-  // ✅ EMPTY CHECK (FIXED)
-  if (!person || Object.keys(person).length === 0) {
-    return (
-      <p className="text-sm text-gray-500">
-        No person data found
-      </p>
-    );
+  // ✅ EMPTY
+  if (!person) {
+    return <p className="text-sm text-gray-500 mt-4">No person data found</p>;
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-4">
+    <>
+      <div className="bg-[#F6F1E9] rounded-xl p-6 mt-6 shadow-sm">
 
-      {/* LEFT */}
-      <div className="space-y-2">
-        <Info label="First Name" value={person.firstName} />
-        <Info label="Last Name" value={person.lastName} />
-        <Info label="Gender" value={person.gender} />
-        <Info label="Birth Date" value={person.birthDate} />
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-semibold text-green-800">
+            👤 Person Information
+          </h2>
 
-        <Info
-          label="Living Status"
-          value={
-            person.living === undefined
-              ? "—"
-              : person.living
-              ? "Yes"
-              : "No"
-          }
+          {/* ✅ EDIT BUTTON */}
+          <button
+            onClick={() => setShowEdit(true)}
+            className="border px-4 py-1.5 rounded-md text-sm hover:bg-gray-100"
+          >
+            ✏️ Edit
+          </button>
+        </div>
+
+        {/* GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-sm">
+
+          {/* LEFT SIDE */}
+          <div className="space-y-4">
+            <Field label="First Name" value={person.firstName} />
+            <Field label="Last Name" value={person.lastName} />
+            <Field label="Gender" value={person.gender} />
+            <Field label="Birth Date" value={person.birthDate} />
+
+            <Field
+              label="Living Status"
+              value={
+                person.living === undefined
+                  ? "—"
+                  : person.living
+                  ? "Yes"
+                  : "No"
+              }
+            />
+
+            <Field label="Marital Status" value={person.maritalStatus} />
+            <Field label="Children Count" value={person.childrenCount} />
+            <Field label="Spouse Count" value={person.spouseCount} />
+          </div>
+
+          {/* RIGHT SIDE */}
+          <div className="space-y-4">
+            <Field label="Birth City" value={person.birthCity} />
+            <Field label="Birth State" value={person.birthState} />
+            <Field label="Birth Country" value={person.birthCountry} />
+
+            <Field label="Residence City" value={person.residenceCity} />
+            <Field label="Residence State" value={person.residenceState} />
+            <Field label="Residence Country" value={person.residenceCountry} />
+
+            <Field label="Occupation" value={person.occupation} />
+            <Field label="Religion" value={person.religion} />
+            <Field label="Community" value={person.community} />
+          </div>
+
+        </div>
+      </div>
+
+      {/* ✅ MODAL */}
+      {showEdit && (
+        <EditPersonModal
+          person={person}
+          userId={userId}
+          onClose={() => setShowEdit(false)}
+          onUpdate={(updatedPerson) => setPerson(updatedPerson)}
         />
-
-        <Info label="Marital Status" value={person.maritalStatus} />
-      </div>
-
-      {/* RIGHT */}
-      <div className="space-y-2">
-        <Info label="Birth City" value={person.birthCity} />
-        <Info label="Birth State" value={person.birthState} />
-        <Info label="Birth Country" value={person.birthCountry} />
-        <Info label="Residence City" value={person.residenceCity} />
-        <Info label="Occupation" value={person.occupation} />
-        <Info label="Religion" value={person.religion} />
-      </div>
-
-    </div>
+      )}
+    </>
   );
 }
 
-/* INFO COMPONENT */
-function Info({ label, value }) {
+/* FIELD COMPONENT */
+function Field({ label, value }) {
   return (
-    <p className="text-sm text-gray-700">
-      <b className="text-gray-900">{label}:</b>{" "}
-      {value ?? "—"} {/* ✅ better fallback */}
-    </p>
+    <div>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-sm font-medium text-gray-900">
+        {value || "—"}
+      </p>
+    </div>
   );
 }
