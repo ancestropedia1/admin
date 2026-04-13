@@ -5,11 +5,11 @@ import { MapPin, User } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { axiosInstance } from "@/config/axios";
 
-import EditUserModal from "./EditUserForm";
-import PersonInfo from "./PersonInfo";
-import ParentsInfo from "./ParentsInfo";
-import SpouseInfo from "./SpouseInfo";
-import ChildrenInfo from "./ChildrenInfo";
+import EditUserModal from "./edituserdetails/EditUserForm";
+import PersonInfo from "../persondetails/PersonInfo";
+import ParentsInfo from "../persondetails/ParentsInfo";
+import SpouseInfo from "../persondetails/SpouseInfo";
+import ChildrenInfo from "../persondetails/ChildrenInfo";
 
 export default function UserInfoForm() {
   const router = useRouter();

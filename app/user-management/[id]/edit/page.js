@@ -1,4 +1,4 @@
-import EditUserForm from '@/component/usermanagement/EditUserForm'
+import EditUserForm from '@/component/usermanagement/userdetails/edituserdetails/EditUserForm'
 
 
 const page = () => {
