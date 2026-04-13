@@ -13,7 +13,10 @@ import ChildrenInfo from "../persondetails/ChildrenInfo";
 
 export default function UserInfoForm() {
   const router = useRouter();
-  const { id } = useParams();
+
+  // ✅ FIXED PARAM
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,7 +26,6 @@ export default function UserInfoForm() {
 
   const [showEdit, setShowEdit] = useState(false);
 
-  // ✅ FETCH USER
   useEffect(() => {
     if (!id) return;
 
@@ -175,7 +177,7 @@ export default function UserInfoForm() {
               <Info label="First Name" value={user.firstName} />
               <Info label="Last Name" value={user.lastName} />
               <Info label="Email" value={user.email} />
-              <Info label="Gender" value={user.gender || "—"} />
+              <Info label="Gender" value={user.gender} />
             </div>
 
             <div className="space-y-2">
@@ -187,7 +189,7 @@ export default function UserInfoForm() {
                 label="Verified"
                 value={user.verified ? "Yes" : "No"}
               />
-              <Info label="Tokens" value={user.tokens || 0} />
+              <Info label="Tokens" value={user.tokens} />
             </div>
           </div>
 
@@ -224,7 +226,7 @@ export default function UserInfoForm() {
 function Info({ label, value }) {
   return (
     <p className="text-sm text-gray-700">
-      <b className="text-gray-900">{label}:</b> {value}
+      <b className="text-gray-900">{label}:</b> {value ?? "—"}
     </p>
   );
 }
