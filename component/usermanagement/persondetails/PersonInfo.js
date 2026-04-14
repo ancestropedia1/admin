@@ -7,10 +7,8 @@ import EditPersonModal from "./editpersonmodal.js/EditPersonModal";
 export default function PersonInfo({ userId }) {
   const [person, setPerson] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showEdit, setShowEdit] = useState(false);
 
-  const [showEdit, setShowEdit] = useState(false); // ✅ NEW
-
-  // ✅ FETCH PERSON
   useEffect(() => {
     if (!userId) return;
 
@@ -34,39 +32,46 @@ export default function PersonInfo({ userId }) {
     fetchPerson();
   }, [userId]);
 
-  // ✅ LOADING
+  /* LOADING */
   if (loading) {
-    return <p className="text-sm text-gray-500 mt-4">Loading person...</p>;
+    return (
+      <p className="text-sm text-gray-500 mt-4">
+        Loading person...
+      </p>
+    );
   }
 
-  // ✅ EMPTY
+  /* EMPTY */
   if (!person) {
-    return <p className="text-sm text-gray-500 mt-4">No person data found</p>;
+    return (
+      <p className="text-sm text-gray-500 mt-4">
+        No person data found
+      </p>
+    );
   }
 
   return (
     <>
-      <div className="bg-[#F6F1E9] rounded-xl p-6 mt-6 shadow-sm">
+      <div className="bg-[#F6F1E9] rounded-xl p-4 md:p-6 mt-6 shadow-sm">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold text-green-800">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+          <h2 className="text-base md:text-lg font-semibold text-green-800">
             👤 Person Information
           </h2>
 
-          {/* ✅ EDIT BUTTON */}
           <button
             onClick={() => setShowEdit(true)}
-            className="border px-4 py-1.5 rounded-md text-sm hover:bg-gray-100"
+            className="border px-4 py-2 rounded-md text-sm hover:bg-gray-100 w-full sm:w-auto"
           >
             ✏️ Edit
           </button>
         </div>
 
         {/* GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 text-sm">
 
-          {/* LEFT SIDE */}
+          {/* LEFT */}
           <div className="space-y-4">
             <Field label="First Name" value={person.firstName} />
             <Field label="Last Name" value={person.lastName} />
@@ -76,7 +81,7 @@ export default function PersonInfo({ userId }) {
             <Field
               label="Living Status"
               value={
-                person.living === undefined
+                person.living === undefined || person.living === null
                   ? "—"
                   : person.living
                   ? "Yes"
@@ -89,7 +94,7 @@ export default function PersonInfo({ userId }) {
             <Field label="Spouse Count" value={person.spouseCount} />
           </div>
 
-          {/* RIGHT SIDE */}
+          {/* RIGHT */}
           <div className="space-y-4">
             <Field label="Birth City" value={person.birthCity} />
             <Field label="Birth State" value={person.birthState} />
@@ -107,26 +112,29 @@ export default function PersonInfo({ userId }) {
         </div>
       </div>
 
-      {/* ✅ MODAL */}
+      {/* MODAL */}
       {showEdit && (
         <EditPersonModal
           person={person}
           userId={userId}
           onClose={() => setShowEdit(false)}
-          onUpdate={(updatedPerson) => setPerson(updatedPerson)}
+          onUpdate={(updatedPerson) => {
+            setPerson(updatedPerson);
+            setShowEdit(false);
+          }}
         />
       )}
     </>
   );
 }
 
-/* FIELD COMPONENT */
+/* FIELD */
 function Field({ label, value }) {
   return (
     <div>
       <p className="text-xs text-gray-500">{label}</p>
-      <p className="text-sm font-medium text-gray-900">
-        {value || "—"}
+      <p className="text-sm font-medium text-gray-900 break-words">
+        {value ?? "—"}
       </p>
     </div>
   );
