@@ -31,23 +31,36 @@ export default function AdminProfilePage() {
           { withCredentials: true }
         );
 
-        const data = res.data.data;
+        console.log("PROFILE RESPONSE:", res.data);
+
+        const data = res.data?.data || res.data?.admin || {};
 
         setFullName(data.fullName || "");
         setGender(data.gender || "");
         setCity(data.city || "");
         setEmail(data.email || "");
-        setContact(data.contact || "");
-        setProfileImage(data.profileImage || "");
+        setContact(data.contact || data.phoneNumber || "");
+        setProfileImage(
+          data.profileImage || data.profilePicture || ""
+        );
 
         if (data.dateOfBirth) {
           const formatted = new Date(data.dateOfBirth)
             .toISOString()
             .split("T")[0];
+
           setDateOfBirth(formatted);
         }
+
       } catch (error) {
-        alert(error?.response?.data?.message || "Request failed");
+        console.log("FETCH PROFILE ERROR:", error);
+        console.log("SERVER ERROR:", error?.response?.data);
+
+        alert(
+          error?.response?.data?.message ||
+          error.message ||
+          "Failed to fetch profile"
+        );
       } finally {
         setInitialLoading(false);
       }
@@ -60,7 +73,9 @@ export default function AdminProfilePage() {
   const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
+
       reader.readAsDataURL(file);
+
       reader.onload = () => resolve(reader.result);
       reader.onerror = reject;
     });
@@ -68,10 +83,11 @@ export default function AdminProfilePage() {
 
   const handleImageSelect = async (e) => {
     const file = e.target.files[0];
+
     if (!file) return;
 
     const base64 = await convertToBase64(file);
-    setProfileImage(base64); // send base64 to backend
+    setProfileImage(base64);
   };
 
   /* ================= UPDATE PROFILE ================= */
@@ -88,21 +104,31 @@ export default function AdminProfilePage() {
           city,
           email,
           contact,
-          profileImage, // base64 OR existing URL
+          profileImage,
         },
         { withCredentials: true }
       );
 
-      // After save, backend returns URL
-      if (res.data.data?.profileImage) {
-        setProfileImage(res.data.data.profileImage);
+      console.log("UPDATE RESPONSE:", res.data);
+
+      const data = res.data?.data || res.data?.admin || {};
+
+      if (data.profileImage || data.profilePicture) {
+        setProfileImage(
+          data.profileImage || data.profilePicture
+        );
       }
 
-      alert(res.data.message);
+      alert(res.data.message || "Profile updated");
+
     } catch (error) {
+      console.log("UPDATE ERROR:", error);
+      console.log("SERVER ERROR:", error?.response?.data);
+
       alert(
         error?.response?.data?.message ||
-          "Failed to update profile"
+        error.message ||
+        "Failed to update profile"
       );
     } finally {
       setProfileLoading(false);
@@ -139,10 +165,12 @@ export default function AdminProfilePage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+
     } catch (error) {
       alert(
         error?.response?.data?.message ||
-          "Failed to update password"
+        error.message ||
+        "Failed to update password"
       );
     } finally {
       setPasswordLoading(false);
@@ -159,40 +187,41 @@ export default function AdminProfilePage() {
 
   return (
     <div className="p-4 sm:p-6 bg-[#F8F6E7] min-h-screen">
-  {/* HEADER CARD */}
-  <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-    <div className="h-36 bg-gradient-to-r from-red-900 to-red-700 relative">
+      {/* HEADER CARD */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="h-36 bg-gradient-to-r from-red-900 to-red-700 relative">
 
-      {/* PROFILE IMAGE */}
-      <div className="absolute -bottom-16 left-6 flex flex-col items-center">
-        <img
-          src={
-            profileImage?.startsWith("data:image")
-              ? profileImage
-              : profileImage || "https://i.pravatar.cc/150"
-          }
-          alt="Profile"
-          className="w-28 h-28 rounded-full border-4 border-white object-cover"
-        />
+          {/* PROFILE IMAGE */}
+          <div className="absolute -bottom-16 left-6 flex flex-col items-center">
+            <img
+              src={
+                profileImage?.startsWith("data:image")
+                  ? profileImage
+                  : profileImage || "https://i.pravatar.cc/150"
+              }
+              alt="Profile"
+              className="w-28 h-28 rounded-full border-4 border-white object-cover"
+            />
 
-        {/* IMAGE UPLOAD INPUT */}
-        <label className="mt-2 text-xs bg-white px-3 py-1 rounded-md shadow cursor-pointer hover:bg-gray-100">
-          Change Photo
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageSelect}
-            className="hidden"
-          />
-        </label>
-      </div>
-    </div>
+            {/* IMAGE UPLOAD INPUT */}
+            <label className="mt-2 text-xs bg-white px-3 py-1 rounded-md shadow cursor-pointer hover:bg-gray-100">
+              Change Photo
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+            </label>
+          </div>
+        </div>
 
         <div className="pt-16 px-6 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold">
               {fullName}
             </h2>
+
             <p className="text-sm text-gray-500">
               Administrator
             </p>
@@ -201,9 +230,11 @@ export default function AdminProfilePage() {
               <span className="flex items-center gap-1">
                 <Mail size={14} /> {email}
               </span>
+
               <span className="flex items-center gap-1">
                 <Phone size={14} /> {contact}
               </span>
+
               <span className="flex items-center gap-1">
                 <Clock size={14} /> Secure Session
               </span>
@@ -218,6 +249,7 @@ export default function AdminProfilePage() {
 
       {/* GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+
         {/* PROFILE FORM */}
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
           <h3 className="font-semibold mb-4">
@@ -225,12 +257,17 @@ export default function AdminProfilePage() {
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input label="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            <Input
+              label="Full Name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
 
             <div>
               <label className="text-xs text-gray-500">
                 Gender
               </label>
+
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
@@ -252,9 +289,23 @@ export default function AdminProfilePage() {
               }
             />
 
-            <Input label="City" value={city} onChange={(e) => setCity(e.target.value)} />
-            <Input label="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <Input label="Contact" value={contact} onChange={(e) => setContact(e.target.value)} />
+            <Input
+              label="City"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
+
+            <Input
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <Input
+              label="Contact"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+            />
           </div>
 
           <button
@@ -277,19 +328,27 @@ export default function AdminProfilePage() {
               label="Current Password"
               type="password"
               value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
+              onChange={(e) =>
+                setCurrentPassword(e.target.value)
+              }
             />
+
             <Input
               label="New Password"
               type="password"
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={(e) =>
+                setNewPassword(e.target.value)
+              }
             />
+
             <Input
               label="Confirm Password"
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) =>
+                setConfirmPassword(e.target.value)
+              }
             />
           </div>
 
@@ -307,12 +366,18 @@ export default function AdminProfilePage() {
 }
 
 /* REUSABLE INPUT */
-function Input({ label, value = "", type = "text", onChange }) {
+function Input({
+  label,
+  value = "",
+  type = "text",
+  onChange
+}) {
   return (
     <div>
       <label className="text-xs text-gray-500">
         {label}
       </label>
+
       <input
         type={type}
         value={value}
