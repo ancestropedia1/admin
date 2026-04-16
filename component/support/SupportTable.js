@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Pagination from "./Pagination";
 
@@ -9,112 +9,192 @@ export default function SupportTable({ tickets }) {
   const router = useRouter();
 
   const rowsPerPage = 5;
-
   const totalPages = Math.ceil(tickets.length / rowsPerPage);
+
+  // ✅ Reset page if ticket count changes
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(1);
+    }
+  }, [tickets, totalPages, page]);
 
   const paginatedTickets = tickets.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
   );
 
+  const getStatusStyle = (status) => {
+    if (status === "Open")
+      return "bg-orange-100 text-orange-600";
+    if (status === "In Progress")
+      return "bg-blue-100 text-blue-600";
+    if (status === "Resolved")
+      return "bg-green-100 text-green-600";
+
+    return "bg-gray-100 text-gray-600";
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm mt-10 overflow-x-auto border">
+    <div className="bg-white rounded-xl shadow-sm mt-6 md:mt-10 border overflow-hidden">
 
       {/* HEADER */}
-      <div className="bg-[#F6F1E9] border-b p-4 text-xl font-bold">
-        Support Tickets
+      <div className="bg-[#F6F1E9] border-b px-4 md:px-6 py-4">
+        <h2 className="text-lg md:text-xl font-bold">
+          Support Tickets
+        </h2>
       </div>
 
-      {/* DESKTOP TABLE */}
-      <table className="w-full hidden md:table">
+      {/* ================= DESKTOP TABLE ================= */}
+      <div className="hidden lg:block overflow-x-auto">
+        <table className="w-full min-w-[900px]">
 
-        <thead>
-          <tr className="bg-[#F6F1E9] border-b">
-            <th className="p-5 text-left">Ticket ID</th>
-            <th className="p-5 text-left">User</th>
-            <th className="p-5 text-left">Category</th>
-            <th className="p-5 text-left">Status</th>
-            <th className="p-5 text-left">Created</th>
-            <th className="p-5 text-left">Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {paginatedTickets.length === 0 && (
-            <tr>
-              <td colSpan="6" className="text-center p-6">
-                No tickets found
-              </td>
+          <thead>
+            <tr className="bg-[#F6F1E9] border-b text-sm text-gray-700">
+              <th className="p-4 text-left">Ticket ID</th>
+              <th className="p-4 text-left">User</th>
+              <th className="p-4 text-left">Category</th>
+              <th className="p-4 text-left">Status</th>
+              <th className="p-4 text-left">Created</th>
+              <th className="p-4 text-left">Action</th>
             </tr>
-          )}
+          </thead>
 
-          {paginatedTickets.map((ticket) => (
+          <tbody>
+            {paginatedTickets.length === 0 && (
+              <tr>
+                <td colSpan="6" className="text-center p-8 text-gray-500">
+                  No tickets found
+                </td>
+              </tr>
+            )}
 
-            <tr key={ticket.ticketId} className="border-t hover:bg-gray-50">
+            {paginatedTickets.map((ticket) => (
+              <tr
+                key={ticket.ticketId}
+                className="border-t hover:bg-gray-50 transition"
+              >
+                <td className="p-4 text-sm font-medium">
+                  {ticket.ticketId}
+                </td>
 
-  {/* ✅ Ticket ID */}
-  <td className="p-5">{ticket.ticketId}</td>
+                <td
+                  className="p-4 cursor-pointer"
+                  onClick={() => {
+                    if (ticket.userId) {
+                      router.push(
+                        `/supportmanagement/user/${ticket.userId}`
+                      );
+                    }
+                  }}
+                >
+                  <span className="text-blue-600 hover:underline text-sm font-medium">
+                    {ticket.userName || "N/A"}
+                  </span>
+                </td>
 
-  {/* ✅ USER (UPDATED UI) */}
-  <td
-    className="p-5 cursor-pointer"
-    onClick={() => {
-      if (ticket.userId) {
-        router.push(`/supportmanagement/user/${ticket.userId}`);
-      }
-    }}
-  >
-    <div className="flex items-center gap-3">
-    
+                <td className="p-4 text-sm">
+                  {ticket.category}
+                </td>
 
-      {/* Name + Email */}
-      <div className="flex flex-col">
-        <span className="text-blue-600 hover:underline text-sm font-medium">
-          {ticket.userName || "N/A"}
-        </span>
+                <td className="p-4">
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium ${getStatusStyle(
+                      ticket.status
+                    )}`}
+                  >
+                    {ticket.status}
+                  </span>
+                </td>
+
+                <td className="p-4 text-sm">
+                  {ticket.createdAt}
+                </td>
+
+                <td className="p-4">
+                  <div className="flex flex-wrap gap-2">
+                    <button className="px-3 py-1 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-xs">
+                      Assign
+                    </button>
+
+                    <button className="px-3 py-1 bg-[#ffd8da] text-red-500 rounded-md text-xs">
+                      Resolve
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+
+        </table>
       </div>
 
-    </div>
-  </td>
+      {/* ================= TABLET VIEW ================= */}
+      <div className="hidden md:block lg:hidden p-4 space-y-4">
 
-  {/* CATEGORY */}
-  <td className="p-5">{ticket.category}</td>
+        {paginatedTickets.length === 0 && (
+          <p className="text-center text-gray-500">
+            No tickets found
+          </p>
+        )}
 
-  {/* STATUS */}
-  <td className="p-5">
-    <span
-      className={`px-2 py-1 rounded text-xs
-        ${ticket.status === "Open" && "bg-orange-100 text-orange-600"}
-        ${ticket.status === "In Progress" && "bg-blue-100 text-blue-600"}
-        ${ticket.status === "Resolved" && "bg-green-100 text-green-600"}
-      `}
-    >
-      {ticket.status}
-    </span>
-  </td>
+        {paginatedTickets.map((ticket) => (
+          <div
+            key={ticket.ticketId}
+            className="border rounded-xl p-4 shadow-sm"
+          >
+            <div className="flex justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold">
+                  {ticket.ticketId}
+                </p>
 
-  {/* DATE */}
-  <td className="p-5">{ticket.createdAt}</td>
+                <p
+                  className="text-sm text-blue-600 cursor-pointer hover:underline mt-1"
+                  onClick={() => {
+                    if (ticket.userId) {
+                      router.push(
+                        `/supportmanagement/user/${ticket.userId}`
+                      );
+                    }
+                  }}
+                >
+                  {ticket.userName || "N/A"}
+                </p>
+              </div>
 
-  {/* ACTION */}
-  <td className="p-5">
-    <button className="px-3 py-1 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-xs">
-      Assign
-    </button>
+              <span
+                className={`px-2 py-1 rounded h-fit text-xs font-medium ${getStatusStyle(
+                  ticket.status
+                )}`}
+              >
+                {ticket.status}
+              </span>
+            </div>
 
-    <button className="px-3 py-1 ml-2 bg-[#ffd8da] text-red-500 rounded-md text-xs">
-      Resolve
-    </button>
-  </td>
+            <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
+              <p>
+                <b>Category:</b> {ticket.category}
+              </p>
 
-</tr>
+              <p>
+                <b>Date:</b> {ticket.createdAt}
+              </p>
+            </div>
 
-          ))}
-        </tbody>
+            <div className="flex gap-2 mt-4">
+              <button className="px-3 py-1 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-xs">
+                Assign
+              </button>
 
-      </table>
+              <button className="px-3 py-1 bg-[#ffd8da] text-red-500 rounded-md text-xs">
+                Resolve
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      {/* MOBILE VIEW */}
+      {/* ================= MOBILE VIEW ================= */}
       <div className="md:hidden p-4 space-y-3">
 
         {paginatedTickets.length === 0 && (
@@ -124,59 +204,68 @@ export default function SupportTable({ tickets }) {
         )}
 
         {paginatedTickets.map((ticket) => (
-
           <div
             key={ticket.ticketId}
             className="border rounded-lg p-4 shadow-sm"
           >
-            <p className="text-sm"><b>ID:</b> {ticket.ticketId}</p>
+            <div className="flex justify-between items-start gap-2">
+              <p className="text-sm font-semibold">
+                {ticket.ticketId}
+              </p>
 
-            <p
-              className="text-sm text-blue-600 cursor-pointer"
-              onClick={() => {
-                if (ticket.userId) {
-                  router.push(`/supportmanagement/user/${ticket.userId}`);
-                }
-              }}
-            >
-              <b>User:</b> {ticket.userName || "N/A"}
-            </p>
-
-            <p className="text-sm"><b>Category:</b> {ticket.category}</p>
-
-            <p className="text-sm">
-              <b>Status:</b>{" "}
               <span
-                className={`px-2 py-1 rounded text-xs
-                  ${ticket.status === "Open" && "bg-orange-100 text-orange-600"}
-                  ${ticket.status === "In Progress" && "bg-blue-100 text-blue-600"}
-                  ${ticket.status === "Resolved" && "bg-green-100 text-green-600"}
-                `}
+                className={`px-2 py-1 rounded text-[10px] font-medium ${getStatusStyle(
+                  ticket.status
+                )}`}
               >
                 {ticket.status}
               </span>
+            </div>
+
+            <p
+              className="text-sm text-blue-600 cursor-pointer mt-2"
+              onClick={() => {
+                if (ticket.userId) {
+                  router.push(
+                    `/supportmanagement/user/${ticket.userId}`
+                  );
+                }
+              }}
+            >
+              {ticket.userName || "N/A"}
             </p>
 
-            <p className="text-sm"><b>Date:</b> {ticket.createdAt}</p>
+            <p className="text-sm mt-2">
+              <b>Category:</b> {ticket.category}
+            </p>
 
-            <button className="mt-2 px-3 py-1 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-xs">
-              Assign
-            </button>
+            <p className="text-sm mt-1">
+              <b>Date:</b> {ticket.createdAt}
+            </p>
+
+            <div className="flex gap-2 mt-3 flex-wrap">
+              <button className="px-3 py-1 bg-[#E6D8FF] text-[#6B47DC] rounded-md text-xs">
+                Assign
+              </button>
+
+              <button className="px-3 py-1 bg-[#ffd8da] text-red-500 rounded-md text-xs">
+                Resolve
+              </button>
+            </div>
           </div>
-
         ))}
-
       </div>
 
       {/* PAGINATION */}
-      <Pagination
-        page={page}
-        setPage={setPage}
-        totalPages={totalPages}
-        tickets={tickets}
-        rowsPerPage={rowsPerPage}
-      />
-
+      <div className="px-2 md:px-4 pb-2">
+        <Pagination
+          page={page}
+          setPage={setPage}
+          totalPages={totalPages}
+          tickets={tickets}
+          rowsPerPage={rowsPerPage}
+        />
+      </div>
     </div>
   );
 }
