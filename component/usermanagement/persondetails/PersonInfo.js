@@ -3,26 +3,29 @@
 import { useEffect, useState } from "react";
 import { axiosInstance } from "@/config/axios";
 import EditPersonModal from "./editpersonmodal.js/EditPersonModal";
-
 export default function PersonInfo({ userId }) {
   const [person, setPerson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      console.warn("PersonInfo: userId is undefined or null");
+      setLoading(false);
+      return;
+    }
 
     const fetchPerson = async () => {
       try {
         setLoading(true);
+        console.log("Fetching person for userId:", userId);
 
-        const res = await axiosInstance.get(
-          `/admin/person/${userId}`
-        );
+        const res = await axiosInstance.get(`/admin/person/${userId}`);
 
+        console.log("Person API response:", res.data);
         setPerson(res.data?.person || null);
       } catch (error) {
-        console.error("❌ Failed to fetch person", error);
+        console.error("Failed to fetch person:", error);
         setPerson(null);
       } finally {
         setLoading(false);
@@ -32,22 +35,12 @@ export default function PersonInfo({ userId }) {
     fetchPerson();
   }, [userId]);
 
-  /* LOADING */
   if (loading) {
-    return (
-      <p className="text-sm text-gray-500 mt-4">
-        Loading person...
-      </p>
-    );
+    return <p className="text-sm text-gray-500 mt-4">Loading person...</p>;
   }
 
-  /* EMPTY */
   if (!person) {
-    return (
-      <p className="text-sm text-gray-500 mt-4">
-        No person data found
-      </p>
-    );
+    return <p className="text-sm text-gray-500 mt-4">No person data found</p>;
   }
 
   return (
@@ -59,7 +52,6 @@ export default function PersonInfo({ userId }) {
           <h2 className="text-base md:text-lg font-semibold text-green-800">
             👤 Person Information
           </h2>
-
           <button
             onClick={() => setShowEdit(true)}
             className="border px-4 py-2 rounded-md text-sm hover:bg-gray-100 w-full sm:w-auto"
@@ -76,19 +68,24 @@ export default function PersonInfo({ userId }) {
             <Field label="First Name" value={person.firstName} />
             <Field label="Last Name" value={person.lastName} />
             <Field label="Gender" value={person.gender} />
-            <Field label="Birth Date" value={person.birthDate} />
-
+            <Field
+              label="Birth Date"
+              value={
+                person.birthDate
+                  ? new Date(person.birthDate).toLocaleDateString()
+                  : null
+              }
+            />
             <Field
               label="Living Status"
               value={
                 person.living === undefined || person.living === null
-                  ? "—"
+                  ? null
                   : person.living
                   ? "Yes"
                   : "No"
               }
             />
-
             <Field label="Marital Status" value={person.maritalStatus} />
             <Field label="Children Count" value={person.childrenCount} />
             <Field label="Spouse Count" value={person.spouseCount} />
@@ -99,11 +96,9 @@ export default function PersonInfo({ userId }) {
             <Field label="Birth City" value={person.birthCity} />
             <Field label="Birth State" value={person.birthState} />
             <Field label="Birth Country" value={person.birthCountry} />
-
             <Field label="Residence City" value={person.residenceCity} />
             <Field label="Residence State" value={person.residenceState} />
             <Field label="Residence Country" value={person.residenceCountry} />
-
             <Field label="Occupation" value={person.occupation} />
             <Field label="Religion" value={person.religion} />
             <Field label="Community" value={person.community} />
@@ -128,13 +123,12 @@ export default function PersonInfo({ userId }) {
   );
 }
 
-/* FIELD */
 function Field({ label, value }) {
   return (
     <div>
       <p className="text-xs text-gray-500">{label}</p>
       <p className="text-sm font-medium text-gray-900 break-words">
-        {value ?? "—"}
+        {value !== undefined && value !== null && value !== "" ? value : "—"}
       </p>
     </div>
   );

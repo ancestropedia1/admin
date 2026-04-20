@@ -4,38 +4,31 @@ import { useState } from "react";
 import { X, User } from "lucide-react";
 import { axiosInstance } from "@/config/axios";
 
-export default function EditPersonModal({
-  person,
-  userId,
-  onClose,
-  onUpdate,
-}) {
+export default function EditPersonModal({ person, userId, onClose, onUpdate }) {
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
     firstName: person?.firstName || "",
     lastName: person?.lastName || "",
     gender: person?.gender || "",
-    birthDate: person?.birthDate || "",
+    birthDate: person?.birthDate
+      ? new Date(person.birthDate).toISOString().split("T")[0]
+      : "",
     living:
       person?.living === true
         ? "true"
         : person?.living === false
         ? "false"
         : "",
-
     maritalStatus: person?.maritalStatus || "",
     childrenCount: person?.childrenCount ?? "",
     spouseCount: person?.spouseCount ?? "",
-
     birthCity: person?.birthCity || "",
     birthState: person?.birthState || "",
     birthCountry: person?.birthCountry || "",
-
     residenceCity: person?.residenceCity || "",
     residenceState: person?.residenceState || "",
     residenceCountry: person?.residenceCountry || "",
-
     occupation: person?.occupation || "",
     religion: person?.religion || "",
     community: person?.community || "",
@@ -43,47 +36,30 @@ export default function EditPersonModal({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
     try {
       setSaving(true);
 
-      // ✅ Clean payload for backend
       const payload = {
         ...form,
-        living:
-          form.living === ""
-            ? undefined
-            : form.living === "true",
-        childrenCount:
-          form.childrenCount === ""
-            ? 0
-            : Number(form.childrenCount),
-        spouseCount:
-          form.spouseCount === ""
-            ? 0
-            : Number(form.spouseCount),
+        living: form.living === "" ? undefined : form.living === "true",
+        childrenCount: form.childrenCount === "" ? 0 : Number(form.childrenCount),
+        spouseCount: form.spouseCount === "" ? 0 : Number(form.spouseCount),
       };
 
-      const res = await axiosInstance.put(
-        `/admin/person/${userId}`,
-        payload
-      );
+      const res = await axiosInstance.put(`/admin/person/${userId}`, payload);
 
-      onUpdate?.(res.data.person);
-      onClose?.();
+      if (res.data?.person) {
+        onUpdate?.(res.data.person);
+      } else {
+        throw new Error("Invalid response from server");
+      }
     } catch (error) {
-      console.error("Person update failed", error);
-      alert(
-        error?.response?.data?.message ||
-          "Failed to update person ❌"
-      );
+      console.error("Person update failed:", error);
+      alert(error?.response?.data?.message || "Failed to update person ❌");
     } finally {
       setSaving(false);
     }
@@ -92,13 +68,11 @@ export default function EditPersonModal({
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex justify-center items-center p-3">
       <div className="bg-white w-full max-w-[520px] max-h-[90vh] overflow-y-auto rounded-lg p-4 shadow-md">
+
         {/* HEADER */}
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-base font-semibold">
-            Update Person Info
-          </h2>
-
-          <button onClick={onClose}>
+          <h2 className="text-base font-semibold">Update Person Info</h2>
+          <button onClick={onClose} disabled={saving}>
             <X size={18} className="cursor-pointer" />
           </button>
         </div>
@@ -111,38 +85,23 @@ export default function EditPersonModal({
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {/* BASIC */}
-            <Input
-              label="First Name"
-              name="firstName"
-              value={form.firstName}
-              onChange={handleChange}
-            />
 
-            <Input
-              label="Last Name"
-              name="lastName"
-              value={form.lastName}
-              onChange={handleChange}
-            />
-
+            <Input label="First Name" name="firstName" value={form.firstName} onChange={handleChange} />
+            <Input label="Last Name" name="lastName" value={form.lastName} onChange={handleChange} />
             <Select
               label="Gender"
               name="gender"
               value={form.gender}
               onChange={handleChange}
+              options={[
+                { label: "Male", value: "male" },
+                { label: "Female", value: "female" },
+                { label: "Others", value: "others" },
+              ]}
             />
-
-            <Input
-              label="Birth Date"
-              name="birthDate"
-              value={form.birthDate}
-              onChange={handleChange}
-              type="date"
-            />
-
+            <Input label="Birth Date" name="birthDate" value={form.birthDate} onChange={handleChange} type="date" />
             <Select
-              label="Living"
+              label="Living Status"
               name="living"
               value={form.living}
               onChange={handleChange}
@@ -151,99 +110,36 @@ export default function EditPersonModal({
                 { label: "No", value: "false" },
               ]}
             />
-
-            <Input
+            <Select
               label="Marital Status"
               name="maritalStatus"
               value={form.maritalStatus}
               onChange={handleChange}
+              options={[
+                { label: "Single", value: "single" },
+                { label: "Married", value: "married" },
+                { label: "Divorced", value: "divorced" },
+                { label: "Widowed", value: "widowed" },
+              ]}
             />
+            <Input label="Children Count" name="childrenCount" value={form.childrenCount} onChange={handleChange} type="number" />
+            <Input label="Spouse Count" name="spouseCount" value={form.spouseCount} onChange={handleChange} type="number" />
 
-            <Input
-              label="Children Count"
-              name="childrenCount"
-              value={form.childrenCount}
-              onChange={handleChange}
-              type="number"
-            />
+            <Input label="Birth City" name="birthCity" value={form.birthCity} onChange={handleChange} />
+            <Input label="Birth State" name="birthState" value={form.birthState} onChange={handleChange} />
+            <Input label="Birth Country" name="birthCountry" value={form.birthCountry} onChange={handleChange} />
 
-            <Input
-              label="Spouse Count"
-              name="spouseCount"
-              value={form.spouseCount}
-              onChange={handleChange}
-              type="number"
-            />
+            <Input label="Residence City" name="residenceCity" value={form.residenceCity} onChange={handleChange} />
+            <Input label="Residence State" name="residenceState" value={form.residenceState} onChange={handleChange} />
+            <Input label="Residence Country" name="residenceCountry" value={form.residenceCountry} onChange={handleChange} />
 
-            {/* BIRTH */}
-            <Input
-              label="Birth City"
-              name="birthCity"
-              value={form.birthCity}
-              onChange={handleChange}
-            />
-
-            <Input
-              label="Birth State"
-              name="birthState"
-              value={form.birthState}
-              onChange={handleChange}
-            />
-
-            <Input
-              label="Birth Country"
-              name="birthCountry"
-              value={form.birthCountry}
-              onChange={handleChange}
-            />
-
-            {/* RESIDENCE */}
-            <Input
-              label="Residence City"
-              name="residenceCity"
-              value={form.residenceCity}
-              onChange={handleChange}
-            />
-
-            <Input
-              label="Residence State"
-              name="residenceState"
-              value={form.residenceState}
-              onChange={handleChange}
-            />
-
-            <Input
-              label="Residence Country"
-              name="residenceCountry"
-              value={form.residenceCountry}
-              onChange={handleChange}
-            />
-
-            {/* OTHER */}
-            <Input
-              label="Occupation"
-              name="occupation"
-              value={form.occupation}
-              onChange={handleChange}
-            />
-
-            <Input
-              label="Religion"
-              name="religion"
-              value={form.religion}
-              onChange={handleChange}
-            />
-
-            <Input
-              label="Community"
-              name="community"
-              value={form.community}
-              onChange={handleChange}
-            />
+            <Input label="Occupation" name="occupation" value={form.occupation} onChange={handleChange} />
+            <Input label="Religion" name="religion" value={form.religion} onChange={handleChange} />
+            <Input label="Community" name="community" value={form.community} onChange={handleChange} />
           </div>
         </div>
 
-        {/* ACTION */}
+        {/* ACTIONS */}
         <div className="flex justify-end gap-2 mt-4">
           <button
             onClick={handleSave}
@@ -252,11 +148,10 @@ export default function EditPersonModal({
           >
             {saving ? "Saving..." : "Save →"}
           </button>
-
           <button
             onClick={onClose}
             disabled={saving}
-            className="px-4 py-1.5 border rounded-md text-sm"
+            className="px-4 py-1.5 border rounded-md text-sm disabled:opacity-60"
           >
             Cancel
           </button>
@@ -266,66 +161,38 @@ export default function EditPersonModal({
   );
 }
 
-/* INPUT */
-function Input({
-  label,
-  name,
-  value,
-  onChange,
-  type = "text",
-}) {
+function Input({ label, name, value, onChange, type = "text" }) {
   return (
     <div>
-      <label className="text-[11px] text-gray-500">
-        {label}
-      </label>
-
+      <label className="text-[11px] text-gray-500">{label}</label>
       <input
         type={type}
         name={name}
         value={value ?? ""}
         onChange={onChange}
-        className="w-full border mt-1 p-1.5 rounded-md text-xs"
+        min={type === "number" ? 0 : undefined}
+        className="w-full border mt-1 p-1.5 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-green-400"
       />
     </div>
   );
 }
 
-/* SELECT */
-function Select({
-  label,
-  name,
-  value,
-  onChange,
-  options,
-}) {
+function Select({ label, name, value, onChange, options = [] }) {
   return (
     <div>
-      <label className="text-[11px] text-gray-500">
-        {label}
-      </label>
-
+      <label className="text-[11px] text-gray-500">{label}</label>
       <select
         name={name}
         value={value ?? ""}
         onChange={onChange}
-        className="w-full border mt-1 p-1.5 rounded-md text-xs"
+        className="w-full border mt-1 p-1.5 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-green-400"
       >
         <option value="">Select</option>
-
-        {options ? (
-          options.map((opt, i) => (
-            <option key={i} value={opt.value}>
-              {opt.label}
-            </option>
-          ))
-        ) : (
-          <>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="others">Others</option>
-          </>
-        )}
+        {options.map((opt, i) => (
+          <option key={i} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
       </select>
     </div>
   );
