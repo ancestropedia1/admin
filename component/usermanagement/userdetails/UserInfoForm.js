@@ -11,6 +11,11 @@ import ParentsInfo from "../persondetails/ParentsInfo";
 import SpouseInfo from "../persondetails/SpouseInfo";
 import ChildrenInfo from "../persondetails/ChildrenInfo";
 
+/* ✅ NEW COMPONENTS */
+import SiblingsInfo from "../persondetails/SiblingsInfo";
+import DNAReport from "../persondetails/DNAReport";
+import AccountHistory from "../persondetails/AccountHistory";
+
 export default function UserInfoForm() {
   const router = useRouter();
   const params = useParams();
@@ -50,6 +55,9 @@ export default function UserInfoForm() {
     "Parent’s Information",
     "Spouse Information",
     "Children’s Information",
+    "Siblings Information",
+    "DNA Report",
+    "Account History",
   ];
 
   return (
@@ -64,6 +72,7 @@ export default function UserInfoForm() {
           <img
             src={user.profilePicture || "/avatar-placeholder.png"}
             className="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover border-2 border-orange-500"
+            alt="profile"
           />
 
           <div className="w-full">
@@ -77,9 +86,9 @@ export default function UserInfoForm() {
 
             {/* INFO */}
             <div className="flex flex-wrap gap-3 text-[11px] md:text-xs text-gray-700 mt-2">
-              <span>📅 Born: —</span>
-              <span>📍 —</span>
-              <span>💼 —</span>
+              <span>📅 Born: {user.dateOfBirth || "—"}</span>
+              <span>📍 {user.birthCity || "—"}</span>
+              <span>💼 {user.profession || "—"}</span>
             </div>
 
             {/* STATUS */}
@@ -103,7 +112,7 @@ export default function UserInfoForm() {
         </button>
       </div>
 
-      {/* ✅ TABS (SCROLLABLE) */}
+      {/* ✅ TABS */}
       <div className="flex gap-6 border-b mt-6 text-xs md:text-sm overflow-x-auto whitespace-nowrap">
         {tabs.map((tab) => (
           <button
@@ -142,11 +151,13 @@ export default function UserInfoForm() {
             <div className="space-y-3 md:space-y-4">
               <Field label="First Name" value={user.firstName} />
               <Field label="Last Name" value={user.lastName} />
+              <Field label="Phone" value={user.phone} />
             </div>
 
             <div className="space-y-3 md:space-y-4">
               <Field label="Email" value={user.email} />
               <Field label="Gender" value={user.gender} />
+              <Field label="Profession" value={user.profession} />
             </div>
 
           </div>
@@ -168,6 +179,19 @@ export default function UserInfoForm() {
 
       {activeTab === "Children’s Information" && (
         <ChildrenInfo userId={id} />
+      )}
+
+      {/* ✅ NEW ADDED TABS */}
+      {activeTab === "Siblings Information" && (
+        <SiblingsInfo userId={id} />
+      )}
+
+      {activeTab === "DNA Report" && (
+        <DNAReport userId={id} />
+      )}
+
+      {activeTab === "Account History" && (
+        <AccountHistory userId={id} />
       )}
 
       {/* ✅ MODAL */}
