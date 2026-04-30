@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Eye,
   Printer,
@@ -8,24 +8,40 @@ import {
   ChevronDown,
 } from "lucide-react";
 
+import { axiosInstance } from "@/config/axios";
 import Pagination from "./Pagination";
 import OrderDetailsModal from "./OrderDetailsModal";
 
-const data = [
-  {
-    id: "#701637",
-    name: "John Doe",
-    userId: "ID-813764",
-    frame: "Canvas Print",
-    size: "80*180 cm",
-    price: "Rs. 12,99",
-    date: "12/05/2025",
-    status: "Dispatched",
-  },
-];
-
 export default function OrderList() {
+  const [orders, setOrders] = useState([]);
   const [open, setOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({});
+
+  // 🔥 Fetch orders from backend
+  const fetchOrders = async () => {
+    try {
+      const res = await axiosInstance.get("/admin/wallart/orders", {
+        params: {
+          page,
+          limit: 10,
+        },
+      });
+
+      if (res.data.success) {
+        setOrders(res.data.data);
+        setPagination(res.data.pagination);
+      }
+    } catch (error) {
+      console.error("Fetch orders error:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [page]);
 
   return (
     <>
@@ -47,45 +63,71 @@ export default function OrderList() {
           <p>Action</p>
         </div>
 
-        {data.map((item, i) => (
-          <div
-            key={i}
-            className="grid grid-cols-8 px-6 py-4 items-center text-sm border-b bg-white"
-          >
-            <p>{item.id}</p>
+        {/* Data */}
+        {orders.length > 0 ? (
+          orders.map((item, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-8 px-6 py-4 items-center text-sm border-b bg-white"
+            >
+              <p>{item.orderId}</p>
 
-            <div>
-              <p className="font-medium">{item.name}</p>
-              <p className="text-xs text-gray-500">{item.userId}</p>
+              <div>
+                <p className="font-medium">{item.userId?.name}</p>
+                <p className="text-xs text-gray-500">
+                  {item.userId?._id}
+                </p>
+              </div>
+
+              <p>{item.frameType || "-"}</p>
+              <p>{item.size || "-"}</p>
+              <p className="text-[#A45B32] font-medium">
+                ₹{item.totalPrice}
+              </p>
+
+              <p>
+                {new Date(item.createdAt).toLocaleDateString()}
+              </p>
+
+              {/* Status */}
+              <button className="border rounded px-3 py-1 flex items-center gap-2 text-xs bg-white capitalize">
+                {item.adminStatus || "received"}
+                <ChevronDown size={14} />
+              </button>
+
+              {/* Actions */}
+              <div className="flex gap-3 text-gray-600">
+                <Eye
+                  size={16}
+                  onClick={() => {
+                    setSelectedOrder(item);
+                    setOpen(true);
+                  }}
+                  className="cursor-pointer hover:text-black"
+                />
+                <Printer size={16} className="cursor-pointer" />
+                <Truck size={16} className="cursor-pointer" />
+              </div>
             </div>
+          ))
+        ) : (
+          <p className="text-center py-6">No orders found</p>
+        )}
 
-            <p>{item.frame}</p>
-            <p>{item.size}</p>
-            <p className="text-[#A45B32] font-medium">{item.price}</p>
-            <p>{item.date}</p>
-
-            <button className="border rounded px-3 py-1 flex items-center gap-2 text-xs bg-white">
-              {item.status}
-              <ChevronDown size={14} />
-            </button>
-
-            <div className="flex gap-3 text-gray-600">
-              <Eye
-                size={16}
-                onClick={() => setOpen(true)}
-                className="cursor-pointer hover:text-black"
-              />
-              <Printer size={16} className="cursor-pointer" />
-              <Truck size={16} className="cursor-pointer" />
-            </div>
-          </div>
-        ))}
-
-        <Pagination />
+        {/* Pagination */}
+        <Pagination
+          page={page}
+          setPage={setPage}
+          totalPages={pagination.pages || 1}
+        />
       </div>
 
       {/* MODAL */}
-      <OrderDetailsModal open={open} setOpen={setOpen} />
+      <OrderDetailsModal
+        open={open}
+        setOpen={setOpen}
+        order={selectedOrder}
+      />
     </>
   );
 }
