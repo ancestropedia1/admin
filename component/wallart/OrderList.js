@@ -10,7 +10,7 @@ import {
 
 import { axiosInstance } from "@/config/axios";
 import Pagination from "./Pagination";
-import OrderDetailsModal from "./OrderDetailsModal";
+import OrderDetailsModal from "./wall-art-tabs/OrderDetailsModal";
 
 export default function OrderList() {
   const [orders, setOrders] = useState([]);
