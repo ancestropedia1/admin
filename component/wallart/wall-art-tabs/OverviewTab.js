@@ -1,6 +1,41 @@
 "use client";
 
-export default function OverviewTab({ order }) {
+import { useEffect, useState } from "react";
+import { axiosInstance } from "@/config/axios";
+
+export default function OverviewTab({ orderId }) {
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // 🔥 FETCH ORDER
+  const fetchOrder = async () => {
+    try {
+      setLoading(true);
+
+      const res = await axiosInstance.get(
+        `/admin/wallart/orders/${orderId}`
+      );
+
+      setOrder(res.data.data);
+    } catch (err) {
+      console.error("Failed to fetch order", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (orderId) fetchOrder();
+  }, [orderId]);
+
+  if (loading) {
+    return <p className="text-gray-500">Loading...</p>;
+  }
+
+  if (!order) {
+    return <p className="text-red-500">Order not found</p>;
+  }
+
   const timeline = order.adminTimeline || [];
 
   return (
@@ -20,13 +55,10 @@ export default function OverviewTab({ order }) {
               timeline.map((t, i) => (
                 <div key={i} className="flex gap-4">
 
-                  {/* DOT + LINE */}
                   <div className="flex flex-col items-center">
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs ${
-                        i === 0
-                          ? "bg-gray-400"
-                          : "bg-green-600"
+                        i === 0 ? "bg-gray-400" : "bg-green-600"
                       }`}
                     >
                       ✓
@@ -37,7 +69,6 @@ export default function OverviewTab({ order }) {
                     )}
                   </div>
 
-                  {/* TEXT */}
                   <div>
                     <p className="font-medium capitalize text-gray-800">
                       {t.status.replaceAll("_", " ")}
@@ -93,7 +124,7 @@ export default function OverviewTab({ order }) {
             <div>
               <p className="text-gray-400">Shipping Address</p>
               <p className="font-medium">
-                {order.addressId?.fullAddress || "-"}
+                {order.address?.fullAddress || "-"}
               </p>
             </div>
 
@@ -125,7 +156,6 @@ export default function OverviewTab({ order }) {
       {/* ================= BOTTOM SECTION ================= */}
       <div className="grid md:grid-cols-2 gap-6">
 
-        {/* 🔥 FAMILY TREE PREVIEW */}
         <div className="border rounded-xl p-5">
           <h3 className="text-lg font-semibold mb-4">
             {order.treeName || "Family Tree"}
@@ -136,7 +166,6 @@ export default function OverviewTab({ order }) {
           </div>
         </div>
 
-        {/* 🔥 QUOTES */}
         <div className="border rounded-xl p-5">
           <h3 className="text-lg font-semibold mb-4">
             Quotes

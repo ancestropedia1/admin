@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import { axiosInstance } from "@/config/axios";
+import toast from "react-hot-toast";
 
-export default function AssignLabTab() {
+export default function AssignLabTab({ order, refreshOrder }) {
   const [selectedLab, setSelectedLab] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const labs = [
     "YRS Printing Agency",
@@ -11,6 +14,35 @@ export default function AssignLabTab() {
     "Alpha Painting House",
     "Astha Printing Lab",
   ];
+
+  // 🔥 ASSIGN LAB API
+  const handleAssignLab = async () => {
+    if (!selectedLab) return toast.error("Please select a lab");
+
+    try {
+      setLoading(true);
+
+      await axiosInstance.put(
+        `/admin/wallart/orders/${order.orderId}/assign-lab`,
+        {
+          labId: selectedLab,
+          labName: selectedLab,
+        }
+      );
+
+      toast.success("Lab assigned successfully");
+
+      // 🔥 refresh parent order (important)
+      if (refreshOrder) refreshOrder();
+
+      setSelectedLab("");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to assign lab");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="grid md:grid-cols-2 gap-6">
@@ -20,6 +52,7 @@ export default function AssignLabTab() {
         <img
           src="https://images.unsplash.com/photo-1581091215367-59ab6b6c6f53"
           className="w-full h-56 object-cover rounded-xl"
+          alt="lab"
         />
       </div>
 
@@ -59,8 +92,12 @@ export default function AssignLabTab() {
         </div>
 
         {/* BUTTON */}
-        <button className="mt-5 bg-[#25543E] text-white px-4 py-2 rounded-md text-sm">
-          Assign Agency
+        <button
+          onClick={handleAssignLab}
+          disabled={loading}
+          className="mt-5 w-full bg-[#25543E] text-white px-4 py-2 rounded-md text-sm disabled:opacity-50"
+        >
+          {loading ? "Assigning..." : "Assign Agency"}
         </button>
       </div>
     </div>
