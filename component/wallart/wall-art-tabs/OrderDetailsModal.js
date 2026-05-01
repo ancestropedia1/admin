@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
 import OverviewTab from "./OverviewTab";
@@ -11,7 +11,14 @@ import Tabs from "./Tabs";
 export default function OrderDetailsModal({ open, setOpen, order }) {
   const [activeTab, setActiveTab] = useState("overview");
 
-  if (!open || !order) return null;
+  // ✅ FIX: Reset tab when modal opens
+  useEffect(() => {
+    if (open) {
+      setActiveTab("overview");
+    }
+  }, [open]);
+
+  if (!open) return null;
 
   const tabs = [
     { id: "overview", label: "Order Overview" },
@@ -27,11 +34,11 @@ export default function OrderDetailsModal({ open, setOpen, order }) {
         <div className="flex justify-between items-center border-b px-6 py-4">
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold">
-              Order #{order.orderId}
+              Order #{order?.orderId || "N/A"}
             </h2>
 
             <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-md capitalize">
-              {order.adminStatus}
+              {order?.adminStatus || "pending"}
             </span>
           </div>
 
@@ -40,7 +47,7 @@ export default function OrderDetailsModal({ open, setOpen, order }) {
           </button>
         </div>
 
-        {/* 🔥 TABS COMPONENT */}
+        {/* TABS */}
         <div className="px-6 py-4 border-b">
           <Tabs
             tabs={tabs}
@@ -49,7 +56,7 @@ export default function OrderDetailsModal({ open, setOpen, order }) {
           />
         </div>
 
-        {/* 🔥 CONTENT SWITCH */}
+        {/* CONTENT */}
         <div className="p-6">
 
           {activeTab === "overview" && (
@@ -57,11 +64,11 @@ export default function OrderDetailsModal({ open, setOpen, order }) {
           )}
 
           {activeTab === "status" && (
-            <UpdateStatusTab order={order} />
+            <UpdateStatusTab />
           )}
 
           {activeTab === "lab" && (
-            <AssignLabTab order={order} />
+            <AssignLabTab />
           )}
 
         </div>
