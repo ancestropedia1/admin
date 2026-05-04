@@ -6,9 +6,9 @@ import { axiosInstance } from "@/config/axios";
 
 import OverviewTab from "./OverviewTab";
 import UpdateStatusTab from "./UpdateStatusTab";
-import AssignLabTab from "./AssignLabTab";
+import AssignLabTab from "./printingAgency";
 import Tabs from "./Tabs";
-import AssignPrintingAgencyTab from "./AssignLabTab";
+import AssignPrintingAgencyTab from "./printingAgency";
 
 export default function OrderDetailsModal({ open, setOpen, order }) {
   const [activeTab, setActiveTab] = useState("overview");
