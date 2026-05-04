@@ -5,11 +5,11 @@ import { axiosInstance } from "@/config/axios";
 import toast from "react-hot-toast";
 
 export default function UpdateStatusTab({ order, refreshOrder }) {
-  const [selectedStatus, setSelectedStatus] = useState("");
+  // ✅ FIX: Pre-select the current adminStatus so admin sees where order is
+  const [selectedStatus, setSelectedStatus] = useState(order?.adminStatus || "");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ Timeline sorted latest-first from backend
   const timeline = order?.adminTimeline || [];
 
   const statuses = [
@@ -19,8 +19,31 @@ export default function UpdateStatusTab({ order, refreshOrder }) {
     { label: "Delivered",      value: "delivered" },
   ];
 
+  // ✅ FIX: Map status to step number for progress comparison
+  const statusStep = {
+    received:   1,
+    preparing:  2,
+    dispatched: 3,
+    delivered:  4,
+  };
+
+  const currentStep  = statusStep[order?.adminStatus] || 0;
+  const selectedStep = statusStep[selectedStatus] || 0;
+
   const handleUpdateStatus = async () => {
     if (!selectedStatus) return toast.error("Please select a status");
+
+    // ✅ FIX: Warn if admin tries to go backwards
+    if (selectedStep < currentStep) {
+      toast.error("Cannot set status to a previous step");
+      return;
+    }
+
+    // ✅ FIX: Warn if same status selected
+    if (selectedStatus === order?.adminStatus) {
+      toast.error("Order is already in this status");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -32,10 +55,8 @@ export default function UpdateStatusTab({ order, refreshOrder }) {
 
       toast.success("Status updated successfully");
 
-      // 🔥 Refresh parent modal data
       if (refreshOrder) await refreshOrder();
 
-      setSelectedStatus("");
       setNote("");
     } catch (err) {
       console.error(err);
@@ -50,25 +71,18 @@ export default function UpdateStatusTab({ order, refreshOrder }) {
 
       {/* ================= LEFT: TIMELINE ================= */}
       <div className="border rounded-xl p-5">
-        <h3 className="text-lg font-semibold mb-5">
-          Order Status Timeline
-        </h3>
+        <h3 className="text-lg font-semibold mb-5">Order Status Timeline</h3>
 
         <div className="space-y-6">
           {timeline.length > 0 ? (
             timeline.map((t, i) => (
               <div key={i} className="flex gap-4">
-
                 <div className="flex flex-col items-center">
-                  {/* ✅ FIX: i === 0 is LATEST → GREEN */}
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs ${
-                      i === 0 ? "bg-green-600" : "bg-gray-300"
-                    }`}
-                  >
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs ${
+                    i === 0 ? "bg-green-600" : "bg-gray-300"
+                  }`}>
                     ✓
                   </div>
-
                   {i !== timeline.length - 1 && (
                     <div className="w-[2px] h-10 bg-gray-300 mt-1" />
                   )}
@@ -88,12 +102,9 @@ export default function UpdateStatusTab({ order, refreshOrder }) {
                     })}
                   </p>
                   {t.note && (
-                    <p className="text-xs text-gray-500 italic mt-0.5">
-                      {t.note}
-                    </p>
+                    <p className="text-xs text-gray-500 italic mt-0.5">{t.note}</p>
                   )}
                 </div>
-
               </div>
             ))
           ) : (
@@ -112,19 +123,51 @@ export default function UpdateStatusTab({ order, refreshOrder }) {
 
         {/* OPTIONS */}
         <div className="divide-y flex-1">
-          {statuses.map((status) => (
-            <div
-              key={status.value}
-              onClick={() => setSelectedStatus(status.value)}
-              className={`py-4 text-center cursor-pointer transition-colors ${
-                selectedStatus === status.value
-                  ? "bg-green-50 text-green-800 font-semibold"
-                  : "hover:bg-gray-50 text-gray-700"
-              }`}
-            >
-              {status.label}
-            </div>
-          ))}
+          {statuses.map((status) => {
+            const isCurrentStatus = status.value === order?.adminStatus;
+            const isSelected      = status.value === selectedStatus;
+            const isPast          = statusStep[status.value] < currentStep;
+
+            return (
+              <div
+                key={status.value}
+                onClick={() => !isPast && setSelectedStatus(status.value)}
+                className={`py-4 px-4 flex items-center justify-between transition-colors ${
+                  isPast
+                    // ✅ Past steps: greyed out, not clickable
+                    ? "bg-gray-50 text-gray-300 cursor-not-allowed"
+                    : isSelected && isCurrentStatus
+                    // ✅ Currently active status selected
+                    ? "bg-green-50 text-green-800 font-semibold cursor-pointer"
+                    : isSelected
+                    // ✅ New status selected (different from current)
+                    ? "bg-blue-50 text-blue-800 font-semibold cursor-pointer"
+                    : "hover:bg-gray-50 text-gray-700 cursor-pointer"
+                }`}
+              >
+                <span>{status.label}</span>
+
+                <span className="flex items-center gap-2 text-xs">
+                  {/* ✅ Badge showing current active status */}
+                  {isCurrentStatus && (
+                    <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                      Current
+                    </span>
+                  )}
+                  {/* ✅ Badge showing newly selected status */}
+                  {isSelected && !isCurrentStatus && (
+                    <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                      Selected
+                    </span>
+                  )}
+                  {/* ✅ Checkmark for past completed steps */}
+                  {isPast && (
+                    <span className="text-gray-300">✓ Done</span>
+                  )}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
         {/* OPTIONAL NOTE */}
@@ -142,10 +185,17 @@ export default function UpdateStatusTab({ order, refreshOrder }) {
         <div className="p-4">
           <button
             onClick={handleUpdateStatus}
-            disabled={loading || !selectedStatus}
+            disabled={
+              loading ||
+              !selectedStatus ||
+              selectedStatus === order?.adminStatus ||
+              selectedStep < currentStep
+            }
             className="w-full bg-[#25543E] text-white py-2 rounded-lg font-medium disabled:opacity-40 transition-opacity"
           >
-            {loading ? "Updating..." : "Update Status"}
+            {loading ? "Updating..." : `Move to ${
+              statuses.find(s => s.value === selectedStatus)?.label || "..."
+            }`}
           </button>
         </div>
 
