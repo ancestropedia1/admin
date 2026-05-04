@@ -1,41 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { axiosInstance } from "@/config/axios";
+// ✅ FIX: OverviewTab now receives the full `order` object as a prop
+// from OrderDetailsModal — no more duplicate fetching or orderId mismatch.
 
-export default function OverviewTab({ orderId }) {
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // 🔥 FETCH ORDER
-  const fetchOrder = async () => {
-    try {
-      setLoading(true);
-
-      const res = await axiosInstance.get(
-        `/admin/wallart/orders/${orderId}`
-      );
-
-      setOrder(res.data.data);
-    } catch (err) {
-      console.error("Failed to fetch order", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (orderId) fetchOrder();
-  }, [orderId]);
-
-  if (loading) {
-    return <p className="text-gray-500">Loading...</p>;
-  }
-
+export default function OverviewTab({ order }) {
   if (!order) {
     return <p className="text-red-500">Order not found</p>;
   }
 
+  // ✅ FIX: Timeline sorted latest-first on backend already.
+  // Index 0 = most recent = GREEN (active)
+  // Last index = oldest = GRAY (past)
   const timeline = order.adminTimeline || [];
 
   return (
@@ -56,9 +31,10 @@ export default function OverviewTab({ orderId }) {
                 <div key={i} className="flex gap-4">
 
                   <div className="flex flex-col items-center">
+                    {/* ✅ FIX: i === 0 is LATEST → GREEN */}
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs ${
-                        i === 0 ? "bg-gray-400" : "bg-green-600"
+                        i === 0 ? "bg-green-600" : "bg-gray-300"
                       }`}
                     >
                       ✓
@@ -70,17 +46,29 @@ export default function OverviewTab({ orderId }) {
                   </div>
 
                   <div>
-                    <p className="font-medium capitalize text-gray-800">
+                    <p className={`font-medium capitalize ${
+                      i === 0 ? "text-gray-900" : "text-gray-400"
+                    }`}>
                       {t.status.replaceAll("_", " ")}
                     </p>
                     <p className="text-xs text-gray-400">
-                      {new Date(t.updatedAt).toLocaleDateString()}
+                      {new Date(t.updatedAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </p>
+                    {t.note && (
+                      <p className="text-xs text-gray-500 mt-1 italic">
+                        {t.note}
+                      </p>
+                    )}
                   </div>
+
                 </div>
               ))
             ) : (
-              <p className="text-gray-400">No timeline</p>
+              <p className="text-gray-400">No timeline entries yet</p>
             )}
           </div>
         </div>
@@ -95,9 +83,7 @@ export default function OverviewTab({ orderId }) {
 
             <div>
               <p className="text-gray-400">Customer</p>
-              <p className="font-medium">
-                {order.userId?.name || "-"}
-              </p>
+              <p className="font-medium">{order.userId?.name || "-"}</p>
             </div>
 
             <div>
@@ -116,30 +102,25 @@ export default function OverviewTab({ orderId }) {
 
             <div>
               <p className="text-gray-400">Order Total</p>
-              <p className="font-medium">
-                ₹{order.totalPrice || 0}
-              </p>
+              <p className="font-medium">₹{order.totalPrice || 0}</p>
             </div>
 
             <div>
               <p className="text-gray-400">Shipping Address</p>
               <p className="font-medium">
-                {order.address?.fullAddress || "-"}
+                {/* ✅ address is populated from addressId via .populate("addressId") */}
+                {order.address?.fullAddress || order.address?.city || "-"}
               </p>
             </div>
 
             <div>
               <p className="text-gray-400">Family Tree</p>
-              <p className="font-medium">
-                {order.treeName || "-"}
-              </p>
+              <p className="font-medium">{order.treeName || "-"}</p>
             </div>
 
             <div>
               <p className="text-gray-400">Wall Art ID</p>
-              <p className="font-medium">
-                {order.wallArtId || "-"}
-              </p>
+              <p className="font-medium">{order.orderId || "-"}</p>
             </div>
 
             <div>
@@ -161,31 +142,33 @@ export default function OverviewTab({ orderId }) {
             {order.treeName || "Family Tree"}
           </h3>
 
-          <div className="bg-black h-56 rounded-lg flex items-center justify-center text-white text-sm">
-            Family Tree Preview
-          </div>
+          {order.previewImage ? (
+            <img
+              src={order.previewImage}
+              alt="Family Tree Preview"
+              className="w-full h-56 object-contain rounded-lg border"
+            />
+          ) : (
+            <div className="bg-black h-56 rounded-lg flex items-center justify-center text-white text-sm">
+              No Preview Available
+            </div>
+          )}
         </div>
 
         <div className="border rounded-xl p-5">
-          <h3 className="text-lg font-semibold mb-4">
-            Quotes
-          </h3>
+          <h3 className="text-lg font-semibold mb-4">Quotes</h3>
 
-          <p className="text-sm text-gray-400">
-            Name of Wall Art
-          </p>
+          <p className="text-sm text-gray-400">Wall Art Name</p>
           <p className="font-semibold mb-4">
-            {order.wallArtName || "Legacy Wall Art"}
+            {order.wallArtName || order.treeName || "Legacy Wall Art"}
           </p>
 
-          <p className="text-sm text-gray-400 mb-1">
-            Quotes on Wall Art
-          </p>
-          <p className="text-gray-700 text-sm leading-6">
-            {order.quote ||
-              "The greatest purpose of life is to live it for something that will last longer than you."}
+          <p className="text-sm text-gray-400 mb-1">Quote on Wall Art</p>
+          <p className="text-gray-700 text-sm leading-6 italic">
+            {order.quote ? `"${order.quote}"` : "No quote provided"}
           </p>
         </div>
+
       </div>
 
     </div>

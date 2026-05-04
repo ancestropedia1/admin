@@ -11,30 +11,46 @@ import Tabs from "./Tabs";
 
 export default function OrderDetailsModal({ open, setOpen, order }) {
   const [activeTab, setActiveTab] = useState("overview");
-  const [currentOrder, setCurrentOrder] = useState(order);
+  const [currentOrder, setCurrentOrder] = useState(null);
+  const [loadingOrder, setLoadingOrder] = useState(false);
 
-  // ✅ Reset tab + sync order
-  useEffect(() => {
-    if (open) {
-      setActiveTab("overview");
-      setCurrentOrder(order);
-    }
-  }, [open, order]);
-
-  // 🔥 REFRESH ORDER (important)
-  const refreshOrder = async () => {
+  // ✅ FIX: Always fetch full order details when modal opens.
+  // The `order` prop from the table only has summary fields
+  // (orderId, name, email, price, status, date).
+  // We need the full order with address, timeline, assignedLab, etc.
+  const fetchOrder = async (orderId) => {
     try {
-      const res = await axiosInstance.get(
-        `/admin/wallart/orders/${currentOrder.orderId}`
-      );
-
+      setLoadingOrder(true);
+      const res = await axiosInstance.get(`/admin/wallart/orders/${orderId}`);
       setCurrentOrder(res.data.data);
     } catch (err) {
-      console.error("Failed to refresh order", err);
+      console.error("Failed to fetch order details", err);
+    } finally {
+      setLoadingOrder(false);
     }
   };
 
-  if (!open || !currentOrder) return null;
+  // ✅ Reset tab + fetch fresh order whenever modal opens
+  useEffect(() => {
+    if (open && order?.orderId) {
+      setActiveTab("overview");
+      fetchOrder(order.orderId);
+    }
+
+    // Cleanup when modal closes
+    if (!open) {
+      setCurrentOrder(null);
+    }
+  }, [open, order?.orderId]);
+
+  // 🔥 Used by child tabs after mutations (status update, lab assign)
+  const refreshOrder = async () => {
+    if (currentOrder?.orderId) {
+      await fetchOrder(currentOrder.orderId);
+    }
+  };
+
+  if (!open) return null;
 
   const tabs = [
     { id: "overview", label: "Order Overview" },
@@ -50,12 +66,14 @@ export default function OrderDetailsModal({ open, setOpen, order }) {
         <div className="flex justify-between items-center border-b px-6 py-4">
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold">
-              Order #{currentOrder.orderId}
+              Order #{order?.orderId}
             </h2>
 
-            <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-md capitalize">
-              {currentOrder.adminStatus}
-            </span>
+            {currentOrder && (
+              <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-md capitalize">
+                {currentOrder.adminStatus}
+              </span>
+            )}
           </div>
 
           <button onClick={() => setOpen(false)}>
@@ -74,25 +92,36 @@ export default function OrderDetailsModal({ open, setOpen, order }) {
 
         {/* CONTENT */}
         <div className="p-6">
+          {loadingOrder ? (
+            <div className="flex items-center justify-center py-16 text-gray-400">
+              Loading order details...
+            </div>
+          ) : !currentOrder ? (
+            <div className="flex items-center justify-center py-16 text-red-400">
+              Failed to load order
+            </div>
+          ) : (
+            <>
+              {activeTab === "overview" && (
+                // ✅ FIX: Pass full `order` object (not just orderId)
+                <OverviewTab order={currentOrder} />
+              )}
 
-          {activeTab === "overview" && (
-            <OverviewTab order={currentOrder} />
+              {activeTab === "status" && (
+                <UpdateStatusTab
+                  order={currentOrder}
+                  refreshOrder={refreshOrder}
+                />
+              )}
+
+              {activeTab === "lab" && (
+                <AssignLabTab
+                  order={currentOrder}
+                  refreshOrder={refreshOrder}
+                />
+              )}
+            </>
           )}
-
-          {activeTab === "status" && (
-            <UpdateStatusTab
-              order={currentOrder}
-              refreshOrder={refreshOrder}
-            />
-          )}
-
-          {activeTab === "lab" && (
-            <AssignLabTab
-              order={currentOrder}
-              refreshOrder={refreshOrder}
-            />
-          )}
-
         </div>
       </div>
     </div>
