@@ -1,6 +1,6 @@
 "use client";
 
-// ✅ FIX: OverviewTab now receives the full `order` object as a prop
+
 // from OrderDetailsModal — no more duplicate fetching or orderId mismatch.
 
 export default function OverviewTab({ order }) {

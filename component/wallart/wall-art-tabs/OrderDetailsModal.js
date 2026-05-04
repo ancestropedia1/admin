@@ -56,7 +56,7 @@ export default function OrderDetailsModal({ open, setOpen, order }) {
   const tabs = [
     { id: "overview", label: "Order Overview" },
     { id: "status", label: "Update Status" },
-    { id: "lab", label: "Assigned Lab" },
+    { id: "lab", label: "Printing Agency" },
   ];
 
   return (
