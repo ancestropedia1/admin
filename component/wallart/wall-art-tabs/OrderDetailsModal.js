@@ -8,6 +8,7 @@ import OverviewTab from "./OverviewTab";
 import UpdateStatusTab from "./UpdateStatusTab";
 import AssignLabTab from "./AssignLabTab";
 import Tabs from "./Tabs";
+import AssignPrintingAgencyTab from "./AssignLabTab";
 
 export default function OrderDetailsModal({ open, setOpen, order }) {
   const [activeTab, setActiveTab] = useState("overview");
@@ -115,7 +116,7 @@ export default function OrderDetailsModal({ open, setOpen, order }) {
               )}
 
               {activeTab === "lab" && (
-                <AssignLabTab
+                <AssignPrintingAgencyTab
                   order={currentOrder}
                   refreshOrder={refreshOrder}
                 />
