@@ -3,63 +3,49 @@
 import { useState, useEffect } from "react";
 import { axiosInstance } from "@/config/axios";
 import { Mail, Phone, Clock } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function AdminProfilePage() {
+
   /* ================= PROFILE STATES ================= */
-  const [fullName, setFullName] = useState("");
-  const [gender, setGender] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [city, setCity] = useState("");
-  const [email, setEmail] = useState("");
-  const [profileImage, setProfileImage] = useState("");
-  const [contact, setContact] = useState("");
-  const [profileLoading, setProfileLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [fullName,      setFullName]      = useState("");
+  const [gender,        setGender]        = useState("");
+  const [dateOfBirth,   setDateOfBirth]   = useState("");
+  const [city,          setCity]          = useState("");
+  const [email,         setEmail]         = useState("");
+  const [profileImage,  setProfileImage]  = useState("");
+  const [contact,       setContact]       = useState("");
+  const [profileLoading,  setProfileLoading]  = useState(false);
+  const [initialLoading,  setInitialLoading]  = useState(true);
 
   /* ================= PASSWORD STATES ================= */
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [currentPassword,  setCurrentPassword]  = useState("");
+  const [newPassword,      setNewPassword]      = useState("");
+  const [confirmPassword,  setConfirmPassword]  = useState("");
+  const [passwordLoading,  setPasswordLoading]  = useState(false);
 
-  /* ================= FETCH PROFILE ON LOAD ================= */
+  /* ================= FETCH PROFILE ================= */
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axiosInstance.get(
-          "/admin/profile/myprofile",
-          { withCredentials: true }
-        );
+        const res = await axiosInstance.get("/admin/profile/myprofile");
+        const data = res.data?.data || {};
 
-        console.log("PROFILE RESPONSE:", res.data);
-
-        const data = res.data?.data || res.data?.admin || {};
-
-        setFullName(data.fullName || "");
-        setGender(data.gender || "");
-        setCity(data.city || "");
-        setEmail(data.email || "");
-        setContact(data.contact || data.phoneNumber || "");
-        setProfileImage(
-          data.profileImage || data.profilePicture || ""
-        );
+        setFullName(data.fullName     || "");
+        setGender(data.gender         || "");
+        setCity(data.city             || "");
+        setEmail(data.email           || "");
+        setContact(data.contact       || "");
+        setProfileImage(data.profileImage || "");
 
         if (data.dateOfBirth) {
-          const formatted = new Date(data.dateOfBirth)
-            .toISOString()
-            .split("T")[0];
-
-          setDateOfBirth(formatted);
+          setDateOfBirth(
+            new Date(data.dateOfBirth).toISOString().split("T")[0]
+          );
         }
-
       } catch (error) {
-        console.log("FETCH PROFILE ERROR:", error);
-        console.log("SERVER ERROR:", error?.response?.data);
-
-        alert(
-          error?.response?.data?.message ||
-          error.message ||
-          "Failed to fetch profile"
+        toast.error(
+          error?.response?.data?.message || "Failed to fetch profile"
         );
       } finally {
         setInitialLoading(false);
@@ -69,66 +55,54 @@ export default function AdminProfilePage() {
     fetchProfile();
   }, []);
 
-  /* ================= CONVERT IMAGE TO BASE64 ================= */
-  const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.readAsDataURL(file);
-
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-    });
-  };
-
+  /* ================= IMAGE TO BASE64 ================= */
   const handleImageSelect = async (e) => {
     const file = e.target.files[0];
-
     if (!file) return;
 
-    const base64 = await convertToBase64(file);
-    setProfileImage(base64);
+    // ✅ Validate size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be under 2MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => setProfileImage(reader.result);
   };
 
   /* ================= UPDATE PROFILE ================= */
   const handleProfileUpdate = async () => {
+    if (!fullName.trim()) {
+      toast.error("Full name is required");
+      return;
+    }
+
     try {
       setProfileLoading(true);
 
-      const res = await axiosInstance.put(
-        "/admin/profile/updateprofile",
-        {
-          fullName,
-          gender,
-          dateOfBirth,
-          city,
-          email,
-          contact,
-          profileImage,
-        },
-        { withCredentials: true }
-      );
+      const res = await axiosInstance.put("/admin/profile/updateprofile", {
+        fullName,
+        gender,
+        dateOfBirth,
+        city,
+        email,
+        contact,
+        // ✅ Only send base64 if image was changed locally
+        profileImage: profileImage?.startsWith("data:image")
+          ? profileImage
+          : undefined,
+      });
 
-      console.log("UPDATE RESPONSE:", res.data);
+      const data = res.data?.data || {};
 
-      const data = res.data?.data || res.data?.admin || {};
+      // ✅ Update image from server response (ImageKit URL)
+      if (data.profileImage) setProfileImage(data.profileImage);
 
-      if (data.profileImage || data.profilePicture) {
-        setProfileImage(
-          data.profileImage || data.profilePicture
-        );
-      }
-
-      alert(res.data.message || "Profile updated");
-
+      toast.success(res.data.message || "Profile updated");
     } catch (error) {
-      console.log("UPDATE ERROR:", error);
-      console.log("SERVER ERROR:", error?.response?.data);
-
-      alert(
-        error?.response?.data?.message ||
-        error.message ||
-        "Failed to update profile"
+      toast.error(
+        error?.response?.data?.message || "Failed to update profile"
       );
     } finally {
       setProfileLoading(false);
@@ -138,39 +112,37 @@ export default function AdminProfilePage() {
   /* ================= CHANGE PASSWORD ================= */
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      alert("All password fields are required");
+      toast.error("All password fields are required");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
     try {
       setPasswordLoading(true);
 
-      const res = await axiosInstance.put(
-        "/admin/login/change-password",
-        {
-          currentPassword,
-          newPassword,
-          confirmPassword,
-        },
-        { withCredentials: true }
-      );
+      // ✅ FIX: Correct endpoint — was /admin/login/change-password (doesn't exist)
+      const res = await axiosInstance.put("/admin/profile/change-password", {
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
 
-      alert(res.data.message);
-
+      toast.success(res.data.message || "Password changed");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-
     } catch (error) {
-      alert(
-        error?.response?.data?.message ||
-        error.message ||
-        "Failed to update password"
+      toast.error(
+        error?.response?.data?.message || "Failed to change password"
       );
     } finally {
       setPasswordLoading(false);
@@ -179,7 +151,7 @@ export default function AdminProfilePage() {
 
   if (initialLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-screen text-gray-500">
         Loading profile...
       </div>
     );
@@ -187,6 +159,7 @@ export default function AdminProfilePage() {
 
   return (
     <div className="p-4 sm:p-6 bg-[#F8F6E7] min-h-screen">
+
       {/* HEADER CARD */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="h-36 bg-gradient-to-r from-red-900 to-red-700 relative">
@@ -194,16 +167,11 @@ export default function AdminProfilePage() {
           {/* PROFILE IMAGE */}
           <div className="absolute -bottom-16 left-6 flex flex-col items-center">
             <img
-              src={
-                profileImage?.startsWith("data:image")
-                  ? profileImage
-                  : profileImage || "https://i.pravatar.cc/150"
-              }
+              src={profileImage || "https://i.pravatar.cc/150"}
               alt="Profile"
-              className="w-28 h-28 rounded-full border-4 border-white object-cover"
+              className="w-28 h-28 rounded-full border-4 border-white object-cover bg-gray-200"
             />
 
-            {/* IMAGE UPLOAD INPUT */}
             <label className="mt-2 text-xs bg-white px-3 py-1 rounded-md shadow cursor-pointer hover:bg-gray-100">
               Change Photo
               <input
@@ -218,32 +186,23 @@ export default function AdminProfilePage() {
 
         <div className="pt-16 px-6 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold">
-              {fullName}
-            </h2>
-
-            <p className="text-sm text-gray-500">
-              Administrator
-            </p>
+            <h2 className="text-lg font-semibold">{fullName || "Admin"}</h2>
+            <p className="text-sm text-gray-500">Administrator</p>
 
             <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-600">
               <span className="flex items-center gap-1">
-                <Mail size={14} /> {email}
+                <Mail size={14} /> {email || "—"}
               </span>
-
               <span className="flex items-center gap-1">
-                <Phone size={14} /> {contact}
+                <Phone size={14} /> {contact || "—"}
               </span>
-
               <span className="flex items-center gap-1">
                 <Clock size={14} /> Secure Session
               </span>
             </div>
           </div>
 
-          <span className="text-green-600 font-medium text-sm">
-            ● Active
-          </span>
+          <span className="text-green-600 font-medium text-sm">● Active</span>
         </div>
       </div>
 
@@ -252,9 +211,7 @@ export default function AdminProfilePage() {
 
         {/* PROFILE FORM */}
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
-          <h3 className="font-semibold mb-4">
-            Profile Information
-          </h3>
+          <h3 className="font-semibold mb-4">Profile Information</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
@@ -264,14 +221,11 @@ export default function AdminProfilePage() {
             />
 
             <div>
-              <label className="text-xs text-gray-500">
-                Gender
-              </label>
-
+              <label className="text-xs text-gray-500">Gender</label>
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-                className="w-full mt-1 border rounded-md px-3 py-2 text-sm"
+                className="w-full mt-1 border rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-green-600"
               >
                 <option value="">Select</option>
                 <option value="Male">Male</option>
@@ -284,9 +238,7 @@ export default function AdminProfilePage() {
               label="Date of Birth"
               type="date"
               value={dateOfBirth}
-              onChange={(e) =>
-                setDateOfBirth(e.target.value)
-              }
+              onChange={(e) => setDateOfBirth(e.target.value)}
             />
 
             <Input
@@ -297,6 +249,7 @@ export default function AdminProfilePage() {
 
             <Input
               label="Email"
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -311,51 +264,41 @@ export default function AdminProfilePage() {
           <button
             onClick={handleProfileUpdate}
             disabled={profileLoading}
-            className="mt-5 bg-green-700 text-white px-5 py-2 rounded-md disabled:opacity-50"
+            className="mt-5 bg-green-700 text-white px-5 py-2 rounded-md disabled:opacity-50 hover:bg-green-800 transition-colors"
           >
             {profileLoading ? "Saving..." : "Save Changes"}
           </button>
         </div>
 
-        {/* PASSWORD SECTION */}
+        {/* PASSWORD */}
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="font-semibold mb-4">
-            Change Password
-          </h3>
+          <h3 className="font-semibold mb-4">Change Password</h3>
 
           <div className="space-y-3">
             <Input
               label="Current Password"
               type="password"
               value={currentPassword}
-              onChange={(e) =>
-                setCurrentPassword(e.target.value)
-              }
+              onChange={(e) => setCurrentPassword(e.target.value)}
             />
-
             <Input
               label="New Password"
               type="password"
               value={newPassword}
-              onChange={(e) =>
-                setNewPassword(e.target.value)
-              }
+              onChange={(e) => setNewPassword(e.target.value)}
             />
-
             <Input
               label="Confirm Password"
               type="password"
               value={confirmPassword}
-              onChange={(e) =>
-                setConfirmPassword(e.target.value)
-              }
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
 
           <button
             onClick={handleChangePassword}
             disabled={passwordLoading}
-            className="mt-4 bg-green-700 text-white w-full py-2 rounded-md disabled:opacity-50"
+            className="mt-4 bg-green-700 text-white w-full py-2 rounded-md disabled:opacity-50 hover:bg-green-800 transition-colors"
           >
             {passwordLoading ? "Updating..." : "Update Now"}
           </button>
@@ -366,23 +309,15 @@ export default function AdminProfilePage() {
 }
 
 /* REUSABLE INPUT */
-function Input({
-  label,
-  value = "",
-  type = "text",
-  onChange
-}) {
+function Input({ label, value = "", type = "text", onChange }) {
   return (
     <div>
-      <label className="text-xs text-gray-500">
-        {label}
-      </label>
-
+      <label className="text-xs text-gray-500">{label}</label>
       <input
         type={type}
         value={value}
         onChange={onChange}
-        className="w-full mt-1 border rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-green-600"
+        className="w-full mt-1 border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-600"
       />
     </div>
   );
