@@ -1,4 +1,4 @@
-I am goin to define admin endpoints..
+I am goin to define admin endpoints.
 
 
 
