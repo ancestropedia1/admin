@@ -4,21 +4,22 @@ import { useState, useEffect } from "react";
 import { axiosInstance } from "../../config/axios.js";
 
 export default function BlogEditor({ editBlog, onSuccess, onCancel, showToast }) {
-  const [title,       setTitle]       = useState("");
-  const [content,     setContent]     = useState("");
-  const [authorName,  setAuthorName]  = useState("");
-  const [image,       setImage]       = useState(null);
-  const [imagePreview,setImagePreview]= useState(null);
-  const [loading,     setLoading]     = useState(false);
+  const [title,        setTitle]        = useState("");
+  const [content,      setContent]      = useState("");
+  const [authorName,   setAuthorName]   = useState("");
+  const [image,        setImage]        = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [loading,      setLoading]      = useState(false);
 
-  // ✅ Pre-fill form when editing
   useEffect(() => {
     if (editBlog) {
-      setTitle(editBlog.title       || "");
-      setContent(editBlog.fullContent || "");
-      setAuthorName(editBlog.author || "");
+      setTitle(editBlog.title || "");
+      // ✅ FIX: backend stores as `description`, frontend mapped as `fullContent`
+      // try both to be safe
+      setContent(editBlog.fullContent || editBlog.description || "");
+      setAuthorName(editBlog.author   || "");
       setImagePreview(editBlog.imageUrl || null);
-      setImage(null); // don't pre-load base64 for existing image
+      setImage(null);
     } else {
       setTitle("");
       setContent("");
@@ -40,8 +41,18 @@ export default function BlogEditor({ editBlog, onSuccess, onCancel, showToast })
   };
 
   const handleSubmit = async () => {
-    if (!title.trim() || !content.trim() || !authorName.trim()) {
-      showToast("Please fill all fields.");
+    if (!title.trim() || !content.trim()) {
+      showToast("Title and content are required.");
+      return;
+    }
+
+    if (title.length < 5) {
+      showToast("Title must be at least 5 characters.");
+      return;
+    }
+
+    if (content.length < 10) {
+      showToast("Content must be at least 10 characters.");
       return;
     }
 
@@ -49,14 +60,16 @@ export default function BlogEditor({ editBlog, onSuccess, onCancel, showToast })
       setLoading(true);
 
       if (editBlog?._id) {
-        // ✅ FIX: Actually call the edit API (was missing before)
-        await axiosInstance.put("/admin/blog/update", {
-          newTitle:       title,
-          newDescription: content,
-          newImage:       image || undefined,
-        }, {
-          params: { blogId: editBlog._id },
-        });
+        await axiosInstance.put(
+          "/admin/blog/update",
+          {
+            newTitle:       title,
+            newDescription: content,
+            // ✅ only send image if a new one was selected
+            ...(image && { newImage: image }),
+          },
+          { params: { blogId: editBlog._id } }
+        );
       } else {
         await axiosInstance.post("/admin/blog/createBlog", {
           title,
@@ -69,7 +82,8 @@ export default function BlogEditor({ editBlog, onSuccess, onCancel, showToast })
       onSuccess();
     } catch (error) {
       console.error("Blog submit failed:", error.response?.data || error);
-      showToast("Failed to save blog");
+      // ✅ Show exact backend error message
+      showToast(error.response?.data?.message || "Failed to save blog");
     } finally {
       setLoading(false);
     }
@@ -109,13 +123,16 @@ export default function BlogEditor({ editBlog, onSuccess, onCancel, showToast })
         )}
       </div>
 
-      <input
-        type="text"
-        placeholder="Author Name"
-        value={authorName}
-        onChange={(e) => setAuthorName(e.target.value)}
-        className="w-full bg-white p-3 border rounded-lg"
-      />
+      {/* ✅ Only show author field for new blogs — existing blogs already have author */}
+      {!editBlog && (
+        <input
+          type="text"
+          placeholder="Author Name"
+          value={authorName}
+          onChange={(e) => setAuthorName(e.target.value)}
+          className="w-full bg-white p-3 border rounded-lg"
+        />
+      )}
 
       <div className="flex gap-3 mt-3">
         <button
