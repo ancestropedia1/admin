@@ -1,6 +1,5 @@
 "use client";
-import  BlogManagement  from "@/component/blogmanagement/BlogManagement";
-// import protectPage from "../utils/protectPage.js";
+import BlogManagement from "@/component/blogmanagement/BlogManagement";
 
 function page() {
   return <div><BlogManagement/></div>;
