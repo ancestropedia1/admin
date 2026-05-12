@@ -1,10 +1,10 @@
 "use client";
+
+// ✅ Change this to match your actual folder name
 import BlogManagement from "@/component/blogmanagement/BlogManagement";
 
 function page() {
-  return <div><BlogManagement/></div>;
+  return <div><BlogManagement /></div>;
 }
 
-// 🚨 ONLY users with "blogmanagement" permission can open this page
-// export default protectPage("blogmanagement")(page);
 export default page;

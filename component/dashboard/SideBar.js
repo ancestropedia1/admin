@@ -25,7 +25,7 @@ const sections = [
       },
       { 
         icon: "/blogs-management.svg", 
-        link: "/blogmanagement", 
+        link: "/blogManagement", 
         text: "Blogs Management" 
       },
     ],
