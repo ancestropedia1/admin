@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { axiosInstance } from "@/config/axios";
 
-import VaultStatsCards      from "./VaultStatsCards";
-import VaultAnalysis        from "./VaultAnalysis";
-import VaultFilters         from "./VaultFilters";
-import VaultUserTable       from "./VaultUserTable";
-import VaultPlanAllocation  from "./VaultPlanAllocation";
+import VaultStatsCards from "./VaultStatsCards";
+import VaultAnalysis from "./VaultAnalysis";
+import VaultFilters from "./VaultFilters";
+import VaultUserTable from "./VaultUserTable";
+import VaultPlanAllocation from "./VaultPlanAllocation";
 import VaultUserDetailModal from "./VaultUserDetailModal";
 
 export default function HeritageVaultManagement() {
