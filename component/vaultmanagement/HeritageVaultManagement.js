@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { axiosInstance } from "@/config/axios";
 
 import VaultStatsCards from "./VaultStatsCards";
@@ -11,39 +11,49 @@ import VaultPlanAllocation from "./VaultPlanAllocation";
 import VaultUserDetailModal from "./VaultUserDetailModal";
 
 export default function HeritageVaultManagement() {
-  const [stats,         setStats]         = useState(null);
-  const [users,         setUsers]         = useState([]);
-  const [pagination,    setPagination]    = useState({ total: 0, pages: 1 });
-  const [page,          setPage]          = useState(1);
-  const [search,        setSearch]        = useState("");
-  const [loading,       setLoading]       = useState(true);
-  const [selectedUser,  setSelectedUser]  = useState(null);
+  const [stats, setStats] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [pagination, setPagination] = useState({});
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [selectedUser, setSelectedUser] =
+    useState(null);
 
-  // ✅ Fetch vault stats
+  // FETCH STATS
   const fetchStats = async () => {
     try {
-      const res = await axiosInstance.get("/admin/vault/stats");
-      if (res.data.success) setStats(res.data.data);
+      const res = await axiosInstance.get(
+        "/admin/vault/stats"
+      );
+
+      if (res.data.success) {
+        setStats(res.data.data);
+      }
     } catch (err) {
-      console.error("Failed to fetch vault stats:", err);
+      console.log(err);
     }
   };
 
-  // ✅ Fetch user storage list
+  // FETCH USERS
   const fetchUsers = async () => {
     try {
-      setLoading(true);
-      const res = await axiosInstance.get("/admin/vault/users", {
-        params: { page, limit: 10, search },
-      });
+      const res = await axiosInstance.get(
+        "/admin/vault/users",
+        {
+          params: {
+            page,
+            limit: 10,
+            search,
+          },
+        }
+      );
+
       if (res.data.success) {
         setUsers(res.data.data);
         setPagination(res.data.pagination);
       }
     } catch (err) {
-      console.error("Failed to fetch vault users:", err);
-    } finally {
-      setLoading(false);
+      console.log(err);
     }
   };
 
@@ -56,46 +66,47 @@ export default function HeritageVaultManagement() {
   }, [page, search]);
 
   return (
-    <div className="min-h-screen bg-[#FEFBF7] p-4 md:p-6 lg:p-10 space-y-8">
+    <div className="min-h-screen bg-[#F8F5F1] p-4 md:p-8 space-y-6">
 
       {/* HEADER */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-semibold text-[#213327]">
+        <h1 className="text-3xl font-bold text-[#1B4332]">
           Heritage Vault Management
         </h1>
-        <p className="text-gray-600 mt-1 text-sm md:text-base max-w-xl">
-          Securely manage storage, user vaults, and heritage content with
-          advanced encryption and access controls.
+
+        <p className="text-sm text-gray-500 mt-1">
+          Securely manage storage, user vaults,
+          and heritage content.
         </p>
       </div>
 
-      {/* TOP ALERT CARDS */}
+      {/* STATS */}
       <VaultStatsCards stats={stats} />
 
-      {/* ANALYSIS SECTION */}
+      {/* ANALYSIS */}
       <VaultAnalysis stats={stats} />
 
       {/* FILTERS */}
       <VaultFilters
         search={search}
         onSearch={setSearch}
-        onPageReset={() => setPage(1)}
       />
 
-      {/* USER TABLE */}
+      {/* TABLE */}
       <VaultUserTable
         users={users}
-        loading={loading}
+        pagination={pagination}
         page={page}
         setPage={setPage}
-        pagination={pagination}
-        onManage={(user) => setSelectedUser(user)}
+        onManage={(user) =>
+          setSelectedUser(user)
+        }
       />
 
-      {/* PLAN ALLOCATION */}
+      {/* PLANS */}
       <VaultPlanAllocation />
 
-      {/* USER DETAIL MODAL */}
+      {/* MODAL */}
       {selectedUser && (
         <VaultUserDetailModal
           userId={selectedUser._id}

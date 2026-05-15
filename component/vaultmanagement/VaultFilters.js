@@ -1,30 +1,35 @@
-"use client";
+import { Search } from "lucide-react";
 
-import { Search, CalendarDays, ChevronDown } from "lucide-react";
-
-export default function VaultFilters({ search, onSearch, onPageReset }) {
+export default function VaultFilters({
+  search,
+  onSearch,
+}) {
   return (
-    <div className="bg-[#D9D9D9] border-2 border-gray-300 p-4 rounded-md shadow flex flex-col md:flex-row justify-between gap-4">
-      <div className="flex gap-2">
-        <button className="flex gap-2 bg-white px-4 py-2 rounded-md shadow-sm text-sm">
-          By Date <CalendarDays size={16} className="mt-0.5" />
+    <div className="bg-white rounded-xl border p-4 flex flex-col md:flex-row justify-between gap-4">
+
+      <div className="flex gap-3">
+        <button className="px-4 py-2 rounded-lg border bg-[#F7F7F7] text-sm">
+          By Date
         </button>
-        <button className="flex gap-2 bg-white px-4 py-2 rounded-md shadow-sm text-sm">
-          By Status <ChevronDown size={16} className="mt-0.5" />
+
+        <button className="px-4 py-2 rounded-lg border bg-[#F7F7F7] text-sm">
+          By Status
         </button>
       </div>
 
-      <div className="flex bg-white rounded-md px-3 py-2 w-full md:w-1/3 shadow-sm items-center gap-2">
-        <Search className="text-gray-500" size={18} />
+      <div className="flex items-center bg-[#F7F7F7] rounded-lg px-3 py-2 w-full md:w-[300px]">
+        <Search
+          size={16}
+          className="text-gray-400"
+        />
+
         <input
-          type="text"
           value={search}
-          onChange={(e) => {
-            onSearch(e.target.value);
-            onPageReset();
-          }}
+          onChange={(e) =>
+            onSearch(e.target.value)
+          }
           placeholder="Search user..."
-          className="w-full outline-none text-sm"
+          className="bg-transparent outline-none ml-2 w-full text-sm"
         />
       </div>
     </div>

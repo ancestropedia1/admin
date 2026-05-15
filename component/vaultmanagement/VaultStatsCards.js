@@ -1,36 +1,31 @@
-export default function VaultStatsCards({ stats }) {
+export default function VaultStatsCards({
+  stats,
+}) {
   const cards = [
     {
-      bg:     "bg-[#D3E7FF]",
-      border: "border-[#000ACC]",
-      text:   "text-[#000ACC]",
-      title:  "Storage Capacity",
-      desc:   stats
-        ? `Total: ${stats.totalStorageGB} GB used of 5 PB`
-        : "Total: 4PB used of 6 PB",
+      title: "Storage Capacity",
+      value: `${stats?.totalStorageGB || 0} GB`,
+      desc: "Total used storage",
+      color: "bg-[#DCEBFF]",
     },
     {
-      bg:     "bg-[#FEF2F2]",
-      border: "border-[#D32F2F]",
-      text:   "text-[#D32F2F]",
-      title:  "Storage Alert",
-      desc:   stats
-        ? `${stats.usersNearingLimit} Users nearing storage limits`
-        : "12 Users nearing storage limits",
+      title: "Storage Alert",
+      value:
+        stats?.usersNearingLimit || 0,
+      desc: "Users nearing limits",
+      color: "bg-[#FFE5E5]",
     },
     {
-      bg:     "bg-[#FFF5D3]",
-      border: "border-[#FFC300]",
-      text:   "text-[#FFC300]",
-      title:  "Backup Reminder",
-      desc:   "10 Users have not backed up their data",
+      title: "Backup Reminder",
+      value: "10",
+      desc: "Users not backed up",
+      color: "bg-[#FFF5D6]",
     },
     {
-      bg:     "bg-[#FEF2F2]",
-      border: "border-[#D32F2F]",
-      text:   "text-[#D32F2F]",
-      title:  "Access Denied",
-      desc:   "5 Users reported access issues",
+      title: "Access Denied",
+      value: "5",
+      desc: "Access issues",
+      color: "bg-[#FFECEC]",
     },
   ];
 
@@ -39,10 +34,19 @@ export default function VaultStatsCards({ stats }) {
       {cards.map((card, i) => (
         <div
           key={i}
-          className={`${card.bg} border ${card.border} p-4 shadow-sm rounded-lg`}
+          className={`${card.color} rounded-xl border p-5 shadow-sm`}
         >
-          <p className={`text-sm font-bold ${card.text}`}>{card.title}</p>
-          <p className={`text-xs ${card.text} mt-1`}>{card.desc}</p>
+          <p className="text-sm font-semibold">
+            {card.title}
+          </p>
+
+          <h2 className="text-2xl font-bold mt-3">
+            {card.value}
+          </h2>
+
+          <p className="text-xs text-gray-600 mt-2">
+            {card.desc}
+          </p>
         </div>
       ))}
     </div>
