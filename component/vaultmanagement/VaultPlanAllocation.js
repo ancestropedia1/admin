@@ -21,7 +21,7 @@ export default function VaultPlanAllocation() {
   const fetchPlans = async () => {
     try {
       const res = await axiosInstance.get(
-        "/admin/vault/plans"
+        "/admin/vault/plans/modify"
       );
 
       if (res.data.success) {
